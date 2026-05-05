@@ -6,10 +6,17 @@ import model.ProductOptionGroup;
 
 public class ProductOptionImpl implements ProductOption {
 
+	private Integer id;
+	private String name;
+	private String description;
+	private Double price;
+	private boolean defaultOption;
+	private ProductOptionGroup productOptionGroup;
 	private Consumation consumation;
 
-	public ProductOptionImpl(Consumation consumation) {
-		this.consumation = consumation;
+
+	public ProductOptionImpl(){
+		
 	}
 
 	@Override

@@ -9,7 +9,7 @@ public class IngredientImpl implements Ingredient {
     private Food food;
     private String quantity;
 
-    // Costruttore vuoto per il DAO
+    
     public IngredientImpl() {
         this.id = 0;
         this.food = null;
@@ -31,12 +31,9 @@ public class IngredientImpl implements Ingredient {
         return this.food;
     }
 
-    /**
-     * Implementato come 'setFoot' per rispettare l'interfaccia inviata.
-     * Si consiglia di correggere l'interfaccia in 'setFood'.
-     */
+   
     @Override
-    public void setFoot(Food food) {
+    public void setFood(Food food) {
         this.food = food;
     }
 
