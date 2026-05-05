@@ -1,4 +1,4 @@
-package model.impl;
+package model.modelImpl;
 
 import model.Consumation;
 import model.ProductOption;
@@ -85,4 +85,3 @@ public class ProductOptionImpl implements ProductOption {
 	}
 
 }
-
