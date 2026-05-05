@@ -1,4 +1,4 @@
-package model.impl;
+package model.modelImpl;
 
 import model.ProductOptionGroup;
 

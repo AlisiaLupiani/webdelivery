@@ -1,15 +1,15 @@
-package model.impl;
-
-import model.Order;
-import model.Client;
-import model.OrderState;
-import model.PaymentMethod;
-import model.Product;
+package model.modelImpl;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import model.Client;
+import model.Order;
+import model.OrderState;
+import model.PaymentMethod;
+import model.Product;
 
 public class OrderImpl implements Order {
 

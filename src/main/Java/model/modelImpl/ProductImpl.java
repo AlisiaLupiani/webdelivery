@@ -1,9 +1,10 @@
-package model.impl;
+package model.modelImpl;
 
-import model.Product;
-import model.Ingredient;
 import java.util.ArrayList;
 import java.util.List;
+
+import model.Ingredient;
+import model.Product;
 
 public class ProductImpl implements Product {
 
