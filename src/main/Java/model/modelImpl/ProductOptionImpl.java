@@ -1,94 +1,89 @@
 package model.modelImpl;
 
-import model.Consumation;
 import model.ProductOption;
 import model.ProductOptionGroup;
 
-public class ProductOptionImpl implements ProductOption {
 
-	private Integer id;
-	private String name;
-	private String description;
-	private Double price;
-	private boolean defaultOption;
-	private ProductOptionGroup productOptionGroup;
-	private Consumation consumation;
+public class ProductOptionImpl implements ProductOption{
+	
+	Integer id;
+	Double price;
+	String name;
+	Double addictionalPrice;
+	String description;
+	ProductOptionGroup productOptionGroup;
+	boolean defaultOption;
 
+	@Override
+	public Double getPrice(){
+		return this.price;
+	}
 
-	public ProductOptionImpl(){
-		
+	@Override
+	public void setPrice(double price){
+		this.price = price;
 	}
 
 	@Override
 	public Integer getId() {
-
-		return null;
+		return id;
 	}
 
 	@Override
 	public void setId(Integer id) {
-
+		this.id = id;
 	}
 
 	@Override
 	public String getName() {
-
-		return null;
+		return name;
 	}
 
 	@Override
 	public void setName(String name) {
-
+		this.name = name;
 	}
 
 	@Override
 	public String getDescription() {
-
-		return null;
+		return description;
 	}
 
 	@Override
 	public void setDescription(String description) {
-
+		this.description = description;
 	}
 
-	@Override
-	public Double getPrice() {
-
-		return this.consumation.getPrice() + getAddictionalPrice();
-	}
 
 	@Override
 	public Double getAddictionalPrice() {
-
-		return null;
+		return this.addictionalPrice;
 	}
 
 	@Override
 	public void setAddictionalPrice(Double price) {
-
+		this.addictionalPrice = addictionalPrice + price;
 	}
-
-	@Override
-	public boolean isDefault() {
-
-		return false;
-	}
-
-	@Override
-	public void setDefault(boolean df) {
-
-	}
-
+	
 	@Override
 	public ProductOptionGroup getProductOptionGroup() {
-
-		return null;
+		return productOptionGroup;
 	}
 
 	@Override
 	public void setProductOptionGroup(ProductOptionGroup productOptionGroup) {
-	
+		this.productOptionGroup = productOptionGroup;
 	}
+
+	@Override
+	public boolean isDefault(){
+		return defaultOption;
+	}
+
+	@Override
+	public void setDefault(boolean df){
+		this.defaultOption = df;
+	}
+
 
 }

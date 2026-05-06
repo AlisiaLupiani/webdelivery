@@ -11,7 +11,7 @@ public class ProductOptionProxy extends ProductOptionImpl{
     public ProductOptionProxy(DataLayer dataLayer){
         super();
         this.dataLayer = dataLayer;
-        this.isDirty = true;
+        this.isDirty = false;
     }
     
     @Override
@@ -27,8 +27,8 @@ public class ProductOptionProxy extends ProductOptionImpl{
     }
     
     @Override
-    public void setAddictionalPrice(double price){
-        super.setAddictionalPrice(price);
+    public void setAddictionalPrice(double addictionalPrice){
+        super.setAddictionalPrice(addictionalPrice);
         isDirty = true;
     }
     
