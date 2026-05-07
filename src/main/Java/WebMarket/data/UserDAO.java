@@ -18,7 +18,7 @@ public interface UserDAO {
     
     void updateUser(User user) throws DataException;
     
-    void deleteUser(int id) throws DataException;
+    void deleteUser(User user) throws DataException;
     
 
 

@@ -6,34 +6,96 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import WebMarket.data.proxy.UserProxy;
 import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
 import model.User;
-import model.modelImpl.UserImpl;
+
 
 
 
 public class UserDAOImpl extends DAO implements UserDAO{
+
+    private PreparedStatement sUserById;
+    private PreparedStatement sUserByEmail;
+    private PreparedStatement sAllUsers;
+    private PreparedStatement sAddUser;
+    private PreparedStatement sUpdateUser;
+    private PreparedStatement sDeleteUser;
+    private static final String TABLE = "UTENTE";
+
+
 
     public UserDAOImpl(DataLayer dataLayer) {
         super(dataLayer);
     }
 
     @Override
+    public void init() throws DataException {
+        try {
+            super.init();
+            sUserById= connection.prepareStatement("SELECT * FROM " + TABLE + " WHERE ID = ?");
+            sUserByEmail = connection.prepareStatement("SELECT * FROM " + TABLE + " WHERE EMAIL = ?");
+            sAllUsers = connection.prepareStatement("SELECT * FROM " + TABLE);
+
+            sAddUser = connection.prepareStatement(
+                "INSERT INTO" + TABLE + "(NOME, COGNOME, EMAIL, PASSWORD) VALUES (?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS);
+
+            sUpdateUser = connection.prepareStatement(
+                "UPDATE" + TABLE + "NOME = ?, COGNOME = ?, EMAIL = ?, PASSWORD = ? WHERE ID = ?");
+
+            sDeleteUser = connection.prepareStatement(
+                "DELETE FROM" + TABLE + "WHERE ID = ?");
+
+
+        } catch (SQLException e) {
+            throw new DataException("Error initializing webdelivery data layer", e);
+
+        }
+    }
+
+    @Override
+    public void destroy() throws DataException {
+        try {
+            if(sUserById != null) sUserById.close();
+            if(sUserByEmail != null) sUserByEmail.close();
+            if(sAllUsers != null) sAllUsers.close();
+
+            if(sAddUser != null) sAddUser.close();
+            if(sUpdateUser != null) sUpdateUser.close();
+            if(sDeleteUser != null) sDeleteUser.close();
+
+            super.destroy();
+            
+        } catch (SQLException e) {
+            throw new DataException("Error closing webdelivery data layer", e);
+        }
+    }
+
+
+
+    @Override
     public User getUserById(int id) throws DataException {
         User user = null;
-        String query = "SELECT * FROM UTENTE WHERE id = ?";
-
-        try (PreparedStatement preparedStatement = dataLayer.getConnection().prepareStatement(query)){
-            preparedStatement.setInt(1, id);
-            try (ResultSet resultSet = preparedStatement.executeQuery()){
-                if (resultSet.next()){
-                    user = createUser(resultSet);
+        if(dataLayer.getCache().has(User.class, id)){
+            user  = dataLayer.getCache().get(User.class, id);
+        }
+        else{
+            try {
+                sUserById.setInt(1, id);
+                try (ResultSet resultSet = sUserById.executeQuery()){
+                    if (resultSet.next()){
+                        user = createUser(resultSet);
+                        dataLayer.getCache().add(User.class, user);
+                    }
                 }
-            } 
-        }catch (SQLException e){
-            throw new DataException(e);
+
+            } catch (SQLException e) {
+                throw new DataException("Unable to find the requested item", e);
+
+            }
         }
         return user;
 
@@ -43,107 +105,153 @@ public class UserDAOImpl extends DAO implements UserDAO{
     @Override
     public User getUserByEmail(String email) throws DataException {
         User user = null;
-        String query = "SELECT * FROM UTENTE WHERE EMAIL = ?";
-
-        try(PreparedStatement statement = dataLayer.getConnection().prepareStatement(query)) {
-            statement.setString(1, email);
-            try(ResultSet resultSet = statement.executeQuery()){
-                if(resultSet.next()){
-                    user = createUser(resultSet);
-                }      
-            }
-        }catch (SQLException e) {
-                throw new DataException(e);
+        if(dataLayer.getCache().has(User.class, email)){
+            user = dataLayer.getCache().get(User.class, email);
         }
-        
+        else{
+            try {
+                sUserByEmail.setString(1, email);
+                try (ResultSet resultSet = sUserByEmail.executeQuery()){
+                    if(resultSet.next()){
+                        user = createUser(resultSet);
+                        dataLayer.getCache().add(User.class, user);
+                    }
+                }
+            }catch(SQLException e){
+                throw new DataException("Unable to find the requested item", e);
+            } 
+
+        }
        return user;
     }
+
 
     @Override
     public List<User> getAllUsers() throws DataException {
         List<User> result = null;
-        String query = "SELECT * FROM UTENTE";
+        
+        try(ResultSet resultSet = sAllUsers.executeQuery()){
 
-        try(PreparedStatement statement = dataLayer.getConnection().prepareStatement(query)){
-            ResultSet resultSet = statement.executeQuery();
+            while(resultSet.next()){
+                User user = null;
 
-            while (resultSet.next()) {
-                result.add(createUser(resultSet));
+                Integer id = resultSet.getInt("ID");
+
+                if(dataLayer.getCache().has(User.class, id)){
+                    user = dataLayer.getCache().get(User.class, id);
+                }
+                else{
+                    user = createUser(resultSet);
+                    dataLayer.getCache().add(User.class, user);
+                }
+                result.add(user);
 
             }
         }catch(SQLException e){
-            throw new DataException(e);
-        }
+                throw new DataException("Unable to find the requested item", e);
+
+            }        
+        
         return null;
     }
 
     @Override
     public void addUser(User user) throws DataException {
-        String query = "INSERT INTO UTENTE (NOME, COGNOME, EMAIL, PASSWORD) VALUES (?, ?, ?, ?)";
 
-        try(PreparedStatement statement = dataLayer.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getSurname());
-            statement.setString(3, user.getEmail());
-            statement.setString(4, user.getPassword());
+        try {
+            sAddUser.setString(1, user.getName());
+            sAddUser.setString(2, user.getSurname());
+            sAddUser.setString(3, user.getEmail());
+            sAddUser.setString(4, user.getPassword());
 
-            statement.executeUpdate();
-        
-        try(ResultSet resultSet = statement.getGeneratedKeys()){
-            if(resultSet.next()){
-                user.setId(resultSet.getInt(1));
+            long initialVersion = 1;
+            sAddUser.setLong(5, initialVersion);
+
+            if(sAddUser.executeUpdate() == 1){
+                try(ResultSet resultSet = sAddUser.getGeneratedKeys()){
+                    if(resultSet.next()){
+                        Integer newKey = resultSet.getInt(1);
+                        user.setKey(newKey);
+
+                        user.setVersion(initialVersion);
+                    }
+                }
+                dataLayer.getCache().add(User.class, user);
             }
+   
+        } catch (SQLException e) {
+                throw new DataException("Unable to add user to the database", e);
         }
         
-    }catch(SQLException e){
-            throw new DataException(e);
+
     }
-}
 
     @Override
     public void updateUser(User user) throws DataException {
-        String query = "UPDATE UTENTE SET NOME = ?, COGNOME = ?, EMAIL = ?, PASSWORD = ? WHERE ID = ?";
+        try {
+            sUpdateUser.setString(1, user.getName());
+            sUpdateUser.setString(2, user.getSurname());
+            sUpdateUser.setString(3, user.getEmail());
+            sUpdateUser.setString(4, user.getPassword());
 
-        try(PreparedStatement statement = dataLayer.getConnection().prepareStatement(query)){
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getSurname());
-            statement.setString(3, user.getEmail());
-            statement.setString(4, user.getPassword());
-            statement.setInt(5, user.getId());
+            long currentVersion = user.getVersion();
+            long nextVersion = currentVersion + 1;
+            sUpdateUser.setLong(5, nextVersion);
 
-            statement.executeUpdate();
+            sUpdateUser.setInt(6, user.getKey());
+            sUpdateUser.setLong(7, currentVersion);
 
-            try(ResultSet resultSet = statement.getGeneratedKeys()){
-                if(resultSet.next()){
-                    user.setId(resultSet.getInt(1));
-                }
+            int affectedRows = sUpdateUser.executeUpdate();
+
+            if(affectedRows == 0){
+
+                throw new DataException("l'utente è stato modificato da un altro processo");
             }
+            else{
+                user.setVersion(nextVersion);
+
+                if(user instanceof UserProxy){
+                    ((UserProxy) user).setClean();
+                }
+            }    
         } catch (SQLException e) {
-            throw new DataException(e);
+            throw new DataException("Unable to update user in the database", e);
         }
 
     }
 
     @Override
-    public void deleteUser(int id) throws DataException {
-        String query = "DELETE FROM UTENTE WHERE ID = ?";
+    public void deleteUser(User user) throws DataException {
+        try {
+            sDeleteUser.setInt(1, user.getKey());
+            
+            int affectedRows = sDeleteUser.executeUpdate();
 
-        try(PreparedStatement statement = dataLayer.getConnection().prepareStatement(query)){
-            statement.setInt(1, id);
-            statement.executeUpdate();
+            if(affectedRows > 0){
+                dataLayer.getCache().delete(User.class, user.getKey());
+            }
+            
         } catch (SQLException e) {
-            throw new DataException(e);
+            throw new DataException("Unable to delete user", e);
         }
     }
 
-    private User createUser(ResultSet rs) throws SQLException {
-        User u = new UserImpl(); 
-        u.setId(rs.getInt("id"));
-        u.setName(rs.getString("name"));
-        u.setSurname(rs.getString("surname"));
-        u.setEmail(rs.getString("email"));
-        u.setPassword(rs.getString("password"));
-        return u;
+    protected User createUser(ResultSet rs) throws SQLException {
+        UserProxy user = new UserProxy(getDataLayer()); 
+
+        user.setKey(rs.getInt("ID")); 
+    
+    
+        user.setVersion(rs.getLong("VERSION")); 
+
+        user.setName(rs.getString("NAME"));
+        user.setSurname(rs.getString("SURNAME"));
+        user.setEmail(rs.getString("EMAIL"));
+        user.setPassword(rs.getString("PASSWORD"));
+
+        user.setClean();
+
+        return user;
     }
 
 }

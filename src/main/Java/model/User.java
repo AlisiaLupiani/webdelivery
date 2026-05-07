@@ -1,6 +1,8 @@
 package model;
 
-public interface User {
+import framework.data.DataItem;
+
+public interface User extends DataItem<Integer>{
 
 	public Integer getId();
 	public void setId(Integer id);

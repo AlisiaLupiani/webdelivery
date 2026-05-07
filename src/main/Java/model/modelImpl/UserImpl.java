@@ -1,10 +1,12 @@
 package model.modelImpl;
 
+import framework.data.DataItemImpl;
 import model.User;
 
 
 
-public class UserImpl implements User {
+
+public class UserImpl extends DataItemImpl<Integer> implements User {
     
 	private Integer id;
 	private String name;

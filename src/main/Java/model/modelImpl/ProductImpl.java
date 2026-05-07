@@ -108,4 +108,6 @@ public class ProductImpl implements Product {
     public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
     }
+
+    
 }

@@ -45,6 +45,26 @@ public class UserProxy extends UserImpl{
         this.isDirty = true;
     }
 
+    @Override
+    public void setKey(Integer key) { // invece di setId
+        super.setKey(key);
+        this.isDirty = true;
+    }
+
+    @Override
+    public void setVersion(long version) { // nuovo attributo del DataItem
+        super.setVersion(version);
+        this.isDirty = true;
+    }
+
+    public boolean isModified() {
+        return isDirty;
+    }
+
+    public void setClean() {
+    this.isDirty = false;
+}
+
 
 
 }
