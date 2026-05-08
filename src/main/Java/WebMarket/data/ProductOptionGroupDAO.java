@@ -1,22 +1,21 @@
 package WebMarket.data;
 
 import java.util.List;
-
 import framework.data.DataException;
 import model.ProductOptionGroup;
+import model.Product;
 
 public interface ProductOptionGroupDAO {
 
-    ProductOptionGroup getProductOptionGroupById(int id) throws DataException;
-
-    ProductOptionGroup getProductOptionGroupByName(String name) throws DataException;
+    ProductOptionGroup getProductOptionGroupById(int group_key) throws DataException;
 
     List<ProductOptionGroup> getAllProductOptionGroups() throws DataException;
 
-    void addProductOptionGroup(ProductOptionGroup productOptionGroup) throws DataException;
-    void updateProductOptionGroup(ProductOptionGroup productOptionGroup) throws DataException;
-    void deleteProductOptionGroup(ProductOptionGroup productOptionGroup) throws DataException;
+    List<ProductOptionGroup> getProductOptionGroupsByProduct(Product product) throws DataException;
 
+    void addProductOptionGroup(ProductOptionGroup group) throws DataException;
 
+    void updateProductOptionGroup(ProductOptionGroup group) throws DataException;
 
+    void deleteProductOptionGroup(ProductOptionGroup group) throws DataException;
 }

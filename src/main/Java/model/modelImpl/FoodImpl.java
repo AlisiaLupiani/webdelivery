@@ -4,32 +4,55 @@ import model.Food;
 
 public class FoodImpl implements Food {
 
-    private Integer id;
-    private String name;
+    protected Integer key;
+    protected String name;
+    protected long version;
 
-    // Costruttore vuoto richiesto per l'uso nei DAO
     public FoodImpl() {
-        this.id = 0;
+        this.key = 0;
         this.name = "";
+        this.version = 0;
+    }
+
+    // Metodi per la chiave (richiesti dal framework DataItem)
+    @Override
+    public Integer getKey() {
+        return key;
     }
 
     @Override
+    public void setKey(Integer key) {
+        this.key = key;
+    }
+
+    // Alias per ID (richiesti dall'interfaccia Food)
+    @Override
     public Integer getId() {
-        return this.id;
+        return key;
     }
 
     @Override
     public void setId(Integer id) {
-        this.id = id;
+        this.key = id;
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public long getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(long version) {
+        this.version = version;
     }
 }

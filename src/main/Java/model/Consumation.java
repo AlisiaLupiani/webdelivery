@@ -1,8 +1,12 @@
 package model;
 
-public interface Consumation {
+import framework.data.DataItem;
 
-	public Double getPrice();
-	public void setPrice();
+// Deve estendere DataItem per avere i metodi della chiave (ID)
+public interface Consumation extends DataItem<Integer> {
+    String getName();
+    void setName(String name);
 
+    Double getPrice();
+    void setPrice(Double price);
 }

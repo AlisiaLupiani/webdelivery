@@ -4,21 +4,55 @@ import model.Consumation;
 
 public class ConsumationImpl implements Consumation {
 
-    private Double price;
+    protected Integer key;
+    protected String name;
+    protected Double price;
+    protected long version;
 
     public ConsumationImpl() {
-        super();
+        this.key = 0;
+        this.name = "";
         this.price = 0.0;
+        this.version = 0;
     }
 
+    @Override
+    public Integer getKey() {
+        return key;
+    }
 
-	public Double getPrice(){
-        return this.price;
-    };
-	public void setPrice(){
+    @Override
+    public void setKey(Integer key) {
+        this.key = key;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public Double getPrice() {
+        return price;
+    }
+
+    @Override
+    public void setPrice(Double price) {
         this.price = price;
-    };
+    }
 
+    @Override
+    public long getVersion() {
+        return version;
+    }
 
-    
+    @Override
+    public void setVersion(long version) {
+        this.version = version;
+    }
 }

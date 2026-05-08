@@ -3,87 +3,116 @@ package model.modelImpl;
 import model.ProductOption;
 import model.ProductOptionGroup;
 
+public class ProductOptionImpl implements ProductOption {
 
-public class ProductOptionImpl implements ProductOption{
-	
-	Integer id;
-	Double price;
-	String name;
-	Double addictionalPrice;
-	String description;
-	ProductOptionGroup productOptionGroup;
-	boolean defaultOption;
+    protected Integer key;
+    protected String name;
+    protected String description;
+    protected Double addictionalPrice;
+    protected boolean isDefault;
+    protected ProductOptionGroup productOptionGroup;
+    protected long version;
 
-	@Override
-	public Double getPrice(){
-		return this.price;
-	}
+    public ProductOptionImpl() {
+        this.key = 0;
+        this.name = "";
+        this.description = "";
+        this.addictionalPrice = 0.0;
+        this.isDefault = false;
+        this.productOptionGroup = null;
+        this.version = 0;
+    }
 
-	@Override
-	public void setPrice(double price){
-		this.price = price;
-	}
+    // Metodi per la Chiave Primaria (DataItem)
+    @Override
+    public Integer getKey() {
+        return key;
+    }
 
-	@Override
-	public Integer getId() {
-		return id;
-	}
+    @Override
+    public void setKey(Integer key) {
+        this.key = key;
+    }
 
-	@Override
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    // Metodi per l'ID (Alias di Key)
+    @Override
+    public Integer getId() {
+        return key;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public void setId(Integer id) {
+        this.key = id;
+    }
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public String getDescription() {
-		return description;
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    @Override
+    public String getDescription() {
+        return description;
+    }
 
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	@Override
-	public Double getAddictionalPrice() {
-		return this.addictionalPrice;
-	}
+    @Override
+    public Double getAddictionalPrice() {
+        return addictionalPrice;
+    }
 
-	@Override
-	public void setAddictionalPrice(Double price) {
-		this.addictionalPrice = addictionalPrice + price;
-	}
-	
-	@Override
-	public ProductOptionGroup getProductOptionGroup() {
-		return productOptionGroup;
-	}
+    @Override
+    public void setAddictionalPrice(Double price) {
+        this.addictionalPrice = price;
+    }
 
-	@Override
-	public void setProductOptionGroup(ProductOptionGroup productOptionGroup) {
-		this.productOptionGroup = productOptionGroup;
-	}
+    @Override
+    public boolean isDefault() {
+        return isDefault;
+    }
 
-	@Override
-	public boolean isDefault(){
-		return defaultOption;
-	}
+    @Override
+    public void setDefault(boolean df) {
+        this.isDefault = df;
+    }
 
-	@Override
-	public void setDefault(boolean df){
-		this.defaultOption = df;
-	}
+    @Override
+    public ProductOptionGroup getProductOptionGroup() {
+        return productOptionGroup;
+    }
 
+    @Override
+    public void setProductOptionGroup(ProductOptionGroup productOptionGroup) {
+        this.productOptionGroup = productOptionGroup;
+    }
 
+    // Metodo richiesto da Consumation (ereditato)
+    @Override
+    public Double getPrice() {
+        return addictionalPrice;
+    }
+
+    @Override
+    public void setPrice(Double price) {
+        this.addictionalPrice = price;
+    }
+
+    @Override
+    public long getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(long version) {
+        this.version = version;
+    }
 }

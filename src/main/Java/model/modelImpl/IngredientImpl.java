@@ -1,49 +1,44 @@
 package model.modelImpl;
 
-import model.Food;
 import model.Ingredient;
+import model.Food;
 
 public class IngredientImpl implements Ingredient {
 
-    private Integer id;
-    private Food food;
-    private String quantity;
+    protected Integer key;
+    protected String quantity;
+    protected Food food;
+    protected long version;
 
-    
     public IngredientImpl() {
-        this.id = 0;
-        this.food = null;
+        this.key = 0;
         this.quantity = "";
+        this.food = null;
+        this.version = 0;
     }
 
     @Override
-    public Integer getId() {
-        return this.id;
-    }
+    public Integer getKey() { return key; }
+    @Override
+    public void setKey(Integer key) { this.key = key; }
 
     @Override
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public Integer getId() { return key; }
+    @Override
+    public void setId(Integer id) { this.key = id; }
 
     @Override
-    public Food getFood() {
-        return this.food;
-    }
-
-   
+    public String getQuantity() { return quantity; }
     @Override
-    public void setFood(Food food) {
-        this.food = food;
-    }
+    public void setQuantity(String quantity) { this.quantity = quantity; }
 
     @Override
-    public String getQuantity() {
-        return this.quantity;
-    }
+    public Food getFood() { return food; }
+    @Override
+    public void setFood(Food food) { this.food = food; }
 
     @Override
-    public void setQuantity(String quantity) {
-        this.quantity = quantity;
-    }
+    public long getVersion() { return version; }
+    @Override
+    public void setVersion(long version) { this.version = version; }
 }

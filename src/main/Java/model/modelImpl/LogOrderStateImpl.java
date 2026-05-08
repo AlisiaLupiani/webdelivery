@@ -2,86 +2,67 @@ package model.modelImpl;
 
 import model.LogOrderState;
 import model.Order;
-import model.OrderState;
 import model.Staff;
+import model.OrderState;
 import java.time.LocalDateTime;
 
 public class LogOrderStateImpl implements LogOrderState {
 
-    private Integer id;
-    private Order order;
-    private Staff staff;
-    private OrderState stateFrom;
-    private OrderState stateTo;
-    private LocalDateTime dateTime;
+    protected Integer key;
+    protected Order order;
+    protected Staff staff;
+    protected OrderState stateFrom;
+    protected OrderState stateTo;
+    protected LocalDateTime dateTime;
+    protected long version;
 
-    // Costruttore vuoto per il DAO
     public LogOrderStateImpl() {
-        this.id = 0;
+        this.key = 0;
         this.order = null;
         this.staff = null;
         this.stateFrom = null;
         this.stateTo = null;
         this.dateTime = LocalDateTime.now();
+        this.version = 0;
     }
 
     @Override
-    public Integer getId() {
-        return this.id;
-    }
+    public Integer getKey() { return key; }
+    @Override
+    public void setKey(Integer key) { this.key = key; }
 
     @Override
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public Integer getId() { return key; }
+    @Override
+    public void setId(Integer id) { this.key = id; }
 
     @Override
-    public Order getOrder() {
-        return this.order;
-    }
+    public Order getOrder() { return order; }
+    @Override
+    public void setOrder(Order order) { this.order = order; }
 
     @Override
-    public void setOrder(Order order) {
-        this.order = order;
-    }
+    public Staff getStaff() { return staff; }
+    @Override
+    public void setStaff(Staff staff) { this.staff = staff; }
 
     @Override
-    public Staff getStaff() {
-        return this.staff;
-    }
+    public OrderState getStateFrom() { return stateFrom; }
+    @Override
+    public void setStateFrom(OrderState state) { this.stateFrom = state; }
 
     @Override
-    public void setStaff(Staff staff) {
-        this.staff = staff;
-    }
+    public OrderState getStateTo() { return stateTo; }
+    @Override
+    public void setStateTo(OrderState state) { this.stateTo = state; }
 
     @Override
-    public OrderState getStateFrom() {
-        return this.stateFrom;
-    }
+    public LocalDateTime getDateTime() { return dateTime; }
+    @Override
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     @Override
-    public void setStateFrom(OrderState state) {
-        this.stateFrom = state;
-    }
-
+    public long getVersion() { return version; }
     @Override
-    public OrderState getStateTo() {
-        return this.stateTo;
-    }
-
-    @Override
-    public void setStateTo(OrderState state) {
-        this.stateTo = state;
-    }
-
-    @Override
-    public LocalDateTime getDateTime() {
-        return this.dateTime;
-    }
-
-    @Override
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
+    public void setVersion(long version) { this.version = version; }
 }
