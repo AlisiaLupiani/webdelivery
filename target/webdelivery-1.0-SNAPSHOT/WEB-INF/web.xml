@@ -8,8 +8,20 @@
 
   <display-name>WebDelivery Project</display-name>
 
+  <context-param>
+    <param-name>data.source</param-name>
+    <param-value>jdbc/webdelivery</param-value>
+  </context-param>
+
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
+
+  <resource-ref>
+    <description>DB Connection</description>
+    <res-ref-name>jdbc/webdelivery</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
 
 </web-app>
