@@ -3,9 +3,9 @@ package model;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import framework.data.DataItem;
 
-// Estendiamo DataItem per permettere al DAO di usare getKey()
 public interface Order extends DataItem<Integer> {
     
     public Integer getId();
@@ -35,7 +35,5 @@ public interface Order extends DataItem<Integer> {
     public List<Product> getProducts();
     public void setProducts(List<Product> products);
 
-    // Metodi necessari per il framework
-    public long getVersion();
-    public void setVersion(long version);
+   
 }

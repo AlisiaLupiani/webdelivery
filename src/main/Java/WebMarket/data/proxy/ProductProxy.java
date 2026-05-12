@@ -1,10 +1,7 @@
 package WebMarket.data.proxy;
 
 import framework.data.DataLayer;
-import model.Product;
-import model.Ingredient;
 import model.modelImpl.ProductImpl;
-import java.util.List;
 
 public class ProductProxy extends ProductImpl {
 
@@ -15,12 +12,6 @@ public class ProductProxy extends ProductImpl {
         super();
         this.dataLayer = dl;
         this.isDirty = false;
-    }
-
-    @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
-        this.isDirty = true;
     }
 
     @Override
@@ -42,21 +33,21 @@ public class ProductProxy extends ProductImpl {
     }
 
     @Override
+    public void setKey(Integer key) {
+        super.setKey(key);
+        this.isDirty = true;
+    }
+
+    @Override
     public void setVersion(long version) {
         super.setVersion(version);
         this.isDirty = true;
     }
 
-    // Metodi per la gestione dello stato del proxy
-    public void setDirty(boolean dirty) {
-        this.isDirty = dirty;
-    }
-
-    public boolean isDirty() {
+    public boolean isModified() {
         return isDirty;
     }
 
-    // Questo è il metodo che mancava!
     public void setClean() {
         this.isDirty = false;
     }

@@ -1,15 +1,17 @@
 package WebMarket.data.proxy;
 
+import WebMarket.data.FoodDAO;
 import framework.data.DataLayer;
-import model.Ingredient;
 import model.Food;
 import model.modelImpl.IngredientImpl;
-import WebMarket.data.FoodDAO;
 
 public class IngredientProxy extends IngredientImpl {
 
     protected DataLayer dataLayer;
     protected boolean isDirty;
+
+    protected Integer idFoodNascosto;
+
 
     public IngredientProxy(DataLayer dl) {
         super();
@@ -17,9 +19,14 @@ public class IngredientProxy extends IngredientImpl {
         this.isDirty = false;
     }
 
-    @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
+    public void setIdFoodNascosto(Integer id) {
+        this.idFoodNascosto = id;
+    }
+
+
+   @Override
+    public void setId(Integer id) {
+        super.setId(id);
         this.isDirty = true;
     }
 
@@ -32,25 +39,47 @@ public class IngredientProxy extends IngredientImpl {
     @Override
     public void setFood(Food food) {
         super.setFood(food);
+
+        if(food != null){
+            this.idFoodNascosto = food.getKey();
+        }else{
+            this.idFoodNascosto = 0;
+        }
+
         this.isDirty = true;
     }
 
-    // Risolve l'errore del caricamento automatico (Lazy Loading)
     @Override
     public Food getFood() {
-        if (super.getFood() == null) {
+        if (super.getFood() == null && this.idFoodNascosto > 0) {
             try {
-                // Qui carichiamo il cibo dal database solo quando serve
+
                 FoodDAO foodDAO = (FoodDAO) dataLayer.getDAO(Food.class);
-                super.setFood(foodDAO.getFoodByIngredient(this));
+                super.setFood(foodDAO.getFoodById(this.idFoodNascosto)); 
+                
             } catch (Exception e) {
-                return null;
+                e.printStackTrace(); 
             }
         }
         return super.getFood();
     }
 
-    public void setDirty(boolean dirty) { this.isDirty = dirty; }
-    public boolean isDirty() { return isDirty; }
-    public void setClean() { this.isDirty = false; }
+    @Override 
+    public void setKey(Integer key) {
+        super.setKey(key);
+        this.isDirty = true;
+    }
+
+    @Override
+    public void setVersion(long version) {
+        super.setVersion(version);
+        this.isDirty = true;
+    }
+    
+    public boolean isModified() {
+         return isDirty;
+    }
+    public void setClean() {
+        this.isDirty = false;
+    }
 }

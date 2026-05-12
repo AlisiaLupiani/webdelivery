@@ -7,11 +7,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import WebMarket.data.proxy.UserProxy;
 import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
 import model.User;
-import model.modelImpl.UserImpl; // FIX: Import corretto per risolvere gli errori
+
 
 public class UserDAOImpl extends DAO implements UserDAO {
 
@@ -60,6 +61,7 @@ public class UserDAOImpl extends DAO implements UserDAO {
             if(sUpdateUser != null) sUpdateUser.close();
             if(sDeleteUser != null) sDeleteUser.close();
             super.destroy();
+            
         } catch (SQLException e) {
             throw new DataException("Error closing WebMarket data layer", e);
         }
@@ -190,13 +192,16 @@ public class UserDAOImpl extends DAO implements UserDAO {
     }
 
     protected User createUser(ResultSet rs) throws SQLException {
-        User user = new UserImpl(); // RIGA 213: Ora risolta grazie all'import corretto
+        UserProxy user = new UserProxy(getDataLayer());
         user.setKey(rs.getInt("ID"));
         user.setVersion(rs.getLong("VERSION"));
         user.setName(rs.getString("NOME"));
         user.setSurname(rs.getString("COGNOME"));
         user.setEmail(rs.getString("EMAIL"));
         user.setPassword(rs.getString("PASSWORD"));
+
+        user.setClean();
+
         return user;
     }
 }

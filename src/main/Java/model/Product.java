@@ -1,10 +1,11 @@
 package model;
 
 import java.util.List;
+
 import framework.data.DataItem;
 
-// Assicuriamoci che estenda Consumation
-public interface Product extends Consumation {
+
+public interface Product extends Consumation, DataItem<Integer> {
     
     public Integer getId();
     public void setId(Integer id);
@@ -27,11 +28,8 @@ public interface Product extends Consumation {
     public String getProcedure();
     public void setProcedure(String procedure);
     
-    // Corretto il nome da getIngrediens a getIngredients
     public List<Ingredient> getIngredients();
     public void setIngredients(List<Ingredient> ingredients);
 
-    // Metodi necessari per il framework
-    public long getVersion();
-    public void setVersion(long version);
+    
 }

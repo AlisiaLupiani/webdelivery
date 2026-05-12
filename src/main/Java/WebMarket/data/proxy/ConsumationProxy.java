@@ -17,11 +17,7 @@ public class ConsumationProxy extends ConsumationImpl implements Consumation {
     }
 
     // Usiamo setKey perché il framework DataItem usa "Key", non "Id"
-    @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
-        this.isDirty = true;
-    }
+
 
     @Override
     public void setName(String name) {
@@ -34,13 +30,20 @@ public class ConsumationProxy extends ConsumationImpl implements Consumation {
         super.setPrice(price);
         this.isDirty = true;
     }
-
-    // Metodi per il proxy
-    public void setDirty() {
+    @Override
+    public void setKey(Integer key) {
+        super.setKey(key);
         this.isDirty = true;
     }
 
-    public boolean isDirty() {
+    @Override
+    public void setVersion(long version) {
+        super.setVersion(version);
+        this.isDirty = true;
+    }
+
+
+    public boolean isModified() {
         return this.isDirty;
     }
 

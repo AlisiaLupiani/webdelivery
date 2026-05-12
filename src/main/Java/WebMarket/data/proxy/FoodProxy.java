@@ -1,7 +1,6 @@
 package WebMarket.data.proxy;
 
 import framework.data.DataLayer;
-import model.Food;
 import model.modelImpl.FoodImpl;
 
 public class FoodProxy extends FoodImpl {
@@ -16,14 +15,14 @@ public class FoodProxy extends FoodImpl {
     }
 
     @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
+    public void setName(String name) {
+        super.setName(name);
         this.isDirty = true;
     }
 
     @Override
-    public void setName(String name) {
-        super.setName(name);
+    public void setKey(Integer key) {
+        super.setKey(key);
         this.isDirty = true;
     }
 
@@ -33,13 +32,8 @@ public class FoodProxy extends FoodImpl {
         this.isDirty = true;
     }
 
-    // Metodi di utilità per il proxy
-    public boolean isDirty() {
+    public boolean isModified() {
         return isDirty;
-    }
-
-    public void setDirty(boolean dirty) {
-        this.isDirty = dirty;
     }
 
     public void setClean() {

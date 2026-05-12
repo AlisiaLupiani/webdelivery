@@ -1,9 +1,10 @@
 package model.modelImpl;
 
+import framework.data.DataItemImpl;
 import model.ProductOption;
 import model.ProductOptionGroup;
 
-public class ProductOptionImpl implements ProductOption {
+public class ProductOptionImpl extends DataItemImpl<Integer> implements ProductOption {
 
     protected Integer key;
     protected String name;
@@ -11,7 +12,7 @@ public class ProductOptionImpl implements ProductOption {
     protected Double addictionalPrice;
     protected boolean isDefault;
     protected ProductOptionGroup productOptionGroup;
-    protected long version;
+   
 
     public ProductOptionImpl() {
         this.key = 0;
@@ -20,7 +21,7 @@ public class ProductOptionImpl implements ProductOption {
         this.addictionalPrice = 0.0;
         this.isDefault = false;
         this.productOptionGroup = null;
-        this.version = 0;
+        
     }
 
     // Metodi per la Chiave Primaria (DataItem)
@@ -106,13 +107,5 @@ public class ProductOptionImpl implements ProductOption {
         this.addictionalPrice = price;
     }
 
-    @Override
-    public long getVersion() {
-        return version;
-    }
-
-    @Override
-    public void setVersion(long version) {
-        this.version = version;
-    }
+    
 }

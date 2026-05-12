@@ -1,7 +1,6 @@
 package WebMarket.data.proxy;
 
 import framework.data.DataLayer;
-import model.ProductOptionGroup;
 import model.modelImpl.ProductOptionGroupImpl;
 
 public class ProductOptionGroupProxy extends ProductOptionGroupImpl {
@@ -16,14 +15,21 @@ public class ProductOptionGroupProxy extends ProductOptionGroupImpl {
     }
 
     @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
+    public void setId(Integer id) {
+        super.setId(id);
         this.isDirty = true;
     }
+
 
     @Override
     public void setName(String name) {
         super.setName(name);
+        this.isDirty = true;
+    }
+
+     @Override
+    public void setKey(Integer key) {
+        super.setKey(key);
         this.isDirty = true;
     }
 
@@ -33,12 +39,7 @@ public class ProductOptionGroupProxy extends ProductOptionGroupImpl {
         this.isDirty = true;
     }
 
-    // Metodi per la gestione dello stato del proxy richiesti dai DAO
-    public void setDirty(boolean dirty) {
-        this.isDirty = dirty;
-    }
-
-    public boolean isDirty() {
+    public boolean isModified() {
         return isDirty;
     }
 

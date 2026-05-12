@@ -1,12 +1,12 @@
 package WebMarket.data.proxy;
 
-import framework.data.DataLayer;
-import model.LogOrderState;
-import model.Order;
-import model.Staff;
-import model.OrderState;
-import model.modelImpl.LogOrderStateImpl;
 import java.time.LocalDateTime;
+
+import framework.data.DataLayer;
+import model.Order;
+import model.OrderState;
+import model.Staff;
+import model.modelImpl.LogOrderStateImpl;
 
 public class LogOrderStateProxy extends LogOrderStateImpl {
 
@@ -18,10 +18,10 @@ public class LogOrderStateProxy extends LogOrderStateImpl {
         this.dataLayer = dl;
         this.isDirty = false;
     }
-
+    
     @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
+    public void setId(Integer id) {
+        super.setId(id);
         this.isDirty = true;
     }
 
@@ -54,11 +54,18 @@ public class LogOrderStateProxy extends LogOrderStateImpl {
         super.setDateTime(dateTime);
         this.isDirty = true;
     }
-
-    // Metodi per la gestione dello stato del proxy
-    public void setDirty(boolean dirty) {
-        this.isDirty = dirty;
+    @Override
+    public void setKey(Integer key) {
+        super.setKey(key);
+        this.isDirty = true;
     }
+
+    @Override
+    public void setVersion(long version) {
+        super.setVersion(version);
+        this.isDirty = true;
+    }
+
 
     public boolean isDirty() {
         return isDirty;

@@ -1,17 +1,18 @@
 package model.modelImpl;
 
+import framework.data.DataItemImpl;
 import model.ProductOptionGroup;
 
-public class ProductOptionGroupImpl implements ProductOptionGroup {
+public class ProductOptionGroupImpl extends DataItemImpl<Integer> implements ProductOptionGroup {
 
     protected Integer key;
     protected String name;
-    protected long version;
+
 
     public ProductOptionGroupImpl() {
         this.key = 0;
         this.name = "";
-        this.version = 0;
+    
     }
 
     // Risolve gli errori su getKey e setKey
@@ -46,14 +47,5 @@ public class ProductOptionGroupImpl implements ProductOptionGroup {
         this.name = name;
     }
 
-    // Risolve gli errori su getVersion e setVersion
-    @Override
-    public long getVersion() {
-        return version;
-    }
-
-    @Override
-    public void setVersion(long version) {
-        this.version = version;
-    }
+   
 }

@@ -1,16 +1,18 @@
 package model.modelImpl;
 
-import model.Order;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import framework.data.DataItemImpl;
 import model.Client;
+import model.Order;
 import model.OrderState;
 import model.PaymentMethod;
 import model.Product;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.ArrayList;
 
-public class OrderImpl implements Order {
+public class OrderImpl extends DataItemImpl<Integer> implements Order {
 
     protected Integer key;
     protected Client client;
@@ -21,7 +23,7 @@ public class OrderImpl implements Order {
     protected PaymentMethod paymentMethod;
     protected String deliveryAddress;
     protected List<Product> products;
-    protected long version;
+    
 
     public OrderImpl() {
         this.key = 0;
@@ -33,7 +35,7 @@ public class OrderImpl implements Order {
         this.paymentMethod = null;
         this.deliveryAddress = "";
         this.products = new ArrayList<>();
-        this.version = 0;
+        
     }
 
     // Metodi per la Chiave (DataItem)
@@ -88,8 +90,5 @@ public class OrderImpl implements Order {
     @Override
     public void setProducts(List<Product> products) { this.products = products; }
 
-    @Override
-    public long getVersion() { return version; }
-    @Override
-    public void setVersion(long version) { this.version = version; }
+    
 }

@@ -1,39 +1,29 @@
 package model.modelImpl;
 
+import framework.data.DataItemImpl;
 import model.Food;
 
-public class FoodImpl implements Food {
+public class FoodImpl extends DataItemImpl<Integer> implements Food {
 
-    protected Integer key;
+    protected Integer id;
     protected String name;
-    protected long version;
+
 
     public FoodImpl() {
-        this.key = 0;
+        this.id = 0;
         this.name = "";
-        this.version = 0;
+        
     }
 
-    // Metodi per la chiave (richiesti dal framework DataItem)
-    @Override
-    public Integer getKey() {
-        return key;
-    }
-
-    @Override
-    public void setKey(Integer key) {
-        this.key = key;
-    }
-
-    // Alias per ID (richiesti dall'interfaccia Food)
+    
     @Override
     public Integer getId() {
-        return key;
+        return id;
     }
 
     @Override
     public void setId(Integer id) {
-        this.key = id;
+        this.id = id;
     }
 
     @Override
@@ -46,13 +36,5 @@ public class FoodImpl implements Food {
         this.name = name;
     }
 
-    @Override
-    public long getVersion() {
-        return version;
-    }
-
-    @Override
-    public void setVersion(long version) {
-        this.version = version;
-    }
+    
 }

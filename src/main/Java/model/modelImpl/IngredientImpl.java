@@ -1,20 +1,22 @@
 package model.modelImpl;
 
-import model.Ingredient;
+import framework.data.DataItemImpl;
 import model.Food;
+import model.Ingredient;
 
-public class IngredientImpl implements Ingredient {
+
+public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient {
 
     protected Integer key;
     protected String quantity;
     protected Food food;
-    protected long version;
+    
 
     public IngredientImpl() {
         this.key = 0;
         this.quantity = "";
         this.food = null;
-        this.version = 0;
+        
     }
 
     @Override
@@ -37,8 +39,5 @@ public class IngredientImpl implements Ingredient {
     @Override
     public void setFood(Food food) { this.food = food; }
 
-    @Override
-    public long getVersion() { return version; }
-    @Override
-    public void setVersion(long version) { this.version = version; }
+   
 }

@@ -1,15 +1,17 @@
 package WebMarket.data.proxy;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import WebMarket.data.ProductDAO;
 import framework.data.DataLayer;
-import model.Order;
 import model.Client;
 import model.OrderState;
 import model.PaymentMethod;
 import model.Product;
 import model.modelImpl.OrderImpl;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
+
 
 public class OrderProxy extends OrderImpl {
 
@@ -23,8 +25,8 @@ public class OrderProxy extends OrderImpl {
     }
 
     @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
+    public void setId(Integer id) {
+        super.setId(id);
         this.isDirty = true;
     }
 
@@ -65,14 +67,30 @@ public class OrderProxy extends OrderImpl {
     }
 
     @Override
-    public void setDeliveryAddress(String deliveryAddress) {
-        super.setDeliveryAddress(deliveryAddress);
+    public void setProducts(List<Product> products) {
+        super.setProducts(products);
         this.isDirty = true;
     }
 
+    @Override 
+    public List<Product> getProducts() {
+        if(super.getProducts() == null){
+            try {
+                ProductDAO productDao = (ProductDAO) dataLayer.getDAO(Product.class);
+
+                List<Product> lista = productDao.getProductsByOrder(this.getKey());
+                super.setProducts(lista);
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+         return super.getProducts();
+    } 
+
     @Override
-    public void setProducts(List<Product> products) {
-        super.setProducts(products);
+    public void setKey(Integer key) {
+        super.setKey(key);
         this.isDirty = true;
     }
 
@@ -82,11 +100,11 @@ public class OrderProxy extends OrderImpl {
         this.isDirty = true;
     }
 
-    public void setDirty(boolean dirty) {
-        this.isDirty = dirty;
-    }
-
     public boolean isDirty() {
         return isDirty;
     }
+
+    public void setClean() {
+    this.isDirty = false;
+}
 }

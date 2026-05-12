@@ -1,15 +1,16 @@
 package model.modelImpl;
 
+import framework.data.DataItemImpl;
 import model.User;
 
-public class UserImpl implements User {
+public class UserImpl extends DataItemImpl<Integer> implements User {
 
     protected Integer key;
     protected String name;
     protected String surname;
     protected String email;
     protected String password;
-    protected long version;
+    
 
     public UserImpl() {
         this.key = 0;
@@ -17,13 +18,7 @@ public class UserImpl implements User {
         this.surname = "";
         this.email = "";
         this.password = "";
-        this.version = 0;
     }
-
-    @Override
-    public Integer getKey() { return key; }
-    @Override
-    public void setKey(Integer key) { this.key = key; }
 
     @Override
     public Integer getId() { return key; }
@@ -50,8 +45,4 @@ public class UserImpl implements User {
     @Override
     public void setPassword(String password) { this.password = password; }
 
-    @Override
-    public long getVersion() { return version; }
-    @Override
-    public void setVersion(long version) { this.version = version; }
 }

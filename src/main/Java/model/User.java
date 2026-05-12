@@ -19,7 +19,4 @@ public interface User extends DataItem<Integer> {
     public String getPassword();
     public void setPassword(String password);
 
-    // Metodi tecnici necessari per il framework
-    public long getVersion();
-    public void setVersion(long version);
 }

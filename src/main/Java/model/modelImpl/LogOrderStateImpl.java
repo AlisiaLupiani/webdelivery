@@ -1,12 +1,15 @@
 package model.modelImpl;
 
-import model.LogOrderState;
-import model.Order;
-import model.Staff;
-import model.OrderState;
 import java.time.LocalDateTime;
 
-public class LogOrderStateImpl implements LogOrderState {
+import framework.data.DataItemImpl;
+import model.LogOrderState;
+import model.Order;
+import model.OrderState;
+import model.Staff;
+
+
+public class LogOrderStateImpl extends DataItemImpl<Integer> implements LogOrderState {
 
     protected Integer key;
     protected Order order;

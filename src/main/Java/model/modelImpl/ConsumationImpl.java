@@ -1,30 +1,21 @@
 package model.modelImpl;
 
+import framework.data.DataItemImpl;
 import model.Consumation;
 
-public class ConsumationImpl implements Consumation {
+public class ConsumationImpl extends DataItemImpl<Integer> implements Consumation {
 
-    protected Integer key;
     protected String name;
     protected Double price;
-    protected long version;
+
 
     public ConsumationImpl() {
-        this.key = 0;
+        
         this.name = "";
         this.price = 0.0;
-        this.version = 0;
+        
     }
 
-    @Override
-    public Integer getKey() {
-        return key;
-    }
-
-    @Override
-    public void setKey(Integer key) {
-        this.key = key;
-    }
 
     @Override
     public String getName() {
@@ -46,13 +37,4 @@ public class ConsumationImpl implements Consumation {
         this.price = price;
     }
 
-    @Override
-    public long getVersion() {
-        return version;
-    }
-
-    @Override
-    public void setVersion(long version) {
-        this.version = version;
-    }
 }

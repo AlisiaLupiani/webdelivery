@@ -1,7 +1,6 @@
 package WebMarket.data.proxy;
 
 import framework.data.DataLayer;
-import model.ProductOption;
 import model.ProductOptionGroup;
 import model.modelImpl.ProductOptionImpl;
 
@@ -17,8 +16,8 @@ public class ProductOptionProxy extends ProductOptionImpl {
     }
 
     @Override
-    public void setKey(Integer key) {
-        super.setKey(key);
+    public void setId(Integer id) {
+        super.setId(id);
         this.isDirty = true;
     }
 
@@ -53,17 +52,19 @@ public class ProductOptionProxy extends ProductOptionImpl {
     }
 
     @Override
+    public void setKey(Integer key) {
+        super.setKey(key);
+        this.isDirty = true;
+    }
+
+    @Override
     public void setVersion(long version) {
         super.setVersion(version);
         this.isDirty = true;
     }
 
-    // Metodi per la gestione dello stato del proxy
-    public void setDirty(boolean dirty) {
-        this.isDirty = dirty;
-    }
 
-    public boolean isDirty() {
+    public boolean isModified() {
         return isDirty;
     }
 

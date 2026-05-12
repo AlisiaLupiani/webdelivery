@@ -2,7 +2,8 @@ package model;
 
 import framework.data.DataItem;
 
-public interface ProductOption extends Consumation {
+
+public interface ProductOption extends Consumation, DataItem<Integer> {
     
     public Integer getId();
     public void setId(Integer id);
@@ -22,7 +23,5 @@ public interface ProductOption extends Consumation {
     public ProductOptionGroup getProductOptionGroup();
     public void setProductOptionGroup(ProductOptionGroup productOptionGroup);
 
-    // Metodi per la gestione del framework
-    public long getVersion();
-    public void setVersion(long version);
+   
 }
