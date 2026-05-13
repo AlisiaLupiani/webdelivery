@@ -1,37 +1,29 @@
 package WebMarket.data.proxy;
 
 import framework.data.DataLayer;
-import model.modelImpl.ProductImpl;
-import model.Product;
+import model.modelImpl.ClientImpl;
 
 
-
-public class ProductProxy extends ProductImpl {
+public class ClientProxy extends ClientImpl {
 
     protected DataLayer dataLayer;
     protected boolean isDirty;
 
-    public ProductProxy(DataLayer dl) {
+    public ClientProxy(DataLayer dl) {
         super();
         this.dataLayer = dl;
         this.isDirty = false;
     }
 
     @Override
-    public void setId(Integer id) {
+    public void setPhone(Integer id) {
         super.setId(id);
         this.isDirty = true;
     }
 
-    @Override
-    public void setName(String name) {
-        super.setName(name);
-        this.isDirty = true;
-    }
-
-    @Override
-    public void setPrice(Double price) {
-        super.setPrice(price);
+    @Override 
+    public void setAddres(String address){
+        super.setAddress(address);
         this.isDirty = true;
     }
 
@@ -54,4 +46,7 @@ public class ProductProxy extends ProductImpl {
     public void setClean() {
         this.isDirty = false;
     }
+
+
+
 }
