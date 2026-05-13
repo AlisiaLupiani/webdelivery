@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,12 +20,11 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
     private PreparedStatement sLogById;
     private PreparedStatement sAllLogs;
     private PreparedStatement sLogByOrder;
-
     private PreparedStatement sAddLog;
     private PreparedStatement sUpdateLog;
     private PreparedStatement sDeleteLog;
-    private static final String TABLE = "LOG_STATO";
 
+    private static final String TABLE = "LOG_STATO";
 
     public LogOrderStateDAOImpl(DataLayer d) {
         super(d);
@@ -34,16 +34,20 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
     public void init() throws DataException {
         try {
             super.init();
-            sLogById = getConnection().prepareStatement("SELECT * FROM"+ TABLE +"WHERE ID=?");
-            sLogByOrder = getConnection().prepareStatement("SELECT * FROM"+ TABLE +"WHERE ORDINE_ID=?");
-            sAllLogs = getConnection().prepareStatement("SELECT * FROM"+ TABLE);
 
-        sAddLog = getConnection().prepareStatement(
-            "INSERT INTO"+ TABLE +"(NOME, STATO_FROM, STATO_TO, ORDINE-ID, UTENTE-ID, VERSION ) VALUES (?,?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            sLogById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID = ?");
+            sAllLogs = getConnection().prepareStatement("SELECT * FROM " + TABLE);
+            sLogByOrder = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ORDINE_ID = ? ORDER BY TIMESTAMP DESC");
+
+            sAddLog = getConnection().prepareStatement(
+                "INSERT INTO " + TABLE + " (TIMESTAMP, STATO_FROM, STATO_TO, ORDINE_ID, UTENTE_ID, VERSION) VALUES (?, ?, ?, ?, ?, ?)", 
+                Statement.RETURN_GENERATED_KEYS);
+
             sUpdateLog = getConnection().prepareStatement(
-                "UPDATE"+ TABLE + "SET NOME=?, STATO_FROM=?, STATO_TO=?, ORDINE-ID=?, UTENTE-ID=?, VERSION=? WHERE ID=? AND VERSION=?");
-            sDeleteLog = getConnection().prepareStatement("DELETE FROM"+ TABLE + "WHERE ID=? AND version=?");
-            
+                "UPDATE " + TABLE + " SET TIMESTAMP = ?, STATO_FROM = ?, STATO_TO = ?, ORDINE_ID = ?, UTENTE_ID = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
+
+            sDeleteLog = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID = ?");
+
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione LogOrderStateDAO", ex);
         }
@@ -52,12 +56,12 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
     @Override
     public void destroy() throws DataException {
         try {
-            if(sLogById != null) sLogById.close();
-            if(sLogByOrder != null) sLogByOrder.close();
-            if(sAllLogs != null) sAllLogs.close();
-            if(sAddLog != null) sAddLog.close();
-            if(sUpdateLog != null) sUpdateLog.close();
-            if(sDeleteLog != null) sDeleteLog.close();
+            if (sLogById != null) sLogById.close();
+            if (sAllLogs != null) sAllLogs.close();
+            if (sLogByOrder != null) sLogByOrder.close();
+            if (sAddLog != null) sAddLog.close();
+            if (sUpdateLog != null) sUpdateLog.close();
+            if (sDeleteLog != null) sDeleteLog.close();
             super.destroy();
         } catch (SQLException ex) {
             throw new DataException("Errore chiusura LogOrderStateDAO", ex);
@@ -65,56 +69,128 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
     }
 
     protected LogOrderState createLogOrderState(ResultSet rs) throws SQLException {
-        LogOrderStateProxy p = new LogOrderStateProxy(getDataLayer());
-        p.setKey(rs.getInt("ID"));
-        p.setVersion(rs.getLong("VERSION"));
-    
+        LogOrderStateProxy log = new LogOrderStateProxy(getDataLayer());
+        log.setKey(rs.getInt("ID"));
+        log.setTimestamp(rs.getTimestamp("TIMESTAMP").toLocalDateTime()); // Assumendo l'uso di LocalDateTime nel model
+        log.setStatoFrom(rs.getString("STATO_FROM"));
+        log.setStatoTo(rs.getString("STATO_TO"));
+        log.setOrderKey(rs.getInt("ORDINE_ID")); // Il Proxy gestirà il caricamento dell'oggetto Order
+        log.setUserKey(rs.getInt("UTENTE_ID"));   // Il Proxy gestirà il caricamento dell'oggetto User
+        log.setVersion(rs.getLong("VERSION"));
         
-        return p;
+        log.setClean();
+        return log;
     }
 
     @Override
     public LogOrderState getLogOrderStateById(int log_key) throws DataException {
+        LogOrderState log;
+        if (getDataLayer().getCache().has(LogOrderState.class, log_key)) {
+            log = getDataLayer().getCache().get(LogOrderState.class, log_key);
+        }
         try {
             sLogById.setInt(1, log_key);
             try (ResultSet rs = sLogById.executeQuery()) {
-                if (rs.next()) return createLogOrderState(rs);
-            }
-        } catch (SQLException ex) {
-            throw new DataException("Errore getLogOrderStateById", ex);
-        }
-        return null;
-    }
-
-    @Override
-    public List<LogOrderState> getLogOrderStateByOrder(Order order) throws DataException {
-        List<LogOrderState> res = new ArrayList<>();
-        try {
-            sLogByOrder.setInt(1, order.getKey());
-            try (ResultSet rs = sLogByOrder.executeQuery()) {
-                while (rs.next()) {
-                    res.add(createLogOrderState(rs)); // Qui l'errore "not applicable" sparirà
+                if (rs.next()) {
+                    log = createLogOrderState(rs);
+                    getDataLayer().getCache().add(LogOrderState.class, log);
                 }
             }
-        } catch (SQLException ex) {
-            throw new DataException("Errore getLogOrderStateByOrder", ex);
+        } catch (SQLException e) {
+            throw new DataException("Errore recupero Log per ID", e);
         }
-        return res;
+        return log;
     }
 
     @Override
     public List<LogOrderState> getAllLogOrderStates() throws DataException {
-        List<LogOrderState> res = new ArrayList<>();
-        try (Statement s = getConnection().createStatement();
-             ResultSet rs = s.executeQuery("SELECT * FROM log_order_state")) {
-            while (rs.next()) res.add(createLogOrderState(rs));
+        List<LogOrderState> result = new ArrayList<>();
+        try (ResultSet rs = sAllLogs.executeQuery()) {
+            while (rs.next()) {
+                result.add(createLogOrderState(rs));
+            }
         } catch (SQLException ex) {
-            throw new DataException("Errore getAllLogOrderStates", ex);
+            throw new DataException("Errore recupero tutti i log", ex);
         }
-        return res;
+        return result;
     }
 
-    @Override public void addLogOrderState(LogOrderState log) throws DataException {}
-    @Override public void updateLogOrderState(LogOrderState log) throws DataException {}
-    @Override public void deleteLogOrderState(LogOrderState log) throws DataException {}
+    @Override
+    public List<LogOrderState> getLogOrderStateByOrder(Order order) throws DataException {
+        List<LogOrderState> result = new ArrayList<>();
+        try {
+            sLogByOrder.setInt(1, order.getKey());
+            try (ResultSet rs = sLogByOrder.executeQuery()) {
+                while (rs.next()) {
+                    result.add(createLogOrderState(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataException("Errore recupero log per ordine", ex);
+        }
+        return result;
+    }
+
+    @Override
+    public void addLogOrderState(LogOrderState log) throws DataException {
+        try {
+            sAddLog.setTimestamp(1, Timestamp.valueOf(log.getTimestamp()));
+            sAddLog.setString(2, log.getStatoFrom());
+            sAddLog.setString(3, log.getStatoTo());
+            sAddLog.setInt(4, log.getOrder().getKey());
+            sAddLog.setInt(5, log.getUser().getKey());
+            
+            long initialVersion = 1;
+            sAddLog.setLong(6, initialVersion);
+
+            if (sAddLog.executeUpdate() == 1) {
+                try (ResultSet rs = sAddLog.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        log.setKey(rs.getInt(1));
+                        log.setVersion(initialVersion);
+                    }
+                }
+                getDataLayer().getCache().add(LogOrderState.class, log);
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore inserimento log", e);
+        }
+    }
+
+    @Override
+    public void updateLogOrderState(LogOrderState log) throws DataException {
+        try {
+            long currentVersion = log.getVersion();
+            long nextVersion = currentVersion + 1;
+
+            sUpdateLog.setTimestamp(1, Timestamp.valueOf(log.getTimestamp()));
+            sUpdateLog.setString(2, log.getStatoFrom());
+            sUpdateLog.setString(3, log.getStatoTo());
+            sUpdateLog.setInt(4, log.getOrder().getKey());
+            sUpdateLog.setInt(5, log.getUser().getKey());
+            sUpdateLog.setLong(6, nextVersion);
+            sUpdateLog.setInt(7, log.getKey());
+            sUpdateLog.setLong(8, currentVersion);
+
+            if (sUpdateLog.executeUpdate() == 0) {
+                throw new DataException("Optimistic locking failed su LogOrderState");
+            } else {
+                log.setVersion(nextVersion);
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore aggiornamento log", e);
+        }
+    }
+
+    @Override
+    public void deleteLogOrderState(LogOrderState log) throws DataException {
+        try {
+            sDeleteLog.setInt(1, log.getKey());
+            if (sDeleteLog.executeUpdate() > 0) {
+                getDataLayer().getCache().delete(LogOrderState.class, log.getKey());
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore eliminazione log", e);
+        }
+    }
 }

@@ -18,9 +18,11 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
     private PreparedStatement sConsumationById;
     private PreparedStatement sConsumationByPrice;
     private PreparedStatement sAllConsumations;
-    private PreparedStatement iConsumation;
-    private PreparedStatement uConsumation;
-    private PreparedStatement dConsumation;
+    private PreparedStatement sAddConsumation;
+    private PreparedStatement sUpdateConsumation;
+    private PreparedStatement sDeleteConsumation;
+
+    private static final String TABLE = "CONSUMAZIONE";
 
     public ConsumationDAOImpl(DataLayer d) {
         super(d);
@@ -30,87 +32,132 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
     public void init() throws DataException {
         try {
             super.init();
-            sConsumationById = connection.prepareStatement("SELECT * FROM CONSUMAZIONE WHERE ID = ?");
-            sConsumationByPrice = connection.prepareStatement("SELECT * FROM CONSUMAZIONE WHERE PREZZO = ?");
-            sAllConsumations = connection.prepareStatement("SELECT * FROM CONSUMAZIONE");
+
+            sConsumationById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID = ?");
             
-            iConsumation = connection.prepareStatement("INSERT INTO CONSUMAZIONE (NOME, PREZZO, VERSION) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
-            uConsumation = connection.prepareStatement("UPDATE CONSUMAZIONE SET NOME=?, PREZZO=?, VERSION=? WHERE ID=? AND VERSION=?");
-            dConsumation = connection.prepareStatement("DELETE FROM CONSUMAZIONE WHERE ID=?");
+            // Query con JOIN perché il prezzo è nella tabella PRODOTTO
+            sConsumationByPrice = getConnection().prepareStatement(
+                "SELECT c.* FROM " + TABLE + " c " +
+                "JOIN PRODOTTO p ON c.PRODOTTO_ID = p.ID " +
+                "WHERE p.PREZZO = ?"
+            );
+            
+            sAllConsumations = getConnection().prepareStatement("SELECT * FROM " + TABLE);
+
+            sAddConsumation = getConnection().prepareStatement(
+                "INSERT INTO " + TABLE + " (NOME, DESCRIZIONE, PRODOTTO_ID, VERSION) VALUES (?, ?, ?, ?)", 
+                Statement.RETURN_GENERATED_KEYS);
+
+            sUpdateConsumation = getConnection().prepareStatement(
+                "UPDATE " + TABLE + " SET NOME = ?, DESCRIZIONE = ?, PRODOTTO_ID = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
+
+            sDeleteConsumation = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID = ?");
+
         } catch (SQLException ex) {
-            throw new DataException("Errore init ConsumationDAO", ex);
+            throw new DataException("Errore inizializzazione ConsumationDAO", ex);
         }
     }
 
-    protected ConsumationProxy createConsumation(ResultSet rs) throws SQLException {
-        ConsumationProxy p = new ConsumationProxy(getDataLayer());
-        p.setKey(rs.getInt("ID"));
-        p.setName(rs.getString("NOME"));
-        p.setPrice(rs.getDouble("PREZZO"));
-        p.setVersion(rs.getLong("VERSION"));
-        p.setClean();
-        return p;
+    @Override
+    public void destroy() throws DataException {
+        try {
+            if (sConsumationById != null) sConsumationById.close();
+            if (sConsumationByPrice != null) sConsumationByPrice.close();
+            if (sAllConsumations != null) sAllConsumations.close();
+            if (sAddConsumation != null) sAddConsumation.close();
+            if (sUpdateConsumation != null) sUpdateConsumation.close();
+            if (sDeleteConsumation != null) sDeleteConsumation.close();
+            super.destroy();
+        } catch (SQLException ex) {
+            throw new DataException("Errore chiusura ConsumationDAO", ex);
+        }
+    }
+
+    protected Consumation createConsumation(ResultSet rs) throws SQLException {
+        ConsumationProxy c = new ConsumationProxy(getDataLayer());
+        c.setKey(rs.getInt("ID"));
+        c.setName(rs.getString("NOME"));
+        c.setDescription(rs.getString("DESCRIZIONE"));
+        c.setProductKey(rs.getInt("PRODOTTO_ID")); // Gestito dal Proxy
+        c.setVersion(rs.getLong("VERSION"));
+        
+        c.setClean();
+        return c;
     }
 
     @Override
     public Consumation getConsumationById(Consumation consumation) throws DataException {
+        int id = consumation.getKey();
+        if (getDataLayer().getCache().has(Consumation.class, id)) {
+            return getDataLayer().getCache().get(Consumation.class, id);
+        }
         try {
-            sConsumationById.setInt(1, consumation.getKey());
+            sConsumationById.setInt(1, id);
             try (ResultSet rs = sConsumationById.executeQuery()) {
                 if (rs.next()) {
-                    return createConsumation(rs);
+                    Consumation c = createConsumation(rs);
+                    getDataLayer().getCache().add(Consumation.class, c);
+                    return c;
                 }
             }
-        } catch (SQLException ex) {
-            throw new DataException(ex);
+        } catch (SQLException e) {
+            throw new DataException("Errore getConsumationById", e);
         }
         return null;
     }
 
     @Override
     public Consumation getConsumationByPrice(Consumation consumation) throws DataException {
+        // Nota: Assumiamo che l'oggetto consumation passato contenga il riferimento al prodotto con il prezzo
         try {
-            sConsumationByPrice.setDouble(1, consumation.getPrice());
+            sConsumationByPrice.setDouble(1, consumation.getProduct().getPrice());
             try (ResultSet rs = sConsumationByPrice.executeQuery()) {
                 if (rs.next()) {
-                    return createConsumation(rs);
+                    Consumation c = createConsumation(rs);
+                    getDataLayer().getCache().add(Consumation.class, c);
+                    return c;
                 }
             }
-        } catch (SQLException ex) {
-            throw new DataException(ex);
+        } catch (SQLException e) {
+            throw new DataException("Errore getConsumationByPrice", e);
         }
         return null;
     }
 
     @Override
     public List<Consumation> getAllConsumations() throws DataException {
-        List<Consumation> res = new ArrayList<>();
+        List<Consumation> result = new ArrayList<>();
         try (ResultSet rs = sAllConsumations.executeQuery()) {
             while (rs.next()) {
-                res.add(createConsumation(rs));
+                result.add(createConsumation(rs));
             }
         } catch (SQLException ex) {
-            throw new DataException(ex);
+            throw new DataException("Errore getAllConsumations", ex);
         }
-        return res;
+        return result;
     }
 
     @Override
     public void addConsumation(Consumation consumation) throws DataException {
         try {
-            iConsumation.setString(1, consumation.getName());
-            iConsumation.setDouble(2, consumation.getPrice());
-            iConsumation.setLong(3, 1L); // Versione iniziale
-            if (iConsumation.executeUpdate() == 1) {
-                try (ResultSet keys = iConsumation.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        consumation.setKey(keys.getInt(1));
-                        consumation.setVersion(1L);
+            sAddConsumation.setString(1, consumation.getName());
+            sAddConsumation.setString(2, consumation.getDescription());
+            sAddConsumation.setInt(3, consumation.getProduct().getKey());
+            
+            long initialVersion = 1;
+            sAddConsumation.setLong(4, initialVersion);
+
+            if (sAddConsumation.executeUpdate() == 1) {
+                try (ResultSet rs = sAddConsumation.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        consumation.setKey(rs.getInt(1));
+                        consumation.setVersion(initialVersion);
                     }
                 }
+                getDataLayer().getCache().add(Consumation.class, consumation);
             }
-        } catch (SQLException ex) {
-            throw new DataException(ex);
+        } catch (SQLException e) {
+            throw new DataException("Errore addConsumation", e);
         }
     }
 
@@ -119,28 +166,33 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
         try {
             long currentVersion = consumation.getVersion();
             long nextVersion = currentVersion + 1;
-            uConsumation.setString(1, consumation.getName());
-            uConsumation.setDouble(2, consumation.getPrice());
-            uConsumation.setLong(3, nextVersion);
-            uConsumation.setInt(4, consumation.getKey());
-            uConsumation.setLong(5, currentVersion);
 
-            if (uConsumation.executeUpdate() == 0) {
-                throw new DataException("Record già modificato (Optimistic Lock fail)");
+            sUpdateConsumation.setString(1, consumation.getName());
+            sUpdateConsumation.setString(2, consumation.getDescription());
+            sUpdateConsumation.setInt(3, consumation.getProduct().getKey());
+            sUpdateConsumation.setLong(4, nextVersion);
+            sUpdateConsumation.setInt(5, consumation.getKey());
+            sUpdateConsumation.setLong(6, currentVersion);
+
+            if (sUpdateConsumation.executeUpdate() == 0) {
+                throw new DataException("Optimistic locking failed su Consumation");
+            } else {
+                consumation.setVersion(nextVersion);
             }
-            consumation.setVersion(nextVersion);
-        } catch (SQLException ex) {
-            throw new DataException(ex);
+        } catch (SQLException e) {
+            throw new DataException("Errore updateConsumation", e);
         }
     }
 
     @Override
     public void deleteConsumation(Consumation consumation) throws DataException {
         try {
-            dConsumation.setInt(1, consumation.getKey());
-            dConsumation.executeUpdate();
-        } catch (SQLException ex) {
-            throw new DataException(ex);
+            sDeleteConsumation.setInt(1, consumation.getKey());
+            if (sDeleteConsumation.executeUpdate() > 0) {
+                getDataLayer().getCache().delete(Consumation.class, consumation.getKey());
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore deleteConsumation", e);
         }
     }
 }

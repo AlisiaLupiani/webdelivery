@@ -114,7 +114,7 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             }
 
         }
-        return null;
+        return order;
     }
 
     @Override
