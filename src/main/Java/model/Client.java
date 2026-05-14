@@ -2,7 +2,7 @@ package model;
 
 import framework.data.DataItem;
 
-public interface Client extends User, DataItem<Integer> {
+public interface Client extends User {
 
 	public String getPhone();
 	public void setPhone(String phone);
@@ -11,4 +11,3 @@ public interface Client extends User, DataItem<Integer> {
 	public void setAddress(String address);
 	
 }
-

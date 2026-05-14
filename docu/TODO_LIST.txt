@@ -1,0 +1,2 @@
+1 - Spostare tutte quante le interfacce dei DAO all'interno di un package.
+2 - Fare refactoring dei nomi "nascosto" (sono ORRIBILI).

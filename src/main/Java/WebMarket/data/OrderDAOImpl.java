@@ -17,7 +17,6 @@ import model.Order;
 import model.OrderState;
 import model.PaymentMethod;
 
-
 public class OrderDAOImpl extends DAO implements OrderDAO {
 
     private PreparedStatement sOrderById;
@@ -28,12 +27,10 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     private PreparedStatement sUpdateOrder;
     private PreparedStatement sDeleteOrder;
     private static final String TABLE = "ORDINE";
-   
-
 
     public OrderDAOImpl(DataLayer d) {
         super(d);
-        
+
     }
 
     @Override
@@ -45,11 +42,14 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             sOrderByClient = getConnection().prepareStatement("SELECT FROM" + TABLE + "WHERE UTENTE_ID =?");
             sAllOrders = getConnection().prepareStatement("SELECT FROM" + TABLE);
             sAddOrder = getConnection().prepareStatement(
-                "INSERT INTO" + TABLE + "(DATA_ORDINE, ORARIO CONSEGNA, PREZZO_TOTALE, STATO, METODO_PAGAMENTO, INDIRIZZO_CONSEGNA, UTENTE_ID) VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO" + TABLE
+                            + "(DATA_ORDINE, ORARIO CONSEGNA, PREZZO_TOTALE, STATO, METODO_PAGAMENTO, INDIRIZZO_CONSEGNA, UTENTE_ID) VALUES (?,?,?,?,?,?,?)",
+                    Statement.RETURN_GENERATED_KEYS);
             sUpdateOrder = getConnection().prepareStatement(
-                "UPDATE" + TABLE + "SET DATA_ORDINE=?, ORARIO CONSEGNA=?, PREZZO_TOTALE=?, STATO=?, METODO_PAGAMENTO=?, INDIRIZZO_CONSEGNA=?, UTENTE_ID=? WHERE ID=? AND VERSION=?");
+                    "UPDATE" + TABLE
+                            + "SET DATA_ORDINE=?, ORARIO CONSEGNA=?, PREZZO_TOTALE=?, STATO=?, METODO_PAGAMENTO=?, INDIRIZZO_CONSEGNA=?, UTENTE_ID=? WHERE ID=? AND VERSION=?");
             sDeleteOrder = getConnection().prepareStatement("DELETE FROM" + TABLE + "WHERE ID=? AND VERSION=?");
-            
+
         } catch (SQLException ex) {
             throw new DataException("Errore durante l'inizializzazione del DAO Order", ex);
         }
@@ -58,15 +58,22 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     @Override
     public void destroy() throws DataException {
         try {
-            if(sOrderById != null) sOrderById.close();
-            if(sOrderByDate != null) sOrderByDate.close();
-            if(sOrderByClient != null) sOrderByClient.close();
-            if(sAllOrders != null) sAllOrders.close();
-            if(sAddOrder != null) sAddOrder.close();
-            if(sUpdateOrder != null) sUpdateOrder.close();
-            if(sDeleteOrder != null) sDeleteOrder.close();
+            if (sOrderById != null)
+                sOrderById.close();
+            if (sOrderByDate != null)
+                sOrderByDate.close();
+            if (sOrderByClient != null)
+                sOrderByClient.close();
+            if (sAllOrders != null)
+                sAllOrders.close();
+            if (sAddOrder != null)
+                sAddOrder.close();
+            if (sUpdateOrder != null)
+                sUpdateOrder.close();
+            if (sDeleteOrder != null)
+                sDeleteOrder.close();
             super.destroy();
-            
+
         } catch (SQLException e) {
             throw new DataException("Errore durante la chiusura del DAO Order", e);
         }
@@ -79,32 +86,34 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
         order.setVersion(rs.getLong("VERSION"));
         order.setDate(rs.getDate("DATA_ORDINE").toLocalDate());
         order.setDeliveryTime(rs.getTime("ORARIO CONSEGNA").toLocalTime());
-        order.setPrice(rs.getDouble("PREZZO_TOTALE")); 
+        order.setPrice(rs.getDouble("PREZZO_TOTALE"));
         order.setDeliveryAddress(rs.getString("INDIRIZZO_CONSEGNA"));
 
         String state = rs.getString("STATO");
-        if(state != null) order.setOrderState(OrderState.valueOf(state));
+        if (state != null)
+            order.setOrderState(OrderState.valueOf(state));
 
         String paymentMethod = rs.getString("METODO_PAGAMENTO");
-        if(paymentMethod != null) order.setPaymentMethod(PaymentMethod.valueOf(paymentMethod));
+        if (paymentMethod != null)
+            order.setPaymentMethod(PaymentMethod.valueOf(paymentMethod));
 
-        order.setIdUtenteNascosto(rs.getInt("UTENTE_ID"));  
+        order.setIdUtenteNascosto(rs.getInt("UTENTE_ID"));
 
         order.setClean();
-        
+
         return order;
     }
 
     @Override
     public Order getOrderById(int order_key) throws DataException {
         Order order = null;
-        if(getDataLayer().getCache().has(Order.class, order_key)){
+        if (getDataLayer().getCache().has(Order.class, order_key)) {
             order = getDataLayer().getCache().get(Order.class, order_key);
-        }else{
+        } else {
             try {
                 sOrderById.setInt(1, order_key);
-                try (ResultSet rs = sOrderById.executeQuery()){
-                    if(rs.next()){
+                try (ResultSet rs = sOrderById.executeQuery()) {
+                    if (rs.next()) {
                         order = createOrder(rs);
                         getDataLayer().getCache().add(Order.class, order);
                     }
@@ -121,47 +130,46 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     public List<Order> getOrdersByDate(LocalDate date) throws DataException {
         List<Order> res = new ArrayList<>();
         Order order;
-        if(getDataLayer().getCache().has(Order.class, date)){
+        if (getDataLayer().getCache().has(Order.class, date)) {
             order = getDataLayer().getCache().get(Order.class, date);
             res.add(order);
-        }else{
+        } else {
             try {
                 sOrderByDate.setDate(1, java.sql.Date.valueOf(date));
-                try (ResultSet rs = sOrderByDate.executeQuery()){
-                    while(rs.next()){
+                try (ResultSet rs = sOrderByDate.executeQuery()) {
+                    while (rs.next()) {
                         order = createOrder(rs);
                         getDataLayer().getCache().add(Order.class, order);
                         res.add(order);
                     }
                 }
-                
+
             } catch (SQLException e) {
                 throw new DataException("Errore nel recupero degli ordini", e);
             }
-                
+
         }
         return res;
     }
-
 
     @Override
     public List<Order> getOrdersByClient(Client client) throws DataException {
         List<Order> res = new ArrayList<>();
         Order order;
-        if(getDataLayer().getCache().has(Order.class, client.getKey())){
+        if (getDataLayer().getCache().has(Order.class, client.getKey())) {
             order = getDataLayer().getCache().get(Order.class, client.getKey());
             res.add(order);
-        }else{
+        } else {
             try {
                 sOrderByClient.setInt(1, client.getKey());
-                try (ResultSet rs = sOrderByClient.executeQuery()){
-                    while(rs.next()){
+                try (ResultSet rs = sOrderByClient.executeQuery()) {
+                    while (rs.next()) {
                         order = createOrder(rs);
                         getDataLayer().getCache().add(Order.class, order);
                         res.add(order);
                     }
                 }
-  
+
             } catch (SQLException e) {
                 throw new DataException("Errore nel recupero degli ordini", e);
             }
@@ -172,26 +180,27 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     @Override
     public List<Order> getAllOrders() throws DataException {
         List<Order> res = new ArrayList<>();
-        try(ResultSet rs = sAllOrders.executeQuery()){
-            while(rs.next()){
+        try (ResultSet rs = sAllOrders.executeQuery()) {
+            while (rs.next()) {
                 Order order;
                 Integer id = rs.getInt("ID");
-                if(getDataLayer().getCache().has(Order.class, id)){
+                if (getDataLayer().getCache().has(Order.class, id)) {
                     order = getDataLayer().getCache().get(Order.class, id);
-                }else{
+                } else {
                     order = createOrder(rs);
                     getDataLayer().getCache().add(Order.class, order);
                 }
                 res.add(order);
             }
-            
-        }catch(SQLException e){
+
+        } catch (SQLException e) {
             throw new DataException("Errore nel recupero di tutti gli ordini", e);
         }
         return res;
     }
 
-    @Override public void addOrder(Order order) throws DataException {
+    @Override
+    public void addOrder(Order order) throws DataException {
         try {
             sAddOrder.setString(1, order.getDate().toString());
             sAddOrder.setString(2, order.getDeliveryTime().toString());
@@ -205,21 +214,22 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             sAddOrder.setLong(8, initialVersion);
 
             if (sAddOrder.executeUpdate() == 1) {
-                try(ResultSet resultSet = sAddOrder.getGeneratedKeys()){
-                    if(resultSet.next()){
+                try (ResultSet resultSet = sAddOrder.getGeneratedKeys()) {
+                    if (resultSet.next()) {
                         Integer newKey = resultSet.getInt(1);
                         order.setKey(newKey);
                         order.setVersion(initialVersion);
                     }
                 }
-                getDataLayer().getCache().add(Order.class, order);       
-             } 
+                getDataLayer().getCache().add(Order.class, order);
+            }
         } catch (SQLException e) {
             throw new DataException("Unable to add order", e);
         }
     }
 
-    @Override public void updateOrder(Order order) throws DataException {
+    @Override
+    public void updateOrder(Order order) throws DataException {
         try {
             sUpdateOrder.setString(1, order.getDate().toString());
             sUpdateOrder.setString(2, order.getDeliveryTime().toString());
@@ -246,17 +256,16 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
 
     }
 
-
-    @Override public void deleteOrder(Order order) throws DataException {
+    @Override
+    public void deleteOrder(Order order) throws DataException {
         try {
             sDeleteOrder.setInt(1, order.getKey());
             if (sDeleteOrder.executeUpdate() > 0) {
                 getDataLayer().getCache().delete(Order.class, order.getKey());
-            }   
+            }
         } catch (SQLException e) {
             throw new DataException("Unable to delete order", e);
         }
     }
 
-    
 }
