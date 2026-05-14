@@ -1,12 +1,10 @@
 package model;
 
-public interface Staff extends User{
+import framework.data.DataItem;
 
-    public boolean getDisposabily();
-    public void setDisposability(boolean disposability);
 
-    public String getVehicle();
-    public void setVehicle(String vehicle);
+public interface Staff extends User, DataItem<Integer>{
+
 
 
 }

@@ -14,9 +14,9 @@ public interface UserDAO {
 
     List<User> getAllUsers() throws DataException;
     
-    void addUser(User user) throws DataException;
+    User addUser(User user) throws DataException;
     
-    void updateUser(User user) throws DataException;
+    User updateUser(User user) throws DataException;
     
     void deleteUser(User user) throws DataException;
     

@@ -1,15 +1,15 @@
 package WebMarket.data.proxy;
 
 import framework.data.DataLayer;
-import model.modelImpl.ClientImpl;
+import model.modelImpl.StaffImpl;
 
 
-public class ClientProxy extends ClientImpl {
+public class StaffProxy extends StaffImpl {
 
     protected DataLayer dataLayer;
     protected boolean isDirty;
 
-    public ClientProxy(DataLayer dl) {
+    public StaffProxy(DataLayer dl) {
         super();
         this.dataLayer = dl;
         this.isDirty = false;
@@ -46,26 +46,15 @@ public class ClientProxy extends ClientImpl {
     }
 
     @Override
-    public void setPhone(String phone) {
-        super.setPhone(phone);
+    public void setVersion(long version) {
+        super.setVersion(version);
         this.isDirty = true;
     }
 
-    @Override 
-    public void setAddress(String address){
-        super.setAddress(address);
-        this.isDirty = true;
-    }
 
     @Override
     public void setKey(Integer key) {
         super.setKey(key);
-        this.isDirty = true;
-    }
-
-    @Override
-    public void setVersion(long version) {
-        super.setVersion(version);
         this.isDirty = true;
     }
 

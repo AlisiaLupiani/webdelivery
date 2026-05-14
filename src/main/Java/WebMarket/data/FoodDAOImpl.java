@@ -83,7 +83,7 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
         f.setKey(rs.getInt("ID"));
         f.setName(rs.getString("NOME"));
         f.setDescription(rs.getString("DESCRIZIONE"));
-        f.setProductKey(rs.getInt("PRODOTTO_ID")); // Il Proxy caricherà l'oggetto Product se necessario
+        f.setProductKey(rs.getInt("PRODOTTO_ID")); 
         f.setVersion(rs.getLong("VERSION"));
         
         f.setClean();

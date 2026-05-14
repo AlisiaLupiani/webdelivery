@@ -16,13 +16,13 @@ import model.User;
 
 public class UserDAOImpl extends DAO implements UserDAO {
 
-    private PreparedStatement sUserById;
-    private PreparedStatement sUserByEmail;
-    private PreparedStatement sAllUsers;
-    private PreparedStatement sAddUser;
-    private PreparedStatement sUpdateUser;
-    private PreparedStatement sDeleteUser;
-    private static final String TABLE = "UTENTE";
+    protected PreparedStatement sUserById;
+    protected PreparedStatement sUserByEmail;
+    protected PreparedStatement sAllUsers;
+    protected PreparedStatement sAddUser;
+    protected PreparedStatement sUpdateUser;
+    protected PreparedStatement sDeleteUser;
+    protected static final String TABLE = "UTENTE";
 
     public UserDAOImpl(DataLayer dataLayer) {
         super(dataLayer);
@@ -131,7 +131,7 @@ public class UserDAOImpl extends DAO implements UserDAO {
     }
 
     @Override
-    public void addUser(User user) throws DataException {
+    public User addUser(User user) throws DataException {
         try {
             sAddUser.setString(1, user.getName());
             sAddUser.setString(2, user.getSurname());
@@ -146,17 +146,21 @@ public class UserDAOImpl extends DAO implements UserDAO {
                         Integer newKey = resultSet.getInt(1);
                         user.setKey(newKey);
                         user.setVersion(initialVersion);
+                
                     }
                 }
                 getDataLayer().getCache().add(User.class, user);
+
+                
             }
         } catch (SQLException e) {
             throw new DataException("Unable to add user", e);
         }
+        return user;
     }
 
     @Override
-    public void updateUser(User user) throws DataException {
+    public User updateUser(User user) throws DataException {
         try {
             sUpdateUser.setString(1, user.getName());
             sUpdateUser.setString(2, user.getSurname());
@@ -177,6 +181,7 @@ public class UserDAOImpl extends DAO implements UserDAO {
         } catch (SQLException e) {
             throw new DataException("Unable to update user", e);
         }
+        return user;
     }
 
     @Override

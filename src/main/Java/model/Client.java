@@ -1,6 +1,8 @@
 package model;
 
-public interface Client extends User {
+import framework.data.DataItem;
+
+public interface Client extends User, DataItem<Integer> {
 
 	public String getPhone();
 	public void setPhone(String phone);

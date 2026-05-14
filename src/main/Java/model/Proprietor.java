@@ -1,5 +1,7 @@
 package model;
 
-public interface Proprietor extends User{
+import framework.data.DataItem;
+
+public interface Proprietor extends User, DataItem<Integer>{
 
 }

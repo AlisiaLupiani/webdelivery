@@ -14,6 +14,8 @@ import framework.data.DataException;
 import framework.data.DataLayer;
 import model.LogOrderState;
 import model.Order;
+import model.OrderState;
+
 
 public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
 
@@ -69,17 +71,27 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
     }
 
     protected LogOrderState createLogOrderState(ResultSet rs) throws SQLException {
+
         LogOrderStateProxy log = new LogOrderStateProxy(getDataLayer());
         log.setKey(rs.getInt("ID"));
-        log.setTimestamp(rs.getTimestamp("TIMESTAMP").toLocalDateTime()); // Assumendo l'uso di LocalDateTime nel model
-        log.setStatoFrom(rs.getString("STATO_FROM"));
-        log.setStatoTo(rs.getString("STATO_TO"));
-        log.setOrderKey(rs.getInt("ORDINE_ID")); // Il Proxy gestirà il caricamento dell'oggetto Order
-        log.setUserKey(rs.getInt("UTENTE_ID"));   // Il Proxy gestirà il caricamento dell'oggetto User
+        log.setDateTime(rs.getTimestamp("TIMESTAMP").toLocalDateTime());
+         
+        String statoFromDalDb = rs.getString("STATO_FROM");
+    if (statoFromDalDb != null) {
+    
+        log.setStateFrom(OrderState.valueOf(statoFromDalDb));
+    }
+        String statoToDalDb = rs.getString("STATO_TO");
+        if (statoToDalDb != null) {
+            log.setStateTo(OrderState.valueOf(statoToDalDb));
+        
+        log.setIdOrderNascosto(rs.getInt("ORDINE_ID")); 
+        log.setUser(rs.getInt("UTENTE_ID"));  
         log.setVersion(rs.getLong("VERSION"));
         
         log.setClean();
         return log;
+        }
     }
 
     @Override
@@ -104,6 +116,7 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
 
     @Override
     public List<LogOrderState> getAllLogOrderStates() throws DataException {
+
         List<LogOrderState> result = new ArrayList<>();
         try (ResultSet rs = sAllLogs.executeQuery()) {
             while (rs.next()) {
@@ -117,6 +130,7 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
 
     @Override
     public List<LogOrderState> getLogOrderStateByOrder(Order order) throws DataException {
+        
         List<LogOrderState> result = new ArrayList<>();
         try {
             sLogByOrder.setInt(1, order.getKey());
