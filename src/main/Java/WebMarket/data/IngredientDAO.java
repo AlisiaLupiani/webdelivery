@@ -1,9 +1,10 @@
 package WebMarket.data;
 
 import java.util.List;
+
 import framework.data.DataException;
+import model.Food;
 import model.Ingredient;
-import model.Product;
 
 public interface IngredientDAO {
 
@@ -12,7 +13,7 @@ public interface IngredientDAO {
     List<Ingredient> getAllIngredients() throws DataException;
 
     
-    List<Ingredient> getIngredientsByProduct(Product product) throws DataException;
+    List<Ingredient> getIngredientsByFood(Food food) throws DataException;
 
     
     void addIngredient(Ingredient ingredient) throws DataException;

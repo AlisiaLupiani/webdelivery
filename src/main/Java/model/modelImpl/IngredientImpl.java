@@ -10,6 +10,7 @@ public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient 
     protected Integer key;
     protected String quantity;
     protected Food food;
+    protected String name;
     
 
     public IngredientImpl() {
@@ -42,9 +43,9 @@ public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient 
 
 
     @Override
-    public String GetName() { return name; }
+    public String getName() { return name; }
     @Override   
-    public void SetName(String name) { this.name = name; }
+    public void setName(String name) { this.name = name; }
 
    
 }

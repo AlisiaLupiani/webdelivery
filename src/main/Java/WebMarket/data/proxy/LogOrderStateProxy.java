@@ -32,12 +32,12 @@ public class LogOrderStateProxy extends LogOrderStateImpl {
     }
 
     
-    public void setIdOrderNascosto(int id) {
+    public void setIdOrder(int id) {
         this.idOrder = id;
     }
     
     
-    public void setIdStaffNascosto(int id) {
+    public void setIdStaff(int id) {
         this.idStaff = id;
     }
     
