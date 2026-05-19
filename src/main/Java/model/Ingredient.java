@@ -6,8 +6,8 @@ public interface Ingredient extends DataItem<Integer> {
 
 
 
-    String GetName();
-    void SetName(String name);
+    String getName();
+    void setName(String name);
 
     String getQuantity();
     void setQuantity(String quantity);

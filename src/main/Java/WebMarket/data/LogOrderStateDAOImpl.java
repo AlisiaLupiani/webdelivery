@@ -15,7 +15,6 @@ import framework.data.DataLayer;
 import model.LogOrderState;
 import model.Order;
 import model.OrderState;
-import model.User;
 
 
 
@@ -87,18 +86,19 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
         if (statoToDalDb != null) {
             log.setStateTo(OrderState.valueOf(statoToDalDb));
         
-        log.setIdOrderNascosto(rs.getInt("ORDINE_ID")); 
-        log.setStaff(rs.getInt("UTENTE_ID"));  
+        log.setIdOrder(rs.getInt("ORDINE_ID")); 
+        log.setIdStaff(rs.getInt("UTENTE_ID"));  
         log.setVersion(rs.getLong("VERSION"));
         
         log.setClean();
-        return log;
         }
+
+        return log;
     }
 
     @Override
     public LogOrderState getLogOrderStateById(int log_key) throws DataException {
-        LogOrderState log;
+        LogOrderState log = null;
         if (getDataLayer().getCache().has(LogOrderState.class, log_key)) {
             log = getDataLayer().getCache().get(LogOrderState.class, log_key);
         }
@@ -150,11 +150,11 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
     @Override
     public void addLogOrderState(LogOrderState log) throws DataException {
         try {
-            sAddLog.setTimestamp(1, Timestamp.valueOf(log.getTimestamp()));
-            sAddLog.setString(2, log.getStatoFrom());
-            sAddLog.setString(3, log.getStatoTo());
+            sAddLog.setTimestamp(1, Timestamp.valueOf(log.getDateTime().toString()));
+            sAddLog.setString(2, log.getStateFrom().name());
+            sAddLog.setString(3, log.getStateTo().name());
             sAddLog.setInt(4, log.getOrder().getKey());
-            sAddLog.setInt(5, log.getUser().getKey());
+            sAddLog.setInt(5, log.getStaff().getKey());
             
             long initialVersion = 1;
             sAddLog.setLong(6, initialVersion);
@@ -179,11 +179,11 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
             long currentVersion = log.getVersion();
             long nextVersion = currentVersion + 1;
 
-            sUpdateLog.setTimestamp(1, Timestamp.valueOf(log.getTimestamp()));
-            sUpdateLog.setString(2, log.getStatoFrom());
-            sUpdateLog.setString(3, log.getStatoTo());
+            sUpdateLog.setTimestamp(1, Timestamp.valueOf(log.getDateTime().toString()));
+            sUpdateLog.setString(2, log.getStateFrom().toString());
+            sUpdateLog.setString(3, log.getStateTo().toString());
             sUpdateLog.setInt(4, log.getOrder().getKey());
-            sUpdateLog.setInt(5, log.getUser().getKey());
+            sUpdateLog.setInt(5, log.getStaff().getKey());
             sUpdateLog.setLong(6, nextVersion);
             sUpdateLog.setInt(7, log.getKey());
             sUpdateLog.setLong(8, currentVersion);

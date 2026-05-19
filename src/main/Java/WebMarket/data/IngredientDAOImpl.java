@@ -11,14 +11,14 @@ import WebMarket.data.proxy.IngredientProxy;
 import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
+import model.Food;
 import model.Ingredient;
-import model.Product;
 
 public class IngredientDAOImpl extends DAO implements IngredientDAO {
 
     private PreparedStatement sIngredientById;
     private PreparedStatement sAllIngredients;
-    private PreparedStatement sIngredientsByProduct;
+    private PreparedStatement sIngredientsByFood;
     private PreparedStatement sAddIngredient;
     private PreparedStatement sUpdateIngredient;
     private PreparedStatement sDeleteIngredient;
@@ -38,11 +38,7 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
             sAllIngredients = getConnection().prepareStatement("SELECT * FROM " + TABLE);
             
             // Query per recuperare gli ingredienti di un prodotto tramite la tabella di join
-            sIngredientsByProduct = getConnection().prepareStatement(
-                "SELECT i.* FROM " + TABLE + " i " +
-                "JOIN PRODOTTO_INGREDIENTE pi ON i.ID = pi.INGREDIENTE_ID " +
-                "WHERE pi.PRODOTTO_ID = ?"
-            );
+            sIngredientsByFood = getConnection().prepareStatement("SELECT * FROM " + TABLE + "WHERE CIBO_ID = ?");
 
             sAddIngredient = getConnection().prepareStatement(
                 "INSERT INTO " + TABLE + " (NOME, VERSION) VALUES (?, ?)", 
@@ -63,7 +59,7 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
         try {
             if (sIngredientById != null) sIngredientById.close();
             if (sAllIngredients != null) sAllIngredients.close();
-            if (sIngredientsByProduct != null) sIngredientsByProduct.close();
+            if (sIngredientsByFood != null) sIngredientsByFood.close();
             if (sAddIngredient != null) sAddIngredient.close();
             if (sUpdateIngredient != null) sUpdateIngredient.close();
             if (sDeleteIngredient != null) sDeleteIngredient.close();
@@ -85,22 +81,26 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
 
     @Override
     public Ingredient getIngredientById(int ingredient_key) throws DataException {
+
+        Ingredient ingredient = null;
+
         if (getDataLayer().getCache().has(Ingredient.class, ingredient_key)) {
-            return getDataLayer().getCache().get(Ingredient.class, ingredient_key);
+
+            ingredient = getDataLayer().getCache().get(Ingredient.class, ingredient_key);
         }
         try {
             sIngredientById.setInt(1, ingredient_key);
             try (ResultSet rs = sIngredientById.executeQuery()) {
                 if (rs.next()) {
-                    Ingredient i = createIngredient(rs);
-                    getDataLayer().getCache().add(Ingredient.class, i);
-                    return i;
+                    ingredient = createIngredient(rs);
+                    getDataLayer().getCache().add(Ingredient.class, ingredient);
+                    return ingredient;
                 }
             }
         } catch (SQLException e) {
             throw new DataException("Errore recupero ingrediente per ID", e);
         }
-        return null;
+        return ingredient;
     }
 
     @Override
@@ -117,11 +117,11 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
     }
 
     @Override
-    public List<Ingredient> getIngredientsByProduct(Product product) throws DataException {
+    public List<Ingredient> getIngredientsByFood(Food food) throws DataException {
         List<Ingredient> result = new ArrayList<>();
         try {
-            sIngredientsByProduct.setInt(1, product.getKey());
-            try (ResultSet rs = sIngredientsByProduct.executeQuery()) {
+            sIngredientsByFood.setInt(1, food.getKey());
+            try (ResultSet rs = sIngredientsByFood.executeQuery()) {
                 while (rs.next()) {
                     result.add(createIngredient(rs));
                 }

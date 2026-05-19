@@ -19,7 +19,7 @@ public class IngredientProxy extends IngredientImpl {
         this.isDirty = false;
     }
 
-    public void setIdFoodNascosto(Integer id) {
+    public void setIdFood(Integer id) {
         this.idFood = id;
     }
 
@@ -27,6 +27,12 @@ public class IngredientProxy extends IngredientImpl {
    @Override
     public void setId(Integer id) {
         super.setId(id);
+        this.isDirty = true;
+    }
+
+    @Override
+    public void setName(String name) {
+        super.setName(name);
         this.isDirty = true;
     }
 
@@ -39,13 +45,6 @@ public class IngredientProxy extends IngredientImpl {
     @Override
     public void setFood(Food food) {
         super.setFood(food);
-
-        if(food != null){
-            this.idFood = food.getKey();
-        }else{
-            this.idFood = 0;
-        }
-
         this.isDirty = true;
     }
 
