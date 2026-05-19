@@ -83,14 +83,16 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
         return c;
     }
 
-    @Override
+   @Override
     public Consumation getConsumationById(Consumation consumation) throws DataException {
-        Consumation id = null;
-        if (getDataLayer().getCache().has(Consumation.class, id)) {
-            return getDataLayer().getCache().get(Consumation.class, id);
+        int veroId = consumation.getKey();
+
+        if (getDataLayer().getCache().has(Consumation.class, veroId)) {
+            return getDataLayer().getCache().get(Consumation.class, veroId);
         }
+
         try {
-            sConsumationById.setInt(1, consumation.getKey());
+            sConsumationById.setInt(1, veroId);
             try (ResultSet rs = sConsumationById.executeQuery()) {
                 if (rs.next()) {
                     Consumation c = createConsumation(rs);
@@ -99,32 +101,30 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new DataException("Errore getConsumationById", e);
+            throw new DataException("Errore esecuzione query in getConsumationById", e);
         }
-        return null;
+        
+        throw new DataException("Impossibile trovare la consumazione nel DB!");
     }
 
     @Override
     public Consumation getConsumationByPrice(double price) throws DataException {
         Consumation consumation = null;
-            if(getDataLayer().getCache().has(Consumation.class, consumation.getKey())){
-                consumation = getDataLayer().getCache().get(Consumation.class, consumation.getKey());
-            }
-            else{
+
         try {
             sConsumationByPrice.setDouble(1, price);
+            
             try (ResultSet rs = sConsumationByPrice.executeQuery()) {
                 if (rs.next()) {
-                    consumation  = createConsumation(rs);
+                    consumation = createConsumation(rs);
+                    
                     getDataLayer().getCache().add(Consumation.class, consumation);
-                
                 }
             }
-        }
-         catch (SQLException e) {
+        } catch (SQLException e) {
             throw new DataException("Errore getConsumationByPrice", e);
         }
-    }
+        
         return consumation;
     }
     
