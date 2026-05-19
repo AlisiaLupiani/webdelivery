@@ -34,6 +34,7 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
         super(d);
     }
 
+    
     @Override
     public void init() throws DataException {
         try {

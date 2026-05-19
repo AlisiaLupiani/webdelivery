@@ -7,7 +7,7 @@ import model.Consumation;
 
 public interface ConsumationDAO {
     Consumation getConsumationById(Consumation consumation) throws DataException;
-    Consumation getConsumationByPrice(Consumation consumation) throws DataException;
+    Consumation getConsumationByPrice(double price) throws DataException;
     List<Consumation> getAllConsumations() throws DataException;
 
     void addConsumation(Consumation consumation) throws DataException;

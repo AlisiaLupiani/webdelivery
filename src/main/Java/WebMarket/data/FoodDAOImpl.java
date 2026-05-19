@@ -82,8 +82,6 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
         FoodProxy f = new FoodProxy(getDataLayer());
         f.setKey(rs.getInt("ID"));
         f.setName(rs.getString("NOME"));
-        f.setDescription(rs.getString("DESCRIZIONE"));
-        f.setProductKey(rs.getInt("PRODOTTO_ID")); 
         f.setVersion(rs.getLong("VERSION"));
         
         f.setClean();
@@ -162,8 +160,6 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
     public void addFood(Food food) throws DataException {
         try {
             sAddFood.setString(1, food.getName());
-            sAddFood.setString(2, food.getDescription());
-            sAddFood.setInt(3, food.getProduct().getKey());
             
             long initialVersion = 1;
             sAddFood.setLong(4, initialVersion);
@@ -189,8 +185,6 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
             long nextVersion = currentVersion + 1;
 
             sUpdateFood.setString(1, food.getName());
-            sUpdateFood.setString(2, food.getDescription());
-            sUpdateFood.setInt(3, food.getProduct().getKey());
             sUpdateFood.setLong(4, nextVersion);
             sUpdateFood.setInt(5, food.getKey());
             sUpdateFood.setLong(6, currentVersion);

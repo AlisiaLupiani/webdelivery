@@ -77,8 +77,6 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
         ConsumationProxy c = new ConsumationProxy(getDataLayer());
         c.setKey(rs.getInt("ID"));
         c.setName(rs.getString("NOME"));
-        c.setDescription(rs.getString("DESCRIZIONE"));
-        c.setProductKey(rs.getInt("PRODOTTO_ID")); // Gestito dal Proxy
         c.setVersion(rs.getLong("VERSION"));
         
         c.setClean();
@@ -87,12 +85,12 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
 
     @Override
     public Consumation getConsumationById(Consumation consumation) throws DataException {
-        int id = consumation.getKey();
+        Consumation id = null;
         if (getDataLayer().getCache().has(Consumation.class, id)) {
             return getDataLayer().getCache().get(Consumation.class, id);
         }
         try {
-            sConsumationById.setInt(1, id);
+            sConsumationById.setInt(1, consumation.getKey());
             try (ResultSet rs = sConsumationById.executeQuery()) {
                 if (rs.next()) {
                     Consumation c = createConsumation(rs);
@@ -107,22 +105,29 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
     }
 
     @Override
-    public Consumation getConsumationByPrice(Consumation consumation) throws DataException {
-        // Nota: Assumiamo che l'oggetto consumation passato contenga il riferimento al prodotto con il prezzo
+    public Consumation getConsumationByPrice(double price) throws DataException {
+        Consumation consumation = null;
+            if(getDataLayer().getCache().has(Consumation.class, consumation.getKey())){
+                consumation = getDataLayer().getCache().get(Consumation.class, consumation.getKey());
+            }
+            else{
         try {
-            sConsumationByPrice.setDouble(1, consumation.getProduct().getPrice());
+            sConsumationByPrice.setDouble(1, price);
             try (ResultSet rs = sConsumationByPrice.executeQuery()) {
                 if (rs.next()) {
-                    Consumation c = createConsumation(rs);
-                    getDataLayer().getCache().add(Consumation.class, c);
-                    return c;
+                    consumation  = createConsumation(rs);
+                    getDataLayer().getCache().add(Consumation.class, consumation);
+                
                 }
             }
-        } catch (SQLException e) {
+        }
+         catch (SQLException e) {
             throw new DataException("Errore getConsumationByPrice", e);
         }
-        return null;
     }
+        return consumation;
+    }
+    
 
     @Override
     public List<Consumation> getAllConsumations() throws DataException {
@@ -141,8 +146,6 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
     public void addConsumation(Consumation consumation) throws DataException {
         try {
             sAddConsumation.setString(1, consumation.getName());
-            sAddConsumation.setString(2, consumation.getDescription());
-            sAddConsumation.setInt(3, consumation.getProduct().getKey());
             
             long initialVersion = 1;
             sAddConsumation.setLong(4, initialVersion);
@@ -168,8 +171,6 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
             long nextVersion = currentVersion + 1;
 
             sUpdateConsumation.setString(1, consumation.getName());
-            sUpdateConsumation.setString(2, consumation.getDescription());
-            sUpdateConsumation.setInt(3, consumation.getProduct().getKey());
             sUpdateConsumation.setLong(4, nextVersion);
             sUpdateConsumation.setInt(5, consumation.getKey());
             sUpdateConsumation.setLong(6, currentVersion);
