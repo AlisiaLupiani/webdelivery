@@ -110,25 +110,27 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
     @Override
     public Consumation getConsumationByPrice(double price) throws DataException {
         Consumation consumation = null;
-
+        if(getDataLayer().getCache().has(Consumation.class, consumation.getKey())){
+            consumation = getDataLayer().getCache().get(Consumation.class, consumation.getKey());
+        }
+        else{
         try {
             sConsumationByPrice.setDouble(1, price);
-            
             try (ResultSet rs = sConsumationByPrice.executeQuery()) {
                 if (rs.next()) {
                     consumation = createConsumation(rs);
-                    
                     getDataLayer().getCache().add(Consumation.class, consumation);
+                    
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new DataException("Errore getConsumationByPrice", e);
+        }
         }
         
         return consumation;
     }
-    
-
     @Override
     public List<Consumation> getAllConsumations() throws DataException {
         List<Consumation> result = new ArrayList<>();
