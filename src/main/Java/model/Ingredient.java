@@ -4,6 +4,11 @@ import framework.data.DataItem;
 
 public interface Ingredient extends DataItem<Integer> {
 
+
+
+    String GetName();
+    void SetName(String name);
+
     String getQuantity();
     void setQuantity(String quantity);
 

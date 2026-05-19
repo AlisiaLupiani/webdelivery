@@ -1,0 +1,5 @@
+framework\data\DataException.class
+model\Consumation.class
+WebMarket\data\ConsumationDAO.class
+framework\data\DataItem.class
+WebMarket\Controller\TestServlet.class

@@ -13,6 +13,7 @@ public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient 
     
 
     public IngredientImpl() {
+        this.name = "";
         this.key = 0;
         this.quantity = "";
         this.food = null;
@@ -38,6 +39,12 @@ public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient 
     public Food getFood() { return food; }
     @Override
     public void setFood(Food food) { this.food = food; }
+
+
+    @Override
+    public String GetName() { return name; }
+    @Override   
+    public void SetName(String name) { this.name = name; }
 
    
 }
