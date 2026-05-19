@@ -2,23 +2,26 @@ package WebMarket.data;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLData;
 import java.sql.SQLException;
-import java.sql.SQLType;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mysql.cj.xdevapi.Client;
-
 import WebMarket.data.proxy.ClientProxy;
+import WebMarket.data.proxy.ProprietorProxy;
 import WebMarket.data.proxy.StaffProxy;
-import WebMarket.data.proxy.UserProxy;
 import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
+import model.Client;
 import model.Proprietor;
+import model.Staff;
 import model.User;
+
+
+
+
+
 
 
 public class UserDAOImpl extends DAO implements UserDAO {
@@ -237,14 +240,14 @@ public class UserDAOImpl extends DAO implements UserDAO {
     }
 
     protected User createUser(ResultSet rs) throws SQLException {
-        UserProxy user = null;
+        User user = null;
         
         // Istanzio l'oggetto in base al ruolo
         String ruolo = rs.getString("RUOLO"); 
         
-        if(ruolo == "STAFF") user = new StaffProxy(dataLayer);
-        else if(ruolo == "ADMIN") user = new ProprietorProxy(dataLayer);
-        else user = ClientProxy(dataLayer);
+        if(ruolo.equals("STAFF")) user = new StaffProxy(dataLayer);
+        else if(ruolo.equals("ADMIN")) user = new ProprietorProxy(dataLayer);
+        else user = new ClientProxy(dataLayer);
 
         user.setKey(rs.getInt("ID"));
         user.setVersion(rs.getLong("VERSION"));
@@ -255,10 +258,9 @@ public class UserDAOImpl extends DAO implements UserDAO {
 
         if(ruolo == "CLIENTE"){
             ((Client)user).setAddress(rs.getString("INDIRIZZO"));
-            ((Client)user).setAddress(rs.getString("TELEFONO"));
+            ((Client)user).setPhone(rs.getString("TELEFONO"));
         }
 
-        user.setClean();
 
         return user;
     }

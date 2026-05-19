@@ -17,6 +17,7 @@ import model.ProductOptionGroup;
 public class ProductOptionGroupDAOImpl extends DAO implements ProductOptionGroupDAO {
 
     private PreparedStatement sGroupById;
+    private PreparedStatement sGroupByProduct;
     private PreparedStatement sAllGroups;
     
     private PreparedStatement sAddGroup;
@@ -34,6 +35,7 @@ public class ProductOptionGroupDAOImpl extends DAO implements ProductOptionGroup
         try {
             super.init();
             sGroupById = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE ID=?");
+            sGroupByProduct = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE PRODOTTO_ID=?");    
             sAllGroups = getConnection().prepareStatement("SELECT * FROM" + TABLE);
             
             sAddGroup = getConnection().prepareStatement("INSERT INTO"+ TABLE + "(NOME, VERSION) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS);
@@ -51,6 +53,7 @@ public class ProductOptionGroupDAOImpl extends DAO implements ProductOptionGroup
     public void destroy() throws DataException {
         try {
             if(sGroupById != null) sGroupById.close();
+            if(sGroupByProduct != null) sGroupByProduct.close();
             if(sAllGroups != null) sAllGroups.close();
             if(sAddGroup != null) sAddGroup.close();
             if(sUpdateGroup != null) sUpdateGroup.close();
@@ -116,6 +119,28 @@ public class ProductOptionGroupDAOImpl extends DAO implements ProductOptionGroup
             throw new DataException("Unable to retrieve all product option groups", e);
         }
         return res;
+    }
+
+    @Override
+    public List<ProductOptionGroup> getProductOptionGroupsByProduct(Product product) throws DataException {
+        List<ProductOptionGroup> res = new ArrayList<>();
+        try(ResultSet resultSet = sGroupByProduct.executeQuery()) {
+            while(resultSet.next()) {
+                ProductOptionGroup group;
+                Integer id = resultSet.getInt("ID");
+                if(getDataLayer().getCache().has(ProductOptionGroup.class, id)) {
+                    group = getDataLayer().getCache().get(ProductOptionGroup.class, id);
+                } else {
+                    group = createProductOptionGroup(resultSet);
+                    getDataLayer().getCache().add(ProductOptionGroup.class, group);
+                }
+                res.add(group);
+            }
+        }catch(SQLException e){
+            throw new DataException("Unable to retrieve product option groups by product", e);
+        }
+        return res;
+
     }
 
     @Override public void addProductOptionGroup(ProductOptionGroup group) throws DataException {

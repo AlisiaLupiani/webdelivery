@@ -3,12 +3,15 @@ package WebMarket.data.proxy;
 import java.time.LocalDateTime;
 
 import WebMarket.data.OrderDAO;
+import WebMarket.data.UserDAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
 import model.Order;
 import model.OrderState;
 import model.Staff;
+import model.User;
 import model.modelImpl.LogOrderStateImpl;
+
 
 
 public class LogOrderStateProxy extends LogOrderStateImpl {
@@ -16,8 +19,8 @@ public class LogOrderStateProxy extends LogOrderStateImpl {
     protected DataLayer dataLayer;
     protected boolean isDirty;
 
-    protected int idOrderNascosto;
-    protected int idStaffNascosto;
+    protected int idOrder;
+    protected int idStaff;
     
 
 
@@ -30,12 +33,12 @@ public class LogOrderStateProxy extends LogOrderStateImpl {
 
     
     public void setIdOrderNascosto(int id) {
-        this.idOrderNascosto = id;
+        this.idOrder = id;
     }
     
     
     public void setIdStaffNascosto(int id) {
-        this.idStaffNascosto = id;
+        this.idStaff = id;
     }
     
     @Override
@@ -53,11 +56,11 @@ public class LogOrderStateProxy extends LogOrderStateImpl {
     @Override
     public Order getOrder() {
         
-        if (super.getOrder() == null && idOrderNascosto > 0) {
+        if (super.getOrder() == null && idOrder > 0) {
             try {
                 OrderDAO orderDAO = (OrderDAO) dataLayer.getDAO(Order.class);
                 
-                super.setOrder(orderDAO.getOrderById(idOrderNascosto));
+                super.setOrder(orderDAO.getOrderById(idOrder));
             } catch (DataException e) {
                 e.printStackTrace();
             }
@@ -73,12 +76,13 @@ public class LogOrderStateProxy extends LogOrderStateImpl {
 
     @Override
     public Staff getStaff() {
-        if (super.getStaff() == null && idStaffNascosto > 0) {
+        if (super.getStaff() == null && idStaff > 0) {
             try {
-                StaffDAO staffDAO = (StaffDAO) dataLayer.getDAO(Staff.class);
+                UserDAO staffDAO = (UserDAO) dataLayer.getDAO(User.class);
 
-                super.setStaff(staffDAO.getStaffById(idStaffNascosto));
-            }catch{
+                User user = staffDAO.getUserById(idStaff);
+                super.setStaff((Staff) user);
+            }catch(DataException e){
                 e.printStackTrace();
             }
         

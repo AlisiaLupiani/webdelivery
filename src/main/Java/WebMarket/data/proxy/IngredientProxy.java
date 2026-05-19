@@ -10,7 +10,7 @@ public class IngredientProxy extends IngredientImpl {
     protected DataLayer dataLayer;
     protected boolean isDirty;
 
-    protected Integer idFoodNascosto;
+    protected Integer idFood;
 
 
     public IngredientProxy(DataLayer dl) {
@@ -20,7 +20,7 @@ public class IngredientProxy extends IngredientImpl {
     }
 
     public void setIdFoodNascosto(Integer id) {
-        this.idFoodNascosto = id;
+        this.idFood = id;
     }
 
 
@@ -41,9 +41,9 @@ public class IngredientProxy extends IngredientImpl {
         super.setFood(food);
 
         if(food != null){
-            this.idFoodNascosto = food.getKey();
+            this.idFood = food.getKey();
         }else{
-            this.idFoodNascosto = 0;
+            this.idFood = 0;
         }
 
         this.isDirty = true;
@@ -51,11 +51,11 @@ public class IngredientProxy extends IngredientImpl {
 
     @Override
     public Food getFood() {
-        if (super.getFood() == null && this.idFoodNascosto > 0) {
+        if (super.getFood() == null && this.idFood > 0) {
             try {
 
                 FoodDAO foodDAO = (FoodDAO) dataLayer.getDAO(Food.class);
-                super.setFood(foodDAO.getFoodById(this.idFoodNascosto)); 
+                super.setFood(foodDAO.getFoodById(this.idFood)); 
                 
             } catch (Exception e) {
                 e.printStackTrace(); 

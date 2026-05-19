@@ -15,6 +15,8 @@ import framework.data.DataLayer;
 import model.LogOrderState;
 import model.Order;
 import model.OrderState;
+import model.User;
+
 
 
 public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
@@ -86,7 +88,7 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
             log.setStateTo(OrderState.valueOf(statoToDalDb));
         
         log.setIdOrderNascosto(rs.getInt("ORDINE_ID")); 
-        log.setUser(rs.getInt("UTENTE_ID"));  
+        log.setStaff(rs.getInt("UTENTE_ID"));  
         log.setVersion(rs.getLong("VERSION"));
         
         log.setClean();

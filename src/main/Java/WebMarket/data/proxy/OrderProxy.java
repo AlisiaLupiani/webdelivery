@@ -17,18 +17,18 @@ public class OrderProxy extends OrderImpl {
 
     protected DataLayer dataLayer;
     protected boolean isDirty;
-    protected Integer idUtenteNascosto;
+    protected Integer idUtente;
 
 
     public OrderProxy(DataLayer dl) {
         super();
         this.dataLayer = dl;
         this.isDirty = false;
-        this.idUtenteNascosto = 0;
+        this.idUtente = 0;
     }
 
     public void setIdUtenteNascosto(Integer id) {
-        this.idUtenteNascosto = id;
+        this.idUtente = id;
     }
 
     @Override
