@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import WebMarket.data.ProductDAO;
+import WebMarket.data.dao.ProductDAO;
 import framework.data.DataLayer;
 import model.Client;
 import model.OrderState;

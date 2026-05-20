@@ -7,7 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import WebMarket.data.ProductOptionDAO;
+import WebMarket.data.dao.ProductOptionDAO;
 import WebMarket.data.proxy.ProductOptionProxy;
 import framework.data.DAO;
 import framework.data.DataException;

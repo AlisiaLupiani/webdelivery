@@ -2,8 +2,8 @@ package WebMarket.data.proxy;
 
 import java.time.LocalDateTime;
 
-import WebMarket.data.OrderDAO;
-import WebMarket.data.UserDAO;
+import WebMarket.data.dao.OrderDAO;
+import WebMarket.data.dao.UserDAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
 import model.Order;

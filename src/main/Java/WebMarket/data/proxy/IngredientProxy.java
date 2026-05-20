@@ -1,6 +1,6 @@
 package WebMarket.data.proxy;
 
-import WebMarket.data.FoodDAO;
+import WebMarket.data.dao.FoodDAO;
 import framework.data.DataLayer;
 import model.Food;
 import model.modelImpl.IngredientImpl;
