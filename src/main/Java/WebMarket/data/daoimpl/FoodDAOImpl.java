@@ -13,7 +13,6 @@ import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
 import model.Food;
-import model.Ingredient;
 
 
 public class FoodDAOImpl extends DAO implements FoodDAO {
@@ -107,26 +106,23 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
     @Override
     public Food getFoodByName(String name) throws DataException {
         Food food = null;
-
-        if(getDataLayer().getCache().has(Food.class, name)){
+         if(getDataLayer().getCache().has(Food.class, name)){
             food = getDataLayer().getCache().get(Food.class, name);
-        }else{
+         }else{
 
             try {
                 sFoodByName.setString(1, name);
                 try (ResultSet rs = sFoodByName.executeQuery()) {
                     if (rs.next()) {
-                        
                         food = createFood(rs);
                         getDataLayer().getCache().add(Food.class, food);
-                    
                     }
                 }
             } catch (SQLException e) {
                 throw new DataException("Errore recupero Food per nome", e);
-            }
+             }
         }
-        return null;
+        return food;
     }
 
     @Override

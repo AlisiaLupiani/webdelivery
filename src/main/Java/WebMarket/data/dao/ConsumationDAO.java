@@ -6,7 +6,7 @@ import framework.data.DataException;
 import model.Consumation;
 
 public interface ConsumationDAO {
-    Consumation getConsumationById(Consumation consumation) throws DataException;
+    Consumation getConsumationById(int id) throws DataException;
     Consumation getConsumationByPrice(double price) throws DataException;
     List<Consumation> getAllConsumations() throws DataException;
 

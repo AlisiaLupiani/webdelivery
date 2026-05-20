@@ -37,22 +37,16 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
             super.init();
 
             sConsumationById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID = ?");
-            
-            // Query con JOIN perché il prezzo è nella tabella PRODOTTO
-            sConsumationByPrice = getConnection().prepareStatement(
-                "SELECT c.* FROM " + TABLE + " c " +
-                "JOIN PRODOTTO p ON c.PRODOTTO_ID = p.ID " +
-                "WHERE p.PREZZO = ?"
-            );
+            sConsumationByPrice = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE PREZZO = ?");
             
             sAllConsumations = getConnection().prepareStatement("SELECT * FROM " + TABLE);
 
             sAddConsumation = getConnection().prepareStatement(
-                "INSERT INTO " + TABLE + " (NOME, DESCRIZIONE, PRODOTTO_ID, VERSION) VALUES (?, ?, ?, ?)", 
+                "INSERT INTO " + TABLE + " (NOME, PREZZO, VERSION) VALUES (?, ?, ?)", 
                 Statement.RETURN_GENERATED_KEYS);
 
             sUpdateConsumation = getConnection().prepareStatement(
-                "UPDATE " + TABLE + " SET NOME = ?, DESCRIZIONE = ?, PRODOTTO_ID = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
+                "UPDATE " + TABLE + " SET NOME = ?, PREZZO = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
 
             sDeleteConsumation = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID = ?");
 
@@ -80,6 +74,7 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
         ConsumationProxy c = new ConsumationProxy(getDataLayer());
         c.setKey(rs.getInt("ID"));
         c.setName(rs.getString("NOME"));
+        c.setPrice(rs.getDouble("PREZZO"));
         c.setVersion(rs.getLong("VERSION"));
         
         c.setClean();
@@ -87,59 +82,66 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
     }
 
    @Override
-    public Consumation getConsumationById(Consumation consumation) throws DataException {
-        int veroId = consumation.getKey();
+    public Consumation getConsumationById(int id) throws DataException {
+        Consumation consumation = null;
 
-        if (getDataLayer().getCache().has(Consumation.class, veroId)) {
-            return getDataLayer().getCache().get(Consumation.class, veroId);
-        }
-
-        try {
-            sConsumationById.setInt(1, veroId);
-            try (ResultSet rs = sConsumationById.executeQuery()) {
-                if (rs.next()) {
-                    Consumation c = createConsumation(rs);
-                    getDataLayer().getCache().add(Consumation.class, c);
-                    return c;
+        if (getDataLayer().getCache().has(Consumation.class, id)) {
+            consumation = getDataLayer().getCache().get(Consumation.class, id);
+            
+        }else{
+            try {
+                sConsumationById.setInt(1, id);
+                try (ResultSet rs = sConsumationById.executeQuery()) {
+                    if (rs.next()) {
+                        consumation = createConsumation(rs);
+                        getDataLayer().getCache().add(Consumation.class, consumation);
+                    
+                    }
                 }
+            } catch (SQLException e) {
+                throw new DataException("Errore esecuzione query in getConsumationById", e);
             }
-        } catch (SQLException e) {
-            throw new DataException("Errore esecuzione query in getConsumationById", e);
         }
-        
-        throw new DataException("Impossibile trovare la consumazione nel DB!");
+        return consumation;
     }
 
     @Override
     public Consumation getConsumationByPrice(double price) throws DataException {
+
         Consumation consumation = null;
-        if(getDataLayer().getCache().has(Consumation.class, consumation.getKey())){
-            consumation = getDataLayer().getCache().get(Consumation.class, consumation.getKey());
+        if(getDataLayer().getCache().has(Consumation.class, price)){
+            consumation = getDataLayer().getCache().get(Consumation.class, price);
         }
         else{
-        try {
-            sConsumationByPrice.setDouble(1, price);
-            try (ResultSet rs = sConsumationByPrice.executeQuery()) {
-                if (rs.next()) {
-                    consumation = createConsumation(rs);
-                    getDataLayer().getCache().add(Consumation.class, consumation);
-                    
+            try {
+                sConsumationByPrice.setDouble(1, price);
+                try (ResultSet rs = sConsumationByPrice.executeQuery()) {
+                    if (rs.next()) {
+                        consumation = createConsumation(rs);
+                        getDataLayer().getCache().add(Consumation.class, consumation);
+                    }
                 }
+            } catch (SQLException e) {
+                throw new DataException("Errore getConsumationByPrice", e);
             }
         }
-        catch (SQLException e) {
-            throw new DataException("Errore getConsumationByPrice", e);
-        }
-        }
-        
         return consumation;
     }
+
     @Override
     public List<Consumation> getAllConsumations() throws DataException {
         List<Consumation> result = new ArrayList<>();
         try (ResultSet rs = sAllConsumations.executeQuery()) {
             while (rs.next()) {
-                result.add(createConsumation(rs));
+                Consumation consumation;
+                Integer id = rs.getInt("ID");
+
+                if(getDataLayer().getCache().has(Consumation.class, id)){
+                    consumation = getDataLayer().getCache().get(Consumation.class, id);
+                }else{
+                    consumation = createConsumation(rs);
+                }
+                result.add(consumation);
             }
         } catch (SQLException ex) {
             throw new DataException("Errore getAllConsumations", ex);
@@ -151,9 +153,10 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
     public void addConsumation(Consumation consumation) throws DataException {
         try {
             sAddConsumation.setString(1, consumation.getName());
+            sAddConsumation.setDouble(2, consumation.getPrice());
             
             long initialVersion = 1;
-            sAddConsumation.setLong(4, initialVersion);
+            sAddConsumation.setLong(3, initialVersion);
 
             if (sAddConsumation.executeUpdate() == 1) {
                 try (ResultSet rs = sAddConsumation.getGeneratedKeys()) {
@@ -176,9 +179,10 @@ public class ConsumationDAOImpl extends DAO implements ConsumationDAO {
             long nextVersion = currentVersion + 1;
 
             sUpdateConsumation.setString(1, consumation.getName());
-            sUpdateConsumation.setLong(4, nextVersion);
-            sUpdateConsumation.setInt(5, consumation.getKey());
-            sUpdateConsumation.setLong(6, currentVersion);
+            sUpdateConsumation.setDouble(2, consumation.getPrice());
+            sUpdateConsumation.setLong(3, nextVersion);
+            sUpdateConsumation.setInt(4, consumation.getKey());
+            sUpdateConsumation.setLong(5, currentVersion);
 
             if (sUpdateConsumation.executeUpdate() == 0) {
                 throw new DataException("Optimistic locking failed su Consumation");
