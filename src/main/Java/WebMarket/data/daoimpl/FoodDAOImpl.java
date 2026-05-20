@@ -1,4 +1,4 @@
-package WebMarket.data;
+package WebMarket.data.daoimpl;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import WebMarket.data.dao.FoodDAO;
 import WebMarket.data.proxy.FoodProxy;
 import framework.data.DAO;
 import framework.data.DataException;
@@ -14,12 +15,12 @@ import framework.data.DataLayer;
 import model.Food;
 import model.Ingredient;
 
+
 public class FoodDAOImpl extends DAO implements FoodDAO {
 
     private PreparedStatement sFoodById;
     private PreparedStatement sFoodByName;
     private PreparedStatement sAllFoods;
-    private PreparedStatement sFoodByIngredient;
     private PreparedStatement sAddFood;
     private PreparedStatement sUpdateFood;
     private PreparedStatement sDeleteFood;
@@ -39,21 +40,13 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
             sFoodById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID = ?");
             sFoodByName = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE NOME = ?");
             sAllFoods = getConnection().prepareStatement("SELECT * FROM " + TABLE);
-            
-            // Query per trovare il cibo partendo da un ingrediente (passando per PRODOTTO)
-            sFoodByIngredient = getConnection().prepareStatement(
-                "SELECT c.* FROM " + TABLE + " c " +
-                "JOIN PRODOTTO p ON c.PRODOTTO_ID = p.ID " +
-                "JOIN PRODOTTO_INGREDIENTE pi ON p.ID = pi.PRODOTTO_ID " +
-                "WHERE pi.INGREDIENTE_ID = ?"
-            );
 
             sAddFood = getConnection().prepareStatement(
-                "INSERT INTO " + TABLE + " (NOME, DESCRIZIONE, PRODOTTO_ID, VERSION) VALUES (?, ?, ?, ?)", 
+                "INSERT INTO " + TABLE + " (NOME, VERSION) VALUES (?,?)", 
                 Statement.RETURN_GENERATED_KEYS);
 
             sUpdateFood = getConnection().prepareStatement(
-                "UPDATE " + TABLE + " SET NOME = ?, DESCRIZIONE = ?, PRODOTTO_ID = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
+                "UPDATE " + TABLE + " SET NOME = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
 
             sDeleteFood = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID = ?");
 
@@ -68,7 +61,7 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
             if (sFoodById != null) sFoodById.close();
             if (sFoodByName != null) sFoodByName.close();
             if (sAllFoods != null) sAllFoods.close();
-            if (sFoodByIngredient != null) sFoodByIngredient.close();
+            
             if (sAddFood != null) sAddFood.close();
             if (sUpdateFood != null) sUpdateFood.close();
             if (sDeleteFood != null) sDeleteFood.close();
@@ -90,40 +83,48 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
 
     @Override
     public Food getFoodById(int food_key) throws DataException {
+        Food food = null;
+
         if (getDataLayer().getCache().has(Food.class, food_key)) {
-            return getDataLayer().getCache().get(Food.class, food_key);
-        }
-        try {
-            sFoodById.setInt(1, food_key);
-            try (ResultSet rs = sFoodById.executeQuery()) {
-                if (rs.next()) {
-                    Food f = createFood(rs);
-                    getDataLayer().getCache().add(Food.class, f);
-                    return f;
+            food = getDataLayer().getCache().get(Food.class, food_key);
+        }else{
+            try {
+                sFoodById.setInt(1, food_key);
+                try (ResultSet rs = sFoodById.executeQuery()) {
+                    if (rs.next()) {
+                        food = createFood(rs);
+                        getDataLayer().getCache().add(Food.class, food);
+                        
+                    }
                 }
+            } catch (SQLException e) {
+                throw new DataException("Errore recupero Food per ID", e);
             }
-        } catch (SQLException e) {
-            throw new DataException("Errore recupero Food per ID", e);
         }
-        return null;
+        return food;
     }
 
     @Override
     public Food getFoodByName(String name) throws DataException {
-        // La cache può essere usata anche per il nome se implementata nel framework, 
-        // altrimenti andiamo diretti sul DB
-        try {
-            sFoodByName.setString(1, name);
-            try (ResultSet rs = sFoodByName.executeQuery()) {
-                if (rs.next()) {
-                    Food f = createFood(rs);
-                    // Aggiorniamo la cache per ID
-                    getDataLayer().getCache().add(Food.class, f);
-                    return f;
+        Food food = null;
+
+        if(getDataLayer().getCache().has(Food.class, name)){
+            food = getDataLayer().getCache().get(Food.class, name);
+        }else{
+
+            try {
+                sFoodByName.setString(1, name);
+                try (ResultSet rs = sFoodByName.executeQuery()) {
+                    if (rs.next()) {
+                        
+                        food = createFood(rs);
+                        getDataLayer().getCache().add(Food.class, food);
+                    
+                    }
                 }
+            } catch (SQLException e) {
+                throw new DataException("Errore recupero Food per nome", e);
             }
-        } catch (SQLException e) {
-            throw new DataException("Errore recupero Food per nome", e);
         }
         return null;
     }
@@ -133,7 +134,16 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
         List<Food> result = new ArrayList<>();
         try (ResultSet rs = sAllFoods.executeQuery()) {
             while (rs.next()) {
-                result.add(createFood(rs));
+                Food food;
+                Integer id = rs.getInt("ID");
+                if (getDataLayer().getCache().has(Food.class, id)) {
+                    food = getDataLayer().getCache().get(Food.class, id);
+                } else {
+                    food = createFood(rs);
+                    getDataLayer().getCache().add(Food.class, food);
+                }
+
+                result.add(food);
             }
         } catch (SQLException ex) {
             throw new DataException("Errore recupero lista Food", ex);
@@ -141,20 +151,6 @@ public class FoodDAOImpl extends DAO implements FoodDAO {
         return result;
     }
 
-    @Override
-    public Food getFoodByIngredient(Ingredient ingredient) throws DataException {
-        try {
-            sFoodByIngredient.setInt(1, ingredient.getKey());
-            try (ResultSet rs = sFoodByIngredient.executeQuery()) {
-                if (rs.next()) {
-                    return createFood(rs);
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataException("Errore recupero Food per ingrediente", ex);
-        }
-        return null;
-    }
 
     @Override
     public void addFood(Food food) throws DataException {

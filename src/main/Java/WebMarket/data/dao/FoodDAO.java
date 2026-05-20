@@ -1,4 +1,4 @@
-package WebMarket.data;
+package WebMarket.data.dao;
 
 import java.util.List;
 
