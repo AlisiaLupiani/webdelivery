@@ -40,12 +40,13 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             sAllProducts = getConnection().prepareStatement("SELECT * FROM" + TABLE);
 
             sAddProduct = getConnection().prepareStatement(
-                "INSERT INTO" + TABLE + "(NOME, DESCRIZIONE, PREZZO, PROCCEDURA, TEMPO_DI_PREPARAZIONE, IMMAGINE, V) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "INSERT INTO" + TABLE + "(NOME, DESCRIZIONE, PREZZO, PROCCEDURA, TEMPO_DI_PREPARAZIONE, IMMAGINE, VERSION) VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
             sUpdateProduct = getConnection().prepareStatement(
-                "UPDATE product SET name=?, price=?, version=? WHERE id=? AND version=?");
+                "UPDATE"+ TABLE + "SET NOME=?, PREZZO=?, DESCRIZIONE=?, PROCCEDURA=?, TEMPO_DI_PREPARAZIONE=?, IMMAGINE=?, V=? WHERE ID=? AND VERSION=?");
+            
 
-            sDeleteProduct = getConnection().prepareStatement("DELETE FROM product WHERE id=?");
+            sDeleteProduct = getConnection().prepareStatement("DELETE FROM" + TABLE + "WHERE ID=?");
 
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductDAO", ex);
@@ -108,6 +109,7 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
         return product;
     }
 
+    //DA AGGIUSTARE(CAMBIARE IL PARAMETRO ANCHE NEL SUO DAO)
     @Override
     public List<Product> getProductsByOrder(int orderId) throws DataException {
         List<Product> products = new ArrayList<>();
@@ -124,7 +126,7 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
      return products;
     }
 
-
+    //DA AGGIUSTARE(USARE IL PATTERN DEGLI ALTRI)
     @Override
     public List<Product> getAllProducts() throws DataException {
         List<Product> res = new ArrayList<>();

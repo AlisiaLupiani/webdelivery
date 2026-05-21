@@ -92,13 +92,14 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
         order.setDeliveryAddress(rs.getString("INDIRIZZO_CONSEGNA"));
 
         String state = rs.getString("STATO");
-        if (state != null)
+        if (state != null){
             order.setOrderState(OrderState.valueOf(state));
-
+        }
+        
         String paymentMethod = rs.getString("METODO_PAGAMENTO");
-        if (paymentMethod != null)
+        if (paymentMethod != null){
             order.setPaymentMethod(PaymentMethod.valueOf(paymentMethod));
-
+        }
         order.setIdUtenteNascosto(rs.getInt("UTENTE_ID"));
 
         order.setClean();

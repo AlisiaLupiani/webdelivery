@@ -9,10 +9,17 @@ public class ProductOptionProxy extends ProductOptionImpl {
     protected DataLayer dataLayer;
     protected boolean isDirty;
 
+    protected Integer idProductOptionGroup;
+
+
     public ProductOptionProxy(DataLayer dl) {
         super();
         this.dataLayer = dl;
         this.isDirty = false;
+    }
+
+    public void setIdProductOptionGroup(Integer id) {
+        this.idProductOptionGroup = id;
     }
 
     @Override
