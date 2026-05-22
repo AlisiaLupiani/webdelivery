@@ -13,6 +13,7 @@ import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
 import model.Product;
+import model.Order;
 
 
 
@@ -109,35 +110,36 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
         return product;
     }
 
-    //DA AGGIUSTARE(CAMBIARE IL PARAMETRO ANCHE NEL SUO DAO)
-    @Override
-    public List<Product> getProductsByOrder(int orderId) throws DataException {
+@Override
+    public List<Product> getProductsByOrder(Order order) throws DataException { 
         List<Product> products = new ArrayList<>();
         try {
-            sProductByOrder.setInt(1, orderId);
+            sProductByOrder.setInt(1, order.getKey()); 
+            
             try (ResultSet rs = sProductByOrder.executeQuery()) {
                 while (rs.next()) {
                     products.add(createProduct(rs));
                 }
             }
-        }catch(SQLException e){
-                throw new DataException("Errore getProductsByOrder", e);   
-            }    
-     return products;
+        } catch(SQLException e){
+            throw new DataException("Errore getProductsByOrder", e);
+        }
+        return products;
     }
 
-    //DA AGGIUSTARE(USARE IL PATTERN DEGLI ALTRI)
     @Override
     public List<Product> getAllProducts() throws DataException {
-        List<Product> res = new ArrayList<>();
-        try (Statement s = getConnection().createStatement();
-             ResultSet rs = s.executeQuery("SELECT * FROM product")) {
-            while (rs.next()) {
-                res.add(createProduct(rs));
+        List<Product> res = new ArrayList<>(); 
+        try {
+            try (ResultSet rs = sAllProducts.executeQuery()) {
+                while (rs.next()) {
+                    res.add(createProduct(rs));
+                }
             }
         } catch (SQLException ex) {
             throw new DataException("Errore getAllProducts", ex);
         }
+        
         return res;
     }
 

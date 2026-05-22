@@ -11,6 +11,7 @@ import model.OrderState;
 import model.PaymentMethod;
 import model.Product;
 import model.modelImpl.OrderImpl;
+import model.Order;
 
 
 public class OrderProxy extends OrderImpl {
@@ -85,7 +86,7 @@ public class OrderProxy extends OrderImpl {
             try {
                 ProductDAO productDao = (ProductDAO) dataLayer.getDAO(Product.class);
 
-                List<Product> lista = productDao.getProductsByOrder(this.getKey());
+                List<Product> lista = productDao.getProductsByOrder(this);
                 super.setProducts(lista);
                 
             } catch (Exception e) {
