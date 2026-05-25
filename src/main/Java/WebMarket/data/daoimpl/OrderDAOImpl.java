@@ -100,7 +100,7 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
         if (paymentMethod != null){
             order.setPaymentMethod(PaymentMethod.valueOf(paymentMethod));
         }
-        order.setIdUtenteNascosto(rs.getInt("UTENTE_ID"));
+        order.setIdUtente(rs.getInt("UTENTE_ID"));
 
         order.setClean();
 

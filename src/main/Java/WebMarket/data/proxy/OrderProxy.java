@@ -11,7 +11,6 @@ import model.OrderState;
 import model.PaymentMethod;
 import model.Product;
 import model.modelImpl.OrderImpl;
-import model.Order;
 
 
 public class OrderProxy extends OrderImpl {
@@ -28,7 +27,7 @@ public class OrderProxy extends OrderImpl {
         this.idUtente = 0;
     }
 
-    public void setIdUtenteNascosto(Integer id) {
+    public void setIdUtente(Integer id) {
         this.idUtente = id;
     }
 

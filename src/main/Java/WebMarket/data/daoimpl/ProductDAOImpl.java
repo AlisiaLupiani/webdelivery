@@ -12,8 +12,8 @@ import WebMarket.data.proxy.ProductProxy;
 import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
-import model.Product;
 import model.Order;
+import model.Product;
 
 
 
@@ -37,7 +37,7 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
         try {
             super.init(); 
             sProductById = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE ID=?");
-            sProductByOrder = getConnection().prepareStatement("SELECT * FROM"+ TABLE + "WHERE ORDINE= ?");
+            sProductByOrder = getConnection().prepareStatement("SELECT * FROM"+ TABLE + "WHERE ORDINE_ID = ?");
             sAllProducts = getConnection().prepareStatement("SELECT * FROM" + TABLE);
 
             sAddProduct = getConnection().prepareStatement(
@@ -118,7 +118,17 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             
             try (ResultSet rs = sProductByOrder.executeQuery()) {
                 while (rs.next()) {
-                    products.add(createProduct(rs));
+                    Product p = null;
+                    int productId = rs.getInt("ID");
+                    
+                    if(getDataLayer().getCache().has(Product.class, productId)){
+                        products.add(getDataLayer().getCache().get(Product.class, productId));
+                    }else{
+                        p = createProduct(rs);
+                        getDataLayer().getCache().add(Product.class, p);
+                        
+                    }
+                    products.add(p);
                 }
             }
         } catch(SQLException e){
@@ -130,14 +140,21 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
     @Override
     public List<Product> getAllProducts() throws DataException {
         List<Product> res = new ArrayList<>(); 
-        try {
-            try (ResultSet rs = sAllProducts.executeQuery()) {
-                while (rs.next()) {
-                    res.add(createProduct(rs));
+        try(ResultSet rs = sAllProducts.executeQuery()){
+            while(rs.next()){ 
+                Product product;
+                Integer id = rs.getInt("ID");
+                if(getDataLayer().getCache().has(Product.class, id)){
+                    product = getDataLayer().getCache().get(Product.class, id);
+                }else{
+                    product = createProduct(rs);
+                    getDataLayer().getCache().add(Product.class, product);
                 }
+                res.add(product);
             }
-        } catch (SQLException ex) {
-            throw new DataException("Errore getAllProducts", ex);
+            
+        } catch (SQLException e) {
+            throw new DataException("Errore getAllProducts", e);
         }
         
         return res;
