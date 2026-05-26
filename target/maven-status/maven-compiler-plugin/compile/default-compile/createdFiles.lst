@@ -8,6 +8,7 @@ model\Ingredient.class
 framework\security\SecurityHelpers.class
 framework\data\OptimisticLockException.class
 model\Product.class
+WebMarket\Controller\MenuServlet.class
 model\modelImpl\FoodImpl.class
 WebMarket\data\dao\UserDAO.class
 WebMarket\data\daoimpl\ProductOptionDAOImpl.class
@@ -16,6 +17,7 @@ model\User.class
 model\modelImpl\StaffImpl.class
 framework\data\DataItemImpl.class
 model\modelImpl\ClientImpl.class
+framework\view\TemplateResult.class
 model\ProductOptionGroup.class
 framework\view\HTMLResult$HTML_Version.class
 WebMarket\data\proxy\FoodProxy.class

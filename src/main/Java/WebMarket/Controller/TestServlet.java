@@ -12,20 +12,19 @@ import jakarta.servlet.http.HttpServlet;
 
 public class TestServlet extends HttpServlet{
 
-    @Override
+@Override
     protected void doGet(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet TestServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1> Bella Ciao Servlet!</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        try {
+            request.setAttribute("messaggio_benvenuto", "Evviva! I template FreeMarker funzionano alla perfezione! 🎉");
+
+            framework.view.TemplateResult templateEngine = new framework.view.TemplateResult(getServletContext());
+
+            templateEngine.activate("home.ftl.html", request, response);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.getWriter().println("Ops, errore nel caricamento del template: " + ex.getMessage());
         }
     }
 

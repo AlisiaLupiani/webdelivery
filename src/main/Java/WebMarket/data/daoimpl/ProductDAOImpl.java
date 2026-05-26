@@ -36,18 +36,20 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
     public void init() throws DataException {
         try {
             super.init(); 
-            sProductById = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE ID=?");
-            sProductByOrder = getConnection().prepareStatement("SELECT * FROM"+ TABLE + "WHERE ORDINE_ID = ?");
-            sAllProducts = getConnection().prepareStatement("SELECT * FROM" + TABLE);
+            
+            sProductById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID=?");
+            
+            sProductByOrder = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ORDINE_ID = ?");
+            
+            sAllProducts = getConnection().prepareStatement("SELECT * FROM " + TABLE);
 
             sAddProduct = getConnection().prepareStatement(
-                "INSERT INTO" + TABLE + "(NOME, DESCRIZIONE, PREZZO, PROCCEDURA, TEMPO_DI_PREPARAZIONE, IMMAGINE, VERSION) VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "INSERT INTO " + TABLE + " (NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIONE, IMMAGINE, VERSION) VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
             sUpdateProduct = getConnection().prepareStatement(
-                "UPDATE"+ TABLE + "SET NOME=?, PREZZO=?, DESCRIZIONE=?, PROCCEDURA=?, TEMPO_DI_PREPARAZIONE=?, IMMAGINE=?, V=? WHERE ID=? AND VERSION=?");
+                "UPDATE " + TABLE + " SET NOME=?, PREZZO=?, DESCRIZIONE=?, PROCEDURA=?, TEMPO_PREPARAZIONE=?, IMMAGINE=?, VERSION=? WHERE ID=? AND VERSION=?");
             
-
-            sDeleteProduct = getConnection().prepareStatement("DELETE FROM" + TABLE + "WHERE ID=?");
+            sDeleteProduct = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID=?");
 
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductDAO", ex);
@@ -77,8 +79,8 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
         p.setName(rs.getString("NOME"));
         p.setDescription(rs.getString("DESCRIZIONE"));
         p.setPrice(rs.getDouble("PREZZO"));
-        p.setProcedure(rs.getString("PROCCEDURA"));
-        p.setPreparationTime(rs.getInt("TEMPO_DI_PREPARAZIONE"));
+        p.setProcedure(rs.getString("PROCEDURA"));
+        p.setPreparationTime(rs.getInt("TEMPO_PREPARAZIONE"));
         p.setImage(rs.getString("IMMAGINE"));
         p.setVersion(rs.getLong("VERSION"));
 

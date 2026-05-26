@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Il nostro Menù - WebDelivery</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .prodotto { border-bottom: 1px solid #ccc; padding: 10px 0; }
+        .prezzo { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Menù Pizzeria 🍕</h1>
+    <p>Ecco tutte le nostre specialità direttamente dal database:</p>
+
+    <ul>
+        <#list lista_prodotti as prodotto>
+            <li class="prodotto">
+                <h3>${prodotto.name}</h3>
+                <p>Prezzo: <span class="prezzo">${prodotto.price} €</span></p>
+                
+                </li>
+        <#else>
+            <p><i>Siamo spiacenti, il menù è vuoto in questo momento.</i></p>
+        </#list>
+    </ul>
+
+    <br>
+    <a href="TestServlet">Torna alla Home</a>
+
+</body>
+</html>
