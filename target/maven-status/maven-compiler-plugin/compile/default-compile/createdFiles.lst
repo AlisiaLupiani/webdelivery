@@ -68,6 +68,7 @@ WebMarket\data\dao\LogOrderStateDAO.class
 WebMarket\data\dao\ProductDAO.class
 model\OrderState.class
 framework\data\DataException.class
+WebMarket\Controller\HomeServlet.class
 model\modelImpl\OrderImpl.class
 framework\data\DataLayer.class
 model\LogOrderState.class

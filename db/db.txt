@@ -1,9 +1,13 @@
+-- ==========================================
 -- 1. PULIZIA E CREAZIONE DATABASE
+-- ==========================================
 DROP DATABASE IF EXISTS WEB_DELIVERY;
 CREATE DATABASE WEB_DELIVERY;
 USE WEB_DELIVERY;
 
--- 2. TABELLA UTENTE
+-- ==========================================
+-- 2. CREAZIONE TABELLE (Struttura)
+-- ==========================================
 CREATE TABLE UTENTE (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(100) NOT NULL,
@@ -16,21 +20,18 @@ CREATE TABLE UTENTE (
     VERSION INT NOT NULL DEFAULT 1
 );
 
--- 3. TABELLA GRUPPO (ProductOptionGroup)
 CREATE TABLE GRUPPO (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(100) NOT NULL,
     VERSION INT NOT NULL DEFAULT 1
 );
 
--- 4. TABELLA INGREDIENTE
 CREATE TABLE INGREDIENTE (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(100) NOT NULL,
     VERSION INT NOT NULL DEFAULT 1
 );
 
--- 5. TABELLA PRODOTTO
 CREATE TABLE PRODOTTO (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(150) NOT NULL,
@@ -42,7 +43,6 @@ CREATE TABLE PRODOTTO (
     VERSION INT NOT NULL DEFAULT 1
 );
 
--- 6. TABELLA CARATTERISTICA (ProductOption)
 CREATE TABLE CARATTERISTICA (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(100) NOT NULL,
@@ -54,7 +54,6 @@ CREATE TABLE CARATTERISTICA (
     FOREIGN KEY (GRUPPO_ID) REFERENCES GRUPPO(ID) ON DELETE CASCADE
 );
 
--- 7. TABELLA ORDINE
 CREATE TABLE ORDINE (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     DATA_ORDINE DATE NOT NULL,
@@ -68,7 +67,6 @@ CREATE TABLE ORDINE (
     FOREIGN KEY (UTENTE_ID) REFERENCES UTENTE(ID) ON DELETE CASCADE
 );
 
--- 8. TABELLA CONSUMAZIONE (Visto che hai Consumation.java)
 CREATE TABLE CONSUMAZIONE (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(100) NOT NULL,
@@ -78,7 +76,6 @@ CREATE TABLE CONSUMAZIONE (
     FOREIGN KEY (PRODOTTO_ID) REFERENCES PRODOTTO(ID) ON DELETE SET NULL
 );
 
--- 9. TABELLA LOG_STATO (Entità debole)
 CREATE TABLE LOG_STATO (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -91,7 +88,7 @@ CREATE TABLE LOG_STATO (
     FOREIGN KEY (UTENTE_ID) REFERENCES UTENTE(ID) ON DELETE CASCADE
 );
 
--- 10. RELAZIONI N:N (Tabelle di Join)
+-- RELAZIONI N:N (Tabelle di Join)
 CREATE TABLE PRODOTTO_INGREDIENTE (
     PRODOTTO_ID INT NOT NULL,
     INGREDIENTE_ID INT NOT NULL,
@@ -118,9 +115,74 @@ CREATE TABLE ORDINE_PRODOTTO (
     FOREIGN KEY (PRODOTTO_ID) REFERENCES PRODOTTO(ID) ON DELETE CASCADE
 );
 
--- 11. DATI DI TEST
-INSERT INTO UTENTE (NOME, COGNOME, EMAIL, PASSWORD, RUOLO, VERSION) 
-VALUES ('Rachid', 'Admin', 'admin@webdelivery.it', 'admin123', 'ADMIN', 1);
+-- ==========================================
+-- 3. INSERIMENTO DATI DI TEST (Popolamento)
+-- ==========================================
 
-INSERT INTO PRODOTTO (NOME, PREZZO, TEMPO_PREPARAZIONE, VERSION) 
-VALUES ('Pizza Margherita', 7.50, 10, 1);
+-- UTENTI (Specifico l'ID per poterli richiamare negli ordini)
+INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO) VALUES 
+(1, 'Rachid', 'Admin', 'admin@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 1', '3331234567'),
+(2, 'Mario', 'Rossi', 'mario.rossi@email.it', 'cliente123', 'CLIENTE', 'Via Roma, 10', '3339876543'),
+(3, 'Luigi', 'Verdi', 'luigi.verdi@email.it', 'cliente123', 'CLIENTE', 'Piazza Napoli, 5', '3335555555'),
+(4, 'Giulia', 'Staff', 'giulia.staff@webdelivery.it', 'staff123', 'STAFF', 'Via Cucina, 2', '3334444444');
+
+-- INGREDIENTI
+INSERT INTO INGREDIENTE (ID, NOME) VALUES 
+(1, 'Salsa di Pomodoro'),
+(2, 'Mozzarella di Bufala'),
+(3, 'Basilico Fresco'),
+(4, 'Salame Piccante'),
+(5, 'Prosciutto Cotto'),
+(6, 'Funghi Champignon'),
+(7, 'Carciofini'),
+(8, 'Olive Nere');
+
+-- GRUPPI DI OPZIONI (Per le caratteristiche personalizzabili)
+INSERT INTO GRUPPO (ID, NOME) VALUES 
+(1, 'Tipo di Impasto'),
+(2, 'Aggiunte Extra');
+
+-- CARATTERISTICHE (Le opzioni dentro ai gruppi)
+INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(1, 'Impasto Classico', 'Il nostro impasto tradizionale a lenta lievitazione', 0.00, TRUE, 1),
+(2, 'Impasto Integrale', 'Ricco di fibre e leggero', 1.50, FALSE, 1),
+(3, 'Senza Glutine', 'Preparata in ambiente separato', 2.00, FALSE, 1),
+(4, 'Doppia Mozzarella', 'Per i più golosi', 1.50, FALSE, 2),
+(5, 'Patatine Fritte Extra', 'Patatine fritte sopra la pizza', 2.00, FALSE, 2);
+
+-- PRODOTTI (Pizze, Bibite, Dolci)
+INSERT INTO PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIONE, IMMAGINE) VALUES 
+(1, 'Pizza Margherita', 'La regina delle pizze, semplice e perfetta.', 7.50, 'Stendere l impasto, aggiungere pomodoro, mozzarella e basilico a fine cottura.', 10, 'margherita.jpg'),
+(2, 'Pizza Diavola', 'Per chi ama il piccante.', 8.50, 'Aggiungere salame piccante abbondante prima di infornare.', 12, 'diavola.jpg'),
+(3, 'Pizza Capricciosa', 'Un classico intramontabile con funghi, prosciutto e carciofini.', 9.50, 'Disporre gli ingredienti in modo uniforme.', 15, 'capricciosa.jpg'),
+(4, 'Patatine Fritte', 'Porzione abbondante di patatine croccanti.', 4.00, 'Friggere a 180 gradi per 5 minuti.', 5, 'patatine.jpg'),
+(5, 'Coca Cola in Lattina', '33cl', 2.50, 'Servire fredda.', 1, 'cocacola.jpg'),
+(6, 'Tiramisù Artigianale', 'Fatto in casa con mascarpone fresco.', 4.50, 'Preparare strati di savoiardi e crema, spolverare di cacao.', 5, 'tiramisu.jpg');
+
+-- COLLEGAMENTO PRODOTTI -> INGREDIENTI
+INSERT INTO PRODOTTO_INGREDIENTE (PRODOTTO_ID, INGREDIENTE_ID, QUANTITA) VALUES 
+(1, 1, 'Abbondante'), (1, 2, 'Normale'), (1, 3, 'A foglie'), -- Margherita
+(2, 1, 'Normale'), (2, 2, 'Normale'), (2, 4, '15 fette'), -- Diavola
+(3, 1, 'Normale'), (3, 2, 'Normale'), (3, 5, '2 fette'), (3, 6, 'Una manciata'), (3, 7, '3 spicchi'); -- Capricciosa
+
+-- COLLEGAMENTO PRODOTTI -> CARATTERISTICHE (Permettiamo di cambiare impasto solo alle pizze)
+INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
+(2, 1), (2, 2), (2, 3), (2, 4),
+(3, 1), (3, 2), (3, 3);
+
+-- ORDINI SIMULATI
+INSERT INTO ORDINE (ID, DATA_ORDINE, ORARIO_CONSEGNA, PREZZO_TOTALE, STATO, METODO_PAGAMENTO, INDIRIZZO_CONSEGNA, UTENTE_ID) VALUES 
+(1, '2026-05-26', '20:00:00', 14.50, 'IN_CONSEGNA', 'CARTA_CREDITO', 'Via Roma, 10', 2),
+(2, '2026-05-26', '20:30:00', 21.00, 'IN_PREPARAZIONE', 'CONTANTI', 'Piazza Napoli, 5', 3);
+
+-- PRODOTTI DENTRO GLI ORDINI
+INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES 
+(1, 1, 1), (1, 5, 1), (1, 6, 1), -- L'ordine di Mario: 1 Margherita, 1 Coca, 1 Tiramisù
+(2, 2, 2), (2, 4, 1);            -- L'ordine di Luigi: 2 Diavole, 1 Patatine
+
+-- LOG DEGLI STATI DEGLI ORDINI (Per lo storico)
+INSERT INTO LOG_STATO (STATO_FROM, STATO_TO, ORDINE_ID, UTENTE_ID) VALUES 
+('RICEVUTO', 'IN_PREPARAZIONE', 1, 4), -- Lo staff (Giulia) ha preso in carico l'ordine 1
+('IN_PREPARAZIONE', 'IN_CONSEGNA', 1, 4),
+('RICEVUTO', 'IN_PREPARAZIONE', 2, 4); -- Lo staff (Giulia) ha preso in carico l'ordine 2
