@@ -45,7 +45,7 @@ public class MenuServlet extends AbstractBaseController {
             ProductDAO productDAO = (ProductDAO) dl.getDAO(Product.class);
             
             List<Product> listaPizze = productDAO.getAllProducts();
-            request.setAttribute("lista_prodotti", listaPizze);
+            request.setAttribute("prodotti", listaPizze);
 
             TemplateResult templateEngine = new TemplateResult(getServletContext());
             templateEngine.activate("menu.ftl.html", request, response);

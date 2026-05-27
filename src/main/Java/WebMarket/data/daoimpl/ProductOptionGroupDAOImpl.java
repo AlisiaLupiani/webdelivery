@@ -35,23 +35,29 @@ public class ProductOptionGroupDAOImpl extends DAO implements ProductOptionGroup
         super(d);
     }
 
-    @Override
+   @Override
     public void init() throws DataException {
         try {
             super.init();
-            sGroupById = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE ID=?");
-            sGroupByProduct = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE PRODOTTO_ID=?");    
-            sAllGroups = getConnection().prepareStatement("SELECT * FROM" + TABLE);
+            sGroupById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID=?");
             
-            sAddGroup = getConnection().prepareStatement("INSERT INTO"+ TABLE + "(NOME, VERSION) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS);
-            sUpdateGroup = getConnection().prepareStatement("UPDATE"+ TABLE + "SET NOME=?, VERSION=? WHERE ID=? AND VERSION=?");
-            sDeleteGroup = getConnection().prepareStatement("DELETE FROM"+ TABLE + "WHERE ID=? AND version=?");
+            // Query corretta con JOIN per collegare PRODOTTO -> CARATTERISTICA -> GRUPPO
+            sGroupByProduct = getConnection().prepareStatement(
+                "SELECT DISTINCT G.* FROM GRUPPO G " +
+                "JOIN CARATTERISTICA C ON G.ID = C.GRUPPO_ID " +
+                "JOIN PRODOTTO_CARATTERISTICA PC ON C.ID = PC.CARATTERISTICA_ID " +
+                "WHERE PC.PRODOTTO_ID = ?"
+            );
+            
+            sAllGroups = getConnection().prepareStatement("SELECT * FROM " + TABLE);
+            
+            sAddGroup = getConnection().prepareStatement("INSERT INTO " + TABLE + " (NOME, VERSION) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS);
+            sUpdateGroup = getConnection().prepareStatement("UPDATE " + TABLE + " SET NOME=?, VERSION=? WHERE ID=? AND VERSION=?");
+            sDeleteGroup = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID=? AND VERSION=?");
 
-
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductOptionGroupDAO", ex);
         }
-          
     }
 
     @Override
@@ -129,23 +135,25 @@ public class ProductOptionGroupDAOImpl extends DAO implements ProductOptionGroup
     @Override
     public List<ProductOptionGroup> getProductOptionGroupsByProduct(Product product) throws DataException {
         List<ProductOptionGroup> res = new ArrayList<>();
-        try(ResultSet resultSet = sGroupByProduct.executeQuery()) {
-            while(resultSet.next()) {
-                ProductOptionGroup group;
-                Integer id = resultSet.getInt("ID");
-                if(getDataLayer().getCache().has(ProductOptionGroup.class, id)) {
-                    group = getDataLayer().getCache().get(ProductOptionGroup.class, id);
-                } else {
-                    group = createProductOptionGroup(resultSet);
-                    getDataLayer().getCache().add(ProductOptionGroup.class, group);
+        try {
+            sGroupByProduct.setInt(1, product.getKey()); // <--- QUESTA RIGA MANCAVA!
+            try(ResultSet resultSet = sGroupByProduct.executeQuery()) {
+                while(resultSet.next()) {
+                    ProductOptionGroup group;
+                    Integer id = resultSet.getInt("ID");
+                    if(getDataLayer().getCache().has(ProductOptionGroup.class, id)) {
+                        group = getDataLayer().getCache().get(ProductOptionGroup.class, id);
+                    } else {
+                        group = createProductOptionGroup(resultSet);
+                        getDataLayer().getCache().add(ProductOptionGroup.class, group);
+                    }
+                    res.add(group);
                 }
-                res.add(group);
             }
-        }catch(SQLException e){
+        } catch(SQLException e){
             throw new DataException("Unable to retrieve product option groups by product", e);
         }
         return res;
-
     }
 
     @Override public void addProductOptionGroup(ProductOptionGroup group) throws DataException {
@@ -192,14 +200,15 @@ public class ProductOptionGroupDAOImpl extends DAO implements ProductOptionGroup
     }
 
 
-    @Override public void deleteProductOptionGroup(ProductOptionGroup group) throws DataException {
-        try{
+    @Override 
+    public void deleteProductOptionGroup(ProductOptionGroup group) throws DataException {
+        try {
             sDeleteGroup.setInt(1, group.getKey());
+            sDeleteGroup.setLong(2, group.getVersion()); // <--- AGGIUNTO IL SECONDO PARAMETRO
             if(sDeleteGroup.executeUpdate() > 0){
                 getDataLayer().getCache().delete(ProductOptionGroup.class, group.getKey());
-            
             }
-        }catch(SQLException e){
+        } catch(SQLException e){
             throw new DataException("Unable to delete product option group", e);
         }
     }

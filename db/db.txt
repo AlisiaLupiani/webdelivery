@@ -119,7 +119,7 @@ CREATE TABLE ORDINE_PRODOTTO (
 -- 3. INSERIMENTO DATI DI TEST (Popolamento)
 -- ==========================================
 
--- UTENTI (Specifico l'ID per poterli richiamare negli ordini)
+-- UTENTI
 INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO) VALUES 
 (1, 'Rachid', 'Admin', 'admin@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 1', '3331234567'),
 (2, 'Mario', 'Rossi', 'mario.rossi@email.it', 'cliente123', 'CLIENTE', 'Via Roma, 10', '3339876543'),
@@ -128,61 +128,113 @@ INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFO
 
 -- INGREDIENTI
 INSERT INTO INGREDIENTE (ID, NOME) VALUES 
-(1, 'Salsa di Pomodoro'),
-(2, 'Mozzarella di Bufala'),
-(3, 'Basilico Fresco'),
-(4, 'Salame Piccante'),
-(5, 'Prosciutto Cotto'),
-(6, 'Funghi Champignon'),
-(7, 'Carciofini'),
-(8, 'Olive Nere');
+(1, 'Salsa di Pomodoro'), (2, 'Mozzarella di Bufala'), (3, 'Basilico Fresco'),
+(4, 'Salame Piccante'), (5, 'Prosciutto Cotto'), (6, 'Funghi Champignon'),
+(7, 'Carciofini'), (8, 'Olive Nere');
 
--- GRUPPI DI OPZIONI (Per le caratteristiche personalizzabili)
+-- ==========================================
+-- I 6 GRUPPI DI PERSONALIZZAZIONE
+-- ==========================================
 INSERT INTO GRUPPO (ID, NOME) VALUES 
 (1, 'Tipo di Impasto'),
-(2, 'Aggiunte Extra');
+(2, 'Aggiunte Extra'),
+(3, 'Scegli il Gusto'),
+(4, 'Salse Extra'),
+(5, 'Cottura Carne'),
+(6, 'Opzioni Bevande');
 
--- CARATTERISTICHE (Le opzioni dentro ai gruppi)
+-- ==========================================
+-- LE CARATTERISTICHE (OPZIONI) DEI GRUPPI
+-- ==========================================
+-- Gruppo 1 e 2: Pizze
 INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
-(1, 'Impasto Classico', 'Il nostro impasto tradizionale a lenta lievitazione', 0.00, TRUE, 1),
+(1, 'Impasto Classico', 'Il nostro impasto tradizionale', 0.00, TRUE, 1),
 (2, 'Impasto Integrale', 'Ricco di fibre e leggero', 1.50, FALSE, 1),
 (3, 'Senza Glutine', 'Preparata in ambiente separato', 2.00, FALSE, 1),
 (4, 'Doppia Mozzarella', 'Per i più golosi', 1.50, FALSE, 2),
 (5, 'Patatine Fritte Extra', 'Patatine fritte sopra la pizza', 2.00, FALSE, 2);
 
--- PRODOTTI (Pizze, Bibite, Dolci)
+-- Gruppo 3: Dolci
+INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(6, 'Frutti di Bosco', 'Classica con coulis di frutti rossi', 0.00, TRUE, 3),
+(7, 'Cioccolato Fondente', 'Con colata di cioccolato fuso', 0.00, FALSE, 3),
+(8, 'Pistacchio di Bronte', 'Con crema di pistacchio e granella', 0.50, FALSE, 3),
+(9, 'Caramello Salato', 'Dolce e salato in perfetto equilibrio', 0.00, FALSE, 3);
+
+-- Gruppo 4: Salse
+INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(10, 'Ketchup', 'Bustina monoporzione', 0.00, FALSE, 4),
+(11, 'Maionese', 'Bustina monoporzione', 0.00, FALSE, 4),
+(12, 'Salsa BBQ', 'Salsa barbecue affumicata', 0.50, FALSE, 4);
+
+-- Gruppo 5: Cottura Carne
+INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(13, 'Al Sangue', 'Cottura rapida, cuore rosso', 0.00, FALSE, 5),
+(14, 'Media', 'Cottura standard, cuore rosato', 0.00, TRUE, 5),
+(15, 'Ben Cotta', 'Nessuna traccia di rosa', 0.00, FALSE, 5);
+
+-- Gruppo 6: Bevande
+INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(16, 'Con Ghiaccio', 'Bicchiere a parte con ghiaccio', 0.00, TRUE, 6),
+(17, 'Senza Ghiaccio', '', 0.00, FALSE, 6),
+(18, 'Fetta di Limone', '', 0.00, FALSE, 6);
+
+-- ==========================================
+-- PRODOTTI
+-- ==========================================
 INSERT INTO PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIONE, IMMAGINE) VALUES 
-(1, 'Pizza Margherita', 'La regina delle pizze, semplice e perfetta.', 7.50, 'Stendere l impasto, aggiungere pomodoro, mozzarella e basilico a fine cottura.', 10, 'margherita.jpg'),
-(2, 'Pizza Diavola', 'Per chi ama il piccante.', 8.50, 'Aggiungere salame piccante abbondante prima di infornare.', 12, 'diavola.jpg'),
-(3, 'Pizza Capricciosa', 'Un classico intramontabile con funghi, prosciutto e carciofini.', 9.50, 'Disporre gli ingredienti in modo uniforme.', 15, 'capricciosa.jpg'),
-(4, 'Patatine Fritte', 'Porzione abbondante di patatine croccanti.', 4.00, 'Friggere a 180 gradi per 5 minuti.', 5, 'patatine.jpg'),
-(5, 'Coca Cola in Lattina', '33cl', 2.50, 'Servire fredda.', 1, 'cocacola.jpg'),
-(6, 'Tiramisù Artigianale', 'Fatto in casa con mascarpone fresco.', 4.50, 'Preparare strati di savoiardi e crema, spolverare di cacao.', 5, 'tiramisu.jpg');
+(7, 'Bruschetta al Pomodoro', 'Pane casereccio tostato con pomodorini freschi, aglio e basilico.', 4.00, 'Tostare il pane e condire a crudo.', 5, 'bruschetta.jpg'),
+(8, 'Tagliere Misto', 'Selezione di salumi e formaggi locali accompagnati da miele e noci.', 12.00, 'Affettare e disporre armonicamente su legno.', 10, 'tagliere.jpg'),
+(4, 'Patatine Fritte', 'Porzione abbondante di patatine super croccanti e dorate.', 4.00, 'Friggere a 180 gradi per 5 minuti.', 5, 'patatine.jpg'),
+(9, 'Crocchette di Patate', '6 crocchette artigianali dal cuore caldo e filante di mozzarella.', 5.00, 'Friggere a 170 gradi fino a doratura esterna.', 6, 'crocchette.jpg'),
+(10, 'Arancino al Ragù', 'Classico arancino siciliano di riso ripieno di ragù di carne e piselli.', 3.50, 'Friggere a immersione totale.', 8, 'arancino.jpg'),
+(19, 'Lasagna al Forno', 'Ricetta tradizionale emiliana con sfoglia fresca, ragù di carne e besciamella.', 9.00, 'Gratinare in forno per 20 minuti.', 20, 'lasagna.jpg'),
+(20, 'Spaghetti alla Carbonara', 'Guanciale croccante, pecorino romano DOP, uova fresche e pepe nero.', 11.00, 'Saltare in padella mantecando lontano dal fuoco.', 15, 'spaghetti.jpg'),
+(1, 'Pizza Margherita', 'La regina, semplice e perfetta con pomodoro, mozzarella e basilico.', 7.50, 'Stendere l impasto, aggiungere pomodoro, mozzarella e basilico.', 10, 'margherita.jpg'),
+(2, 'Pizza Diavola', 'Per chi ama i sapori decisi, con salamino piccante di alta qualità.', 8.50, 'Aggiungere salame piccante abbondante prima di infornare.', 12, 'diavola.jpg'),
+(3, 'Pizza Capricciosa', 'Un grande classico guarnito con funghi, prosciutto cotto e carciofini.', 9.50, 'Disporre gli ingredienti in modo uniforme sulla base.', 15, 'capricciosa.jpg'),
+(11, 'Pizza Bufalina', 'Pomodoro San Marzano, mozzarella di bufala campana DOP e olio EVO.', 10.00, 'Aggiungere la mozzarella all''uscita dal forno.', 12, 'bufalina.jpg'),
+(12, 'Pizza Pistacchio', 'Fior di latte, mortadella di Bologna, granella di pistacchio e burrata.', 11.00, 'Aggiungere mortadella e burrata fuori dal forno.', 12, 'pistacchio.jpg'),
+(13, 'Bacon Cheeseburger', 'Hamburger di manzo sceltissimo 200g, cheddar fuso, bacon e salsa BBQ.', 10.50, 'Cuocere l''hamburger su piastra bollente, piastrare il pane.', 15, 'burger.jpg'),
+(14, 'Panino Salsiccia e Friarielli', 'Il re della tradizione partenopea racchiuso in un pane saltimbocca.', 7.50, 'Saltare i friarielli in padella e grigliare la salsiccia.', 12, 'salsiccia.jpg'),
+(15, 'Piadina Crudo e Squacquerone', 'Piadina artigianale con prosciutto crudo di Parma, squacquerone e rucola.', 6.50, 'Scaldare leggermente la piadina sul testo e farcire.', 5, 'piadina.jpg'),
+(16, 'Focaccia Ripiena', 'Focaccia calda della casa spaccata a metà e farcita con mortadella e provola.', 6.00, 'Tagliare a metà, farcire e riscaldare brevemente.', 5, 'focaccia.jpg'),
+(6, 'Tiramisù Artigianale', 'Fatto in casa seguendo la ricetta tradizionale con mascarpone fresco.', 4.50, 'Preparare strati di savoiardi e crema, spolverare di cacao.', 5, 'tiramisu.jpg'),
+(17, 'Cheesecake', 'Base croccante di biscotto con crema morbida. Scegli il tuo gusto!', 5.50, 'Impiattare la fetta e guarnire.', 2, 'cheesecake.jpg'),
+(5, 'Coca Cola in Lattina', '33cl, servita fredda di frigorifero.', 2.50, 'Servire fredda.', 1, 'cocacola.jpg'),
+(18, 'Birra Bionda', '33cl, birra bionda artigianale locale, fresca e beverina.', 3.50, 'Prendere dal frigo e stappare al momento.', 1, 'birra.jpg'),
+(21, 'Acqua Naturale', 'Bottiglia da 50cl fresca di frigorifero.', 1.00, 'Prendere dal frigo.', 1, 'acqua.jpg');
 
--- COLLEGAMENTO PRODOTTI -> INGREDIENTI
-INSERT INTO PRODOTTO_INGREDIENTE (PRODOTTO_ID, INGREDIENTE_ID, QUANTITA) VALUES 
-(1, 1, 'Abbondante'), (1, 2, 'Normale'), (1, 3, 'A foglie'), -- Margherita
-(2, 1, 'Normale'), (2, 2, 'Normale'), (2, 4, '15 fette'), -- Diavola
-(3, 1, 'Normale'), (3, 2, 'Normale'), (3, 5, '2 fette'), (3, 6, 'Una manciata'), (3, 7, '3 spicchi'); -- Capricciosa
-
--- COLLEGAMENTO PRODOTTI -> CARATTERISTICHE (Permettiamo di cambiare impasto solo alle pizze)
+-- ==========================================
+-- COLLEGHIAMO PRODOTTI ALLE OPZIONI
+-- ==========================================
+-- Pizze (Impasti e aggiunte)
 INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
 (1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
 (2, 1), (2, 2), (2, 3), (2, 4),
 (3, 1), (3, 2), (3, 3);
 
--- ORDINI SIMULATI
+-- Patatine (Salse)
+INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
+(4, 10), (4, 11), (4, 12);
+
+-- Hamburger (Cottura e Salse)
+INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
+(13, 13), (13, 14), (13, 15), (13, 10), (13, 11), (13, 12);
+
+-- Cheesecake (Gusti Dolci)
+INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
+(17, 6), (17, 7), (17, 8), (17, 9);
+
+-- Coca Cola (Ghiaccio e Limone)
+INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
+(5, 16), (5, 17), (5, 18);
+
+-- Ordini di Test
 INSERT INTO ORDINE (ID, DATA_ORDINE, ORARIO_CONSEGNA, PREZZO_TOTALE, STATO, METODO_PAGAMENTO, INDIRIZZO_CONSEGNA, UTENTE_ID) VALUES 
 (1, '2026-05-26', '20:00:00', 14.50, 'IN_CONSEGNA', 'CARTA_CREDITO', 'Via Roma, 10', 2),
 (2, '2026-05-26', '20:30:00', 21.00, 'IN_PREPARAZIONE', 'CONTANTI', 'Piazza Napoli, 5', 3);
 
--- PRODOTTI DENTRO GLI ORDINI
 INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES 
-(1, 1, 1), (1, 5, 1), (1, 6, 1), -- L'ordine di Mario: 1 Margherita, 1 Coca, 1 Tiramisù
-(2, 2, 2), (2, 4, 1);            -- L'ordine di Luigi: 2 Diavole, 1 Patatine
-
--- LOG DEGLI STATI DEGLI ORDINI (Per lo storico)
-INSERT INTO LOG_STATO (STATO_FROM, STATO_TO, ORDINE_ID, UTENTE_ID) VALUES 
-('RICEVUTO', 'IN_PREPARAZIONE', 1, 4), -- Lo staff (Giulia) ha preso in carico l'ordine 1
-('IN_PREPARAZIONE', 'IN_CONSEGNA', 1, 4),
-('RICEVUTO', 'IN_PREPARAZIONE', 2, 4); -- Lo staff (Giulia) ha preso in carico l'ordine 2
+(1, 1, 1), (1, 5, 1), (1, 6, 1),
+(2, 2, 2), (2, 4, 1);

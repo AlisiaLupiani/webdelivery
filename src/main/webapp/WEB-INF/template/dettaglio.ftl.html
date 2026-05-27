@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${prodotto.name!""} - WebDelivery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background-color: #ff5722; color: white; }
+        .navbar h1 { margin: 0; font-size: 24px; }
+        .btn-back { background: white; color: #ff5722; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; }
+        
+        .detail-container { max-width: 1000px; margin: 40px auto; background: white; border-radius: 15px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); display: flex; overflow: hidden; flex-wrap: wrap; }
+        .detail-img-box { flex: 1; min-width: 300px; background: #f8f9fa; }
+        .detail-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-info { flex: 1; min-width: 300px; padding: 40px; display: flex; flex-direction: column; }
+        .detail-price { font-size: 28px; font-weight: bold; color: #2e7d32; margin-bottom: 20px; }
+        
+        .options-group { margin-bottom: 25px; }
+        .options-group h4 { color: #ff5722; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .option-item { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+        .option-item label { cursor: pointer; color: #444; }
+        .option-price { color: #777; font-size: 14px; }
+        
+        .add-to-cart-btn { background: #ff5722; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 25px; cursor: pointer; margin-top: auto; transition: background 0.3s; }
+        .add-to-cart-btn:hover { background: #e64a19; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <h1>WebDelivery</h1>
+        <a href="menu" class="btn-back">⬅ Torna al Menù</a>
+    </header>
+
+    <main>
+        <div class="detail-container">
+            <div class="detail-img-box">
+                <img src="img/${prodotto.image!'placeholder.jpg'}" alt="${prodotto.name!''}" onerror="this.src='img/placeholder.jpg'">
+            </div>
+            
+            <div class="detail-info">
+                <h2>${prodotto.name!""}</h2>
+                <p style="color: #666; line-height: 1.6;">${prodotto.description!""}</p>
+                <div class="detail-price">${prodotto.price!0} €</div>
+
+                <form action="cart" method="POST">
+                    <input type="hidden" name="action" value="add">
+                    <input type="hidden" name="prodotto_id" value="${prodotto.id!""}">
+
+                    <#if gruppi?? && gruppi?has_content>
+                        <#list gruppi as gruppo>
+                            <div class="options-group">
+                                <h4>${gruppo.name!""}</h4>
+                                <#list gruppo.options as opzione>
+                                    <div class="option-item">
+                                        <label>
+                                            <input type="checkbox" name="caratteristica_id" value="${opzione.id!""}">
+                                            ${opzione.name!""}
+                                        </label>
+                                        <span class="option-price">
+                                            <#if opzione.addictionalPrice?? && opzione.addictionalPrice gt 0>
+                                                +${opzione.addictionalPrice} €
+                                            <#else>
+                                                Gratis
+                                            </#if>
+                                        </span>
+                                    </div>
+                                </#list>
+                            </div>
+                        </#list>
+                    <#else>
+                        <p style="color: #888;">Nessuna personalizzazione disponibile.</p>
+                    </#if>
+
+                    <button type="submit" class="add-to-cart-btn">Aggiungi all'Ordine 🛒</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

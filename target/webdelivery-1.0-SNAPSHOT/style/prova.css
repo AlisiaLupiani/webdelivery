@@ -1,0 +1,155 @@
+html {
+    scroll-behavior: smooth; /* Scorrimento fluido */
+    scroll-padding-top: 90px; /* Evita che la barra copra i titoli delle sezioni */
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* --- Navbar --- */
+.navbar {
+    background: linear-gradient(135deg, #ff5722 0%, #e64a19 100%);
+    color: white;
+    padding: 10px 40px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    height: 50px;
+    margin-right: 15px;
+}
+
+/* --- IL NUOVO MENÙ A TENDINA (CSS Dropdown) --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: 30px;
+}
+
+.dropbtn {
+    background-color: white;
+    color: #ff5722;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.dropbtn:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.15);
+    z-index: 1001;
+    border-radius: 10px;
+    overflow: hidden;
+    top: 45px;
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-weight: 500;
+    font-size: 15px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-content a:hover {
+    background-color: #ff5722;
+    color: white;
+}
+
+/* Mostra la tendina quando passi il mouse sopra il container */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* --- Struttura Pagina e Card --- */
+main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+h2 { color: #ff5722; text-align: center; font-size: 32px; }
+p.subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+
+/* Stile per i titoli delle 8 Sezioni */
+.section-title {
+    color: #ff5722; 
+    border-bottom: 2px solid #ff5722; 
+    padding-bottom: 8px; 
+    margin-top: 60px; 
+    font-size: 24px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.product-card {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s;
+}
+
+.product-card:hover { transform: translateY(-8px); }
+
+.product-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 3px solid #ff5722;
+}
+
+.card-content {
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.product-title { margin: 0 0 10px 0; color: #333; }
+.product-desc { color: #777; font-size: 14px; margin-bottom: 15px; flex-grow: 1; }
+.product-price { font-size: 24px; font-weight: bold; color: #2e7d32; margin-bottom: 15px; }
+
+.btn {
+    background: #ff5722;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn:hover { background: #e64a19; }

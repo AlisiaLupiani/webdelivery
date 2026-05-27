@@ -2,32 +2,204 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Il nostro Menù - WebDelivery</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .prodotto { border-bottom: 1px solid #ccc; padding: 10px 0; }
-        .prezzo { color: green; font-weight: bold; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menù - WebDelivery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style/prova.css">
 </head>
 <body>
 
-    <h1>Menù Pizzeria 🍕</h1>
-    <p>Ecco tutte le nostre specialità direttamente dal database:</p>
+    <header class="navbar" style="justify-content: space-between;">
+        <div style="display: flex; align-items: center;">
+            <img src="img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+            <h1>WebDelivery</h1>
+            
+            <div class="dropdown">
+                <button class="dropbtn">📂 Scegli Categoria ▾</button>
+                <div class="dropdown-content">
+                    <a href="#antipasti">🍅 Antipasti & Sfizi</a>
+                    <a href="#fritti">🍟 Friggitoria</a>
+                    <a href="#primi">🍝 Primi Piatti</a>
+                    <a href="#pizze-classiche">🍕 Pizze Classiche</a>
+                    <a href="#pizze-speciali">✨ Pizze Speciali</a>
+                    <a href="#panini">🍔 Panini & Burger</a>
+                    <a href="#piadine">🥙 Focacce & Piadine</a>
+                    <a href="#dolci">🍰 Dolci della Casa</a>
+                    <a href="#bevande">🥤 Bevande & Birre</a>
+                </div>
+            </div>
+        </div>
+        
+        <a href="home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">🏠 Home</a>
+    </header>
 
-    <ul>
-        <#list lista_prodotti as prodotto>
-            <li class="prodotto">
-                <h3>${prodotto.name}</h3>
-                <p>Prezzo: <span class="prezzo">${prodotto.price} €</span></p>
-                
-                </li>
-        <#else>
-            <p><i>Siamo spiacenti, il menù è vuoto in questo momento.</i></p>
-        </#list>
-    </ul>
+    <main>
+        <h2>Il nostro Menù Digitale</h2>
+        <p class="subtitle">Scopri i sapori autentici del nostro Ristorante, Pizzeria e Panineria.</p>
 
-    <br>
-    <a href="TestServlet">Torna alla Home</a>
+        <h3 id="antipasti" class="section-title">🍅 Antipasti & Sfizi</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("bruschetta") || nameLower?contains("tagliere") || nameLower?contains("antipasto")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="fritti" class="section-title">🍟 Friggitoria</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("patatine") || nameLower?contains("crocchette") || nameLower?contains("arancin")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="primi" class="section-title">🍝 Primi Piatti</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("lasagna") || nameLower?contains("spaghetti") || nameLower?contains("pasta") || nameLower?contains("maccheroni")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="pizze-classiche" class="section-title">🍕 Pizze Classiche</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("margherita") || nameLower?contains("diavola") || nameLower?contains("capricciosa") || nameLower?contains("marinara")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="pizze-speciali" class="section-title">✨ Pizze Speciali</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("bufalina") || nameLower?contains("pistacchio") || nameLower?contains("speciale")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="panini" class="section-title">🍔 Panini & Burger</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("burger") || nameLower?contains("salsiccia")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="piadine" class="section-title">🥙 Focacce & Piadine</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("piadina") || nameLower?contains("focaccia")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="dolci" class="section-title">🍰 Dolci della Casa</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("tiramisu") || nameLower?contains("cheesecake") || nameLower?contains("dolce")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+        <h3 id="bevande" class="section-title">🥤 Bevande & Birre</h3>
+        <div class="menu-grid">
+            <#list prodotti as prodotto>
+                <#assign nameLower = prodotto.name?lower_case>
+                <#if nameLower?contains("coca") || nameLower?contains("acqua") || nameLower?contains("birra") || nameLower?contains("bibita")>
+                <div class="product-card">
+                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <div class="card-content">
+                        <h3 class="product-title">${prodotto.name}</h3>
+                        <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
+                        <div class="product-price">${prodotto.price} €</div>
+                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                    </div>
+                </div>
+                </#if>
+            </#list>
+        </div>
+
+    </main>
 
 </body>
 </html>

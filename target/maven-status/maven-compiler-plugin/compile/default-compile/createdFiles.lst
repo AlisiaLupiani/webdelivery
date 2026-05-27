@@ -64,6 +64,7 @@ framework\data\DataItem.class
 framework\data\DataItemProxyImpl.class
 model\Proprietor.class
 model\Order.class
+WebMarket\Controller\DettaglioServlet.class
 WebMarket\data\dao\LogOrderStateDAO.class
 WebMarket\data\dao\ProductDAO.class
 model\OrderState.class

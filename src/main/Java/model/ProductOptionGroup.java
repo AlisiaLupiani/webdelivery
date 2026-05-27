@@ -10,5 +10,7 @@ public interface ProductOptionGroup extends DataItem<Integer> {
     
     public String getName();
     public void setName(String name);
+    java.util.List<ProductOption> getOptions();
+    void setOptions(java.util.List<ProductOption> options);
 
 }

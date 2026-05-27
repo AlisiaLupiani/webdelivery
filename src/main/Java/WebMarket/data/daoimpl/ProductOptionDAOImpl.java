@@ -36,13 +36,17 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
     public void init() throws DataException {
         try {
             super.init();
-            sProductOptionById = getConnection().prepareStatement("SELECT * FROM" + TABLE + "WHERE ID=?");
-            sProductOptionByProductOptionGroup = getConnection().prepareStatement("SELECT * FROM " + TABLE + "WHERE GRUPPO_ID= ?");
-            sAllProductOptions = getConnection().prepareStatement("SELECT * FROM" + TABLE);
+            sProductOptionById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID=?");
+            sProductOptionByProductOptionGroup = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE GRUPPO_ID= ?");
+            sAllProductOptions = getConnection().prepareStatement("SELECT * FROM " + TABLE);
 
-            sAddProductOption = getConnection().prepareStatement("INSERT INTO" + TABLE + "(NOME,DESCRIZIONE,PREZZO,IS_DEFAULT,GRUPPO_ID, VERSION) VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-            sUpdateProductOption = getConnection().prepareStatement("UPDATE" + TABLE + "SET NOME=?,DESCRIZIONE=?,IS_DEFAULT=?,GRUPPO=?, VERSION=? WHERE ID=? AND VERSION=?");
-            sDeleteProductOption = getConnection().prepareStatement("DELETE FROM" + TABLE + "WHERE ID=? AND VERSION=?" );
+            sAddProductOption = getConnection().prepareStatement("INSERT INTO " + TABLE + " (NOME,DESCRIZIONE,PREZZO,IS_DEFAULT,GRUPPO_ID, VERSION) VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            
+            // Query UPDATE corretta: NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID, VERSION (6 campi)
+            // Filtra per ID e VERSION (2 campi)
+            sUpdateProductOption = getConnection().prepareStatement("UPDATE " + TABLE + " SET NOME=?,DESCRIZIONE=?,PREZZO=?,IS_DEFAULT=?,GRUPPO_ID=?, VERSION=? WHERE ID=? AND VERSION=?");
+            
+            sDeleteProductOption = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID=? AND VERSION=?" );
 
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductOptionDAO", ex);
@@ -105,27 +109,30 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
     }
 
     @Override
-    public ProductOption geProductOptionByProductOptionGroup(ProductOptionGroup group) throws DataException {
-        ProductOption product = null;
-        if(getDataLayer().getCache().has(ProductOption.class, group.getKey())){
-            product = getDataLayer().getCache().get(ProductOption.class, group.getKey());
-        }else{
-            try{
-                sProductOptionByProductOptionGroup.setInt(1, group.getKey());
-                try(ResultSet rs = sProductOptionByProductOptionGroup.executeQuery()){
-                    if(rs.next()){
-                        product = createProductOption(rs);
-                        getDataLayer().getCache().add(ProductOption.class, product);
+    public List<ProductOption> getProductOptionsByProductOptionGroup(ProductOptionGroup group) throws DataException {
+        List<ProductOption> res = new ArrayList<>();
+        try {
+            sProductOptionByProductOptionGroup.setInt(1, group.getKey());
+            try (ResultSet rs = sProductOptionByProductOptionGroup.executeQuery()) {
+                while (rs.next()) {
+                    ProductOption option;
+                    Integer id = rs.getInt("ID");
+                    // Controlliamo se la singola opzione è già in cache
+                    if (getDataLayer().getCache().has(ProductOption.class, id)) {
+                        option = getDataLayer().getCache().get(ProductOption.class, id);
+                    } else {
+                        option = createProductOption(rs);
+                        getDataLayer().getCache().add(ProductOption.class, option);
                     }
+                    res.add(option);
                 }
-            }catch(SQLException e){
-                throw new DataException("Errore getProductOptionByProductOptionGroup", e);
             }
-            
+        } catch (SQLException e) {
+            throw new DataException("Errore getProductOptionsByProductOptionGroup", e);
         }
-
-        return product;
+        return res;
     }
+
 
     @Override
     public List<ProductOption> getAllProductOptions() throws DataException {
@@ -200,17 +207,17 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
             throw new DataException("Errore updateProductOption", e);
         }
     }
-
-    @Override
+@Override
     public void deleteProductOption(ProductOption option) throws DataException {
         try {
             sDeleteProductOption.setInt(1, option.getKey());
+            sDeleteProductOption.setLong(2, option.getVersion()); // <--- AGGIUNTO IL SECONDO PARAMETRO!
+            
             if(sDeleteProductOption.executeUpdate() == 1){
                 getDataLayer().getCache().delete(ProductOption.class, option.getKey());
-            }       
+            }      
         } catch (SQLException e) {
             throw new DataException("Errore deleteProductOption", e);
         }
-    
     }
 }

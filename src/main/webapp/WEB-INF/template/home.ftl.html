@@ -2,46 +2,46 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>WebDelivery - Home Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - WebDelivery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style/prova.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            color: #333;
+        /* Un po' di stile extra solo per far risaltare il centro della Home */
+        .hero-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            margin-top: 40px;
         }
-        .messaggio-magico {
-            background-color: #e0f7fa; 
-            padding: 15px; 
-            border-left: 5px solid #00acc1; 
-            margin-top: 20px;
-            border-radius: 4px;
+        .hero-logo {
+            width: 150px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Benvenuto su WebDelivery! 🍕</h1>
+    <header class="navbar">
+        <img src="img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h1>WebDelivery</h1>
     </header>
 
     <main>
-        <p>Se vedi questa pagina con i colori giusti, la configurazione dei template è perfetta!</p>
-        
-        <div class="messaggio-magico">
-            <h3>Messaggio dal server Java:</h3>
-            <p><b>${messaggio_benvenuto}</b></p>
+        <div class="hero-section">
+            <img src="img/logo.png" alt="WebDelivery Logo" class="hero-logo" onerror="this.style.display='none'">
+            
+            <h2 style="font-size: 38px; color: #333;">Benvenuto su <span style="color: #ff5722;">WebDelivery!</span> 🍔</h2>
+            <p class="subtitle" style="font-size: 20px; max-width: 600px; margin: 0 auto 40px auto;">
+                Il miglior cibo della città, dai panini alle pizze artigianali, consegnato caldo e fumante direttamente a casa tua in pochi minuti.
+            </p>
+            
+            <a href="menu" class="btn" style="font-size: 20px; padding: 15px 40px;">Scopri il Menù e Ordina 🍕</a>
         </div>
-        <div style="margin-top: 30px;">
-    <a href="menu" style="background-color: #ff5722; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-        🍕 Vai al Menù e Ordina
-    </a>
-</div>
     </main>
-
-    <footer style="margin-top: 50px; font-size: 0.8em; color: #777;">
-        <hr>
-        <p>&copy; 2026 - Progetto Ingegneria del Web</p>
-    </footer>
 
 </body>
 </html>
