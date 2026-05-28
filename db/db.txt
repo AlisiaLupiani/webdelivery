@@ -121,10 +121,12 @@ CREATE TABLE ORDINE_PRODOTTO (
 
 -- UTENTI
 INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO) VALUES 
-(1, 'Rachid', 'Admin', 'admin@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 1', '3331234567'),
+(1, 'Rachid', 'Nhachi', 'rachid@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 1', '3330000001'),
 (2, 'Mario', 'Rossi', 'mario.rossi@email.it', 'cliente123', 'CLIENTE', 'Via Roma, 10', '3339876543'),
 (3, 'Luigi', 'Verdi', 'luigi.verdi@email.it', 'cliente123', 'CLIENTE', 'Piazza Napoli, 5', '3335555555'),
-(4, 'Giulia', 'Staff', 'giulia.staff@webdelivery.it', 'staff123', 'STAFF', 'Via Cucina, 2', '3334444444');
+(4, 'Giulia', 'Staff', 'giulia.staff@webdelivery.it', 'staff123', 'STAFF', 'Via Cucina, 2', '3334444444'),
+(5, 'Alisia', 'Lupiani', 'alisia@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 2', '3330000002'),
+(6, 'Alessandro', 'Casasanta', 'alessandro@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 3', '3330000003');
 
 -- INGREDIENTI
 INSERT INTO INGREDIENTE (ID, NOME) VALUES 

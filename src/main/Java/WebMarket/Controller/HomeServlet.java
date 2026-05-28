@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-@jakarta.servlet.annotation.WebServlet(name = "HomeServlet", urlPatterns = {"", "/home"})
+@jakarta.servlet.annotation.WebServlet(name = "HomeServlet", urlPatterns = {"/home"})
 public class HomeServlet extends AbstractBaseController {
 
     @Override
@@ -22,6 +22,10 @@ public class HomeServlet extends AbstractBaseController {
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        jakarta.servlet.http.HttpSession sessioneFantasma = request.getSession(false);
+        if (sessioneFantasma != null && sessioneFantasma.getAttribute("session-start-ts") == null) {
+            sessioneFantasma.invalidate(); // Boom! Distrutta.
+        }
         try {
             // ECCO LA MAGIA: Inseriamo il testo nella variabile che l'HTML sta aspettando!
             request.setAttribute("messaggio_benvenuto", "Ciao! Il motore Java e i template stanno comunicando alla perfezione! 🚀");

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il tuo Carrello</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; color: #333; }
+        .cart-container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #ff8c00; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f1f1f1; }
+        .opzioni-list { margin: 0; padding-left: 20px; font-size: 0.9em; color: #666; }
+        .totale-box { margin-top: 30px; text-align: right; font-size: 1.5em; font-weight: bold; color: #d32f2f; }
+        .btn { display: inline-block; padding: 10px 20px; margin-top: 20px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .btn-menu { background-color: #ccc; color: #333; }
+        .btn-cassa { background-color: #28a745; color: white; float: right; }
+        .empty-cart { text-align: center; padding: 50px; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="cart-container">
+    <h1>🛒 Il tuo Carrello</h1>
+
+    <#-- Controlliamo se il carrello esiste e se ha almeno un elemento dentro -->
+    <#if carrello?? && carrello.elementi?has_content>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Prodotto</th>
+                    <th>Personalizzazioni</th>
+                    <th>Q.tà</th>
+                    <th>Prezzo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#-- Cicliamo su tutte le righe (CartItem) salvate nel carrello -->
+                <#list carrello.elementi as item>
+                    <tr>
+                        <td><strong>${item.prodotto.name!""}</strong></td>
+                        <td>
+                            <#if item.opzioniScelte?has_content>
+                                <ul class="opzioni-list">
+                                    <#list item.opzioniScelte as opzione>
+                                        <li>${opzione.name!""} (+ € ${opzione.addictionalPrice!"0.00"})</li>
+                                    </#list>
+                                </ul>
+                            <#else>
+                                <span style="color: #aaa; font-style: italic;">Nessuna</span>
+                            </#if>
+                        </td>
+                        <td>${item.quantita}</td>
+                        <td>€ ${item.prezzoTotaleRiga}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+
+        <div class="totale-box">
+            Totale: € ${carrello.prezzoTotaleCarrello}
+        </div>
+
+        <div>
+            <a href="/webdelivery/menu" class="btn btn-menu">Continua gli acquisti</a>
+            <a href="#" class="btn btn-cassa">Vai alla Cassa ➔</a>
+        </div>
+
+    <#else>
+        <div class="empty-cart">
+            <h2>Il tuo carrello è vuoto! 🍽️</h2>
+            <p>Torna al menù per aggiungere piatti deliziosi.</p>
+            <a href="/webdelivery/menu" class="btn btn-menu" style="background-color: #ff8c00; color: white;">Vai al Menù</a>
+        </div>
+    </#if>
+
+</div>
+
+</body>
+</html>

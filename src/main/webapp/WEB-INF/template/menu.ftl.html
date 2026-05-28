@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menù - WebDelivery</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style/prova.css">
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
 </head>
 <body>
 
     <header class="navbar" style="justify-content: space-between;">
         <div style="display: flex; align-items: center;">
-            <img src="img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+            <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
             <h1>WebDelivery</h1>
             
             <div class="dropdown">
@@ -30,7 +30,7 @@
             </div>
         </div>
         
-        <a href="home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">🏠 Home</a>
+        <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">🏠 Home</a>
     </header>
 
     <main>
@@ -43,12 +43,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("bruschetta") || nameLower?contains("tagliere") || nameLower?contains("antipasto")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -61,12 +61,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("patatine") || nameLower?contains("crocchette") || nameLower?contains("arancin")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -79,12 +79,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("lasagna") || nameLower?contains("spaghetti") || nameLower?contains("pasta") || nameLower?contains("maccheroni")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -97,12 +97,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("margherita") || nameLower?contains("diavola") || nameLower?contains("capricciosa") || nameLower?contains("marinara")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -115,12 +115,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("bufalina") || nameLower?contains("pistacchio") || nameLower?contains("speciale")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -133,12 +133,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("burger") || nameLower?contains("salsiccia")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -151,12 +151,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("piadina") || nameLower?contains("focaccia")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -169,12 +169,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("tiramisu") || nameLower?contains("cheesecake") || nameLower?contains("dolce")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
@@ -187,12 +187,12 @@
                 <#assign nameLower = prodotto.name?lower_case>
                 <#if nameLower?contains("coca") || nameLower?contains("acqua") || nameLower?contains("birra") || nameLower?contains("bibita")>
                 <div class="product-card">
-                    <img src="img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='img/placeholder.jpg'">
+                    <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
                         <h3 class="product-title">${prodotto.name}</h3>
                         <p class="product-desc">${prodotto.description!"Descrizione non disponibile"}</p>
                         <div class="product-price">${prodotto.price} €</div>
-                        <a href="dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
+                        <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
                 </#if>
