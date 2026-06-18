@@ -1,19 +1,20 @@
 package WebMarket.Controller;
 
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import WebMarket.data.dao.ProductDAO;
 import framework.controller.AbstractBaseController;
 import framework.data.DataLayer;
 import framework.view.TemplateResult;
-import WebMarket.data.dao.ProductDAO;
-import model.Product;
-
-// ECCO IL NUOVO IMPORT CHE SERVE PER IL CACCIAVITE:
-import WebMarket.data.daoimpl.ProductDAOImpl;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import javax.sql.DataSource;
+import jakarta.servlet.http.HttpSession;
+import model.Cart;
+import model.Product;
+
 
 @jakarta.servlet.annotation.WebServlet(name = "MenuServlet", urlPatterns = {"/menu"})
 public class MenuServlet extends AbstractBaseController {
@@ -48,6 +49,9 @@ public class MenuServlet extends AbstractBaseController {
             request.setAttribute("prodotti", listaPizze);
 
             TemplateResult templateEngine = new TemplateResult(getServletContext());
+            HttpSession session = request.getSession();
+            Cart carrello = (Cart) session.getAttribute("carrello_utente");
+            request.setAttribute("carrello", carrello); 
             templateEngine.activate("menu.ftl.html", request, response);
 
         } catch (Exception ex) {

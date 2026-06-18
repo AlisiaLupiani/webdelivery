@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <header class="navbar" style="justify-content: space-between;">
+  <header class="navbar" style="justify-content: space-between;">
         <div style="display: flex; align-items: center;">
             <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
             <h1>WebDelivery</h1>
@@ -30,7 +30,18 @@
             </div>
         </div>
         
-        <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">🏠 Home</a>
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch;">
+            <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none; text-align: center;">🏠 Home</a>
+            
+            <button onclick="toggleCart()" class="btn" style="background: white; color: #ff5722; border: none; cursor: pointer; box-shadow: none; font-weight: bold;">
+                🛒 Carrello
+                <#if carrello?? && carrello.elementi?has_content>
+                    <span style="background: #ff5722; color: white; border-radius: 50%; padding: 2px 8px; margin-left: 5px; font-size: 0.9em;">
+                        ${carrello.elementi?size}
+                    </span>
+                </#if>
+            </button>
+        </div>
     </header>
 
     <main>
@@ -200,6 +211,78 @@
         </div>
 
     </main>
+<style>
+    /* LA BARRA LATERALE (nascosta a destra) */
+    .sidebar-cart {
+        position: fixed;
+        top: 0;
+        right: -400px; /* Nascosta fuori dallo schermo */
+        width: 340px;
+        height: 100vh;
+        background-color: #ffffff;
+        box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+        padding: 20px;
+        overflow-y: auto;
+        z-index: 1000;
+        transition: right 0.4s ease-in-out;
+    }
+    
+    /* Classe che attiva l'apertura quando clicchi il bottone */
+    .sidebar-cart.open { right: 0; }
+    
+    /* Il tasto 'X' per chiudere il carrello */
+    .close-cart-btn { float: right; background: none; border: none; font-size: 1.5em; cursor: pointer; color: #888; margin-top: -5px; }
+    .close-cart-btn:hover { color: #ff5722; }
 
+    /* Stili interni del carrello */
+    .sidebar-cart h3 { margin-top: 0; color: #ff5722; border-bottom: 2px solid #f8f9fa; padding-bottom: 15px; }
+    .cart-item-mini { border-bottom: 1px dashed #ccc; padding: 15px 0; font-size: 0.9em; }
+    .badge-qta { background: #ff5722; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 8px; }
+    .cart-totale-mini { font-size: 1.4em; font-weight: 700; color: #333; margin-top: 25px; text-align: right; }
+    .btn-cassa { display: block; background-color: #28a745; color: white; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 15px; text-decoration: none; }
+    .btn-cassa:hover { background-color: #218838; }
+</style>
+
+<div class="sidebar-cart" id="sideCart">
+    <button class="close-cart-btn" onclick="toggleCart()">✖</button>
+    <h3>🛒 Il tuo Ordine</h3>
+
+    <#if carrello?? && carrello.elementi?has_content>
+        <#list carrello.elementi as item>
+            <div class="cart-item-mini">
+                <strong><span class="badge-qta">${item.quantita}x</span> ${item.prodotto.name!""}</strong>
+                <div style="color: #777; font-size: 0.85em; margin-top: 6px; padding-left: 30px;">
+                    <#if item.opzioniScelte?has_content>
+                        <#list item.opzioniScelte as opzione>
+                            + ${opzione.name!""}<br>
+                        </#list>
+                    <#else>
+                        <i>Nessuna aggiunta</i>
+                    </#if>
+                </div>
+                <div style="text-align: right; font-weight: 600; margin-top: 8px; color: #ff5722;">
+                    € ${item.prezzoTotaleRiga}
+                </div>
+            </div>
+        </#list>
+
+        <div class="cart-totale-mini">
+            Totale: € ${carrello.prezzoTotaleCarrello}
+        </div>
+        <a href="/webdelivery/cart" class="btn-cassa">Vai alla Cassa ➔</a>
+
+    <#else>
+        <div style="text-align: center; color: #aaa; margin-top: 60px;">
+            <div style="font-size: 4em; margin-bottom: 10px;">🍽️</div>
+            <p style="font-weight: 600;">Il carrello è vuoto</p>
+        </div>
+    </#if>
+</div>
+
+<script>
+    function toggleCart() {
+        document.getElementById("sideCart").classList.toggle("open");
+    }
+</script>
 </body>
 </html>

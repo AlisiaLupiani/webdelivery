@@ -1,5 +1,9 @@
 package WebMarket.Controller;
 
+import javax.sql.DataSource;
+
+import WebMarket.data.dao.UserDAO;
+import WebMarket.data.daoimpl.UserDAOImpl;
 import framework.controller.AbstractBaseController;
 import framework.data.DataLayer;
 import framework.security.SecurityHelpers;
@@ -7,10 +11,6 @@ import framework.view.TemplateResult;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-
-import WebMarket.data.dao.UserDAO;
-import WebMarket.data.daoimpl.UserDAOImpl;
 import model.User;
 
 @jakarta.servlet.annotation.WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
