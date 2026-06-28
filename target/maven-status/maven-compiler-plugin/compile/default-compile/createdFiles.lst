@@ -8,6 +8,7 @@ model\modelImpl\ProductOptionImpl.class
 model\Ingredient.class
 framework\security\SecurityHelpers.class
 framework\data\OptimisticLockException.class
+WebMarket\data\daoimpl\CartItemDAOImpl.class
 model\Product.class
 WebMarket\Controller\MenuServlet.class
 model\modelImpl\FoodImpl.class
@@ -33,6 +34,7 @@ model\modelImpl\IngredientImpl.class
 model\CartItem.class
 model\Client.class
 WebMarket\data\dao\ProductOptionGroupDAO.class
+WebMarket\data\dao\CartItemDAO.class
 model\Cart.class
 WebMarket\data\daoimpl\FoodDAOImpl.class
 WebMarket\data\proxy\ProductOptionProxy.class
@@ -43,6 +45,7 @@ framework\application\ApplicationInitializer.class
 WebMarket\data\proxy\OrderProxy.class
 framework\data\DAO.class
 model\Staff.class
+WebMarket\data\daoimpl\CartDAOImpl.class
 WebMarket\data\dao\IngredientDAO.class
 WebMarket\Controller\CartServlet.class
 WebMarket\data\proxy\ConsumationProxy.class
@@ -51,6 +54,7 @@ model\modelImpl\CartItemImpl.class
 WebMarket\data\daoimpl\UserDAOImpl.class
 model\PaymentMethod.class
 model\Consumation.class
+WebMarket\data\dao\CartDAO.class
 WebMarket\data\proxy\IngredientProxy.class
 WebMarket\data\proxy\UserProxy.class
 WebMarket\Controller\TestServlet.class

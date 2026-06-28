@@ -6,8 +6,9 @@ CREATE DATABASE WEB_DELIVERY;
 USE WEB_DELIVERY;
 
 -- ==========================================
--- 2. CREAZIONE TABELLE (Struttura)
+-- 2. CREAZIONE TABELLE
 -- ==========================================
+
 CREATE TABLE UTENTE (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(100) NOT NULL,
@@ -38,7 +39,7 @@ CREATE TABLE PRODOTTO (
     DESCRIZIONE TEXT,
     PREZZO DECIMAL(10, 2) NOT NULL,
     PROCEDURA TEXT,
-    TEMPO_PREPARAZIONE INT, 
+    TEMPO_PREPARAZIONE INT,
     IMMAGINE VARCHAR(255),
     VERSION INT NOT NULL DEFAULT 1
 );
@@ -88,7 +89,10 @@ CREATE TABLE LOG_STATO (
     FOREIGN KEY (UTENTE_ID) REFERENCES UTENTE(ID) ON DELETE CASCADE
 );
 
--- RELAZIONI N:N (Tabelle di Join)
+-- ==========================================
+-- RELAZIONI N:N
+-- ==========================================
+
 CREATE TABLE PRODOTTO_INGREDIENTE (
     PRODOTTO_ID INT NOT NULL,
     INGREDIENTE_ID INT NOT NULL,
@@ -116,11 +120,58 @@ CREATE TABLE ORDINE_PRODOTTO (
 );
 
 -- ==========================================
--- 3. INSERIMENTO DATI DI TEST (Popolamento)
+-- CARRELLO PERSISTENTE
+-- ==========================================
+
+CREATE TABLE CARRELLO (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    UTENTE_ID INT NOT NULL,
+    STATO VARCHAR(30) NOT NULL DEFAULT 'ATTIVO',
+    CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    VERSION INT NOT NULL DEFAULT 1,
+
+    FOREIGN KEY (UTENTE_ID) REFERENCES UTENTE(ID) ON DELETE CASCADE,
+
+    INDEX IDX_CARRELLO_UTENTE_STATO (UTENTE_ID, STATO)
+);
+
+CREATE TABLE CARRELLO_PRODOTTO (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    CARRELLO_ID INT NOT NULL,
+    PRODOTTO_ID INT NOT NULL,
+    QUANTITA INT NOT NULL DEFAULT 1,
+    PREZZO_UNITARIO DECIMAL(10, 2) NOT NULL,
+    VERSION INT NOT NULL DEFAULT 1,
+
+    FOREIGN KEY (CARRELLO_ID) REFERENCES CARRELLO(ID) ON DELETE CASCADE,
+    FOREIGN KEY (PRODOTTO_ID) REFERENCES PRODOTTO(ID) ON DELETE CASCADE,
+
+    INDEX IDX_CARRELLO_PRODOTTO_CARRELLO (CARRELLO_ID),
+    INDEX IDX_CARRELLO_PRODOTTO_PRODOTTO (PRODOTTO_ID)
+);
+
+CREATE TABLE CARRELLO_PRODOTTO_CARATTERISTICA (
+    CARRELLO_PRODOTTO_ID INT NOT NULL,
+    CARATTERISTICA_ID INT NOT NULL,
+
+    PRIMARY KEY (CARRELLO_PRODOTTO_ID, CARATTERISTICA_ID),
+
+    FOREIGN KEY (CARRELLO_PRODOTTO_ID)
+        REFERENCES CARRELLO_PRODOTTO(ID)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (CARATTERISTICA_ID)
+        REFERENCES CARATTERISTICA(ID)
+        ON DELETE CASCADE
+);
+
+-- ==========================================
+-- 3. INSERIMENTO DATI DI TEST
 -- ==========================================
 
 -- UTENTI
-INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO) VALUES 
+INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO) VALUES
 (1, 'Rachid', 'Nhachi', 'rachid@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 1', '3330000001'),
 (2, 'Mario', 'Rossi', 'mario.rossi@email.it', 'cliente123', 'CLIENTE', 'Via Roma, 10', '3339876543'),
 (3, 'Luigi', 'Verdi', 'luigi.verdi@email.it', 'cliente123', 'CLIENTE', 'Piazza Napoli, 5', '3335555555'),
@@ -129,15 +180,18 @@ INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFO
 (6, 'Alessandro', 'Casasanta', 'alessandro@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 3', '3330000003');
 
 -- INGREDIENTI
-INSERT INTO INGREDIENTE (ID, NOME) VALUES 
-(1, 'Salsa di Pomodoro'), (2, 'Mozzarella di Bufala'), (3, 'Basilico Fresco'),
-(4, 'Salame Piccante'), (5, 'Prosciutto Cotto'), (6, 'Funghi Champignon'),
-(7, 'Carciofini'), (8, 'Olive Nere');
+INSERT INTO INGREDIENTE (ID, NOME) VALUES
+(1, 'Salsa di Pomodoro'),
+(2, 'Mozzarella di Bufala'),
+(3, 'Basilico Fresco'),
+(4, 'Salame Piccante'),
+(5, 'Prosciutto Cotto'),
+(6, 'Funghi Champignon'),
+(7, 'Carciofini'),
+(8, 'Olive Nere');
 
--- ==========================================
--- I 6 GRUPPI DI PERSONALIZZAZIONE
--- ==========================================
-INSERT INTO GRUPPO (ID, NOME) VALUES 
+-- GRUPPI DI PERSONALIZZAZIONE
+INSERT INTO GRUPPO (ID, NOME) VALUES
 (1, 'Tipo di Impasto'),
 (2, 'Aggiunte Extra'),
 (3, 'Scegli il Gusto'),
@@ -145,46 +199,29 @@ INSERT INTO GRUPPO (ID, NOME) VALUES
 (5, 'Cottura Carne'),
 (6, 'Opzioni Bevande');
 
--- ==========================================
--- LE CARATTERISTICHE (OPZIONI) DEI GRUPPI
--- ==========================================
--- Gruppo 1 e 2: Pizze
-INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+-- CARATTERISTICHE
+INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES
 (1, 'Impasto Classico', 'Il nostro impasto tradizionale', 0.00, TRUE, 1),
 (2, 'Impasto Integrale', 'Ricco di fibre e leggero', 1.50, FALSE, 1),
 (3, 'Senza Glutine', 'Preparata in ambiente separato', 2.00, FALSE, 1),
 (4, 'Doppia Mozzarella', 'Per i più golosi', 1.50, FALSE, 2),
-(5, 'Patatine Fritte Extra', 'Patatine fritte sopra la pizza', 2.00, FALSE, 2);
-
--- Gruppo 3: Dolci
-INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(5, 'Patatine Fritte Extra', 'Patatine fritte sopra la pizza', 2.00, FALSE, 2),
 (6, 'Frutti di Bosco', 'Classica con coulis di frutti rossi', 0.00, TRUE, 3),
 (7, 'Cioccolato Fondente', 'Con colata di cioccolato fuso', 0.00, FALSE, 3),
 (8, 'Pistacchio di Bronte', 'Con crema di pistacchio e granella', 0.50, FALSE, 3),
-(9, 'Caramello Salato', 'Dolce e salato in perfetto equilibrio', 0.00, FALSE, 3);
-
--- Gruppo 4: Salse
-INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(9, 'Caramello Salato', 'Dolce e salato in perfetto equilibrio', 0.00, FALSE, 3),
 (10, 'Ketchup', 'Bustina monoporzione', 0.00, FALSE, 4),
 (11, 'Maionese', 'Bustina monoporzione', 0.00, FALSE, 4),
-(12, 'Salsa BBQ', 'Salsa barbecue affumicata', 0.50, FALSE, 4);
-
--- Gruppo 5: Cottura Carne
-INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(12, 'Salsa BBQ', 'Salsa barbecue affumicata', 0.50, FALSE, 4),
 (13, 'Al Sangue', 'Cottura rapida, cuore rosso', 0.00, FALSE, 5),
 (14, 'Media', 'Cottura standard, cuore rosato', 0.00, TRUE, 5),
-(15, 'Ben Cotta', 'Nessuna traccia di rosa', 0.00, FALSE, 5);
-
--- Gruppo 6: Bevande
-INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES 
+(15, 'Ben Cotta', 'Nessuna traccia di rosa', 0.00, FALSE, 5),
 (16, 'Con Ghiaccio', 'Bicchiere a parte con ghiaccio', 0.00, TRUE, 6),
 (17, 'Senza Ghiaccio', '', 0.00, FALSE, 6),
 (18, 'Fetta di Limone', '', 0.00, FALSE, 6);
 
--- ==========================================
 -- PRODOTTI
--- ==========================================
-INSERT INTO PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIONE, IMMAGINE) VALUES 
+INSERT INTO PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIONE, IMMAGINE) VALUES
 (7, 'Bruschetta al Pomodoro', 'Pane casereccio tostato con pomodorini freschi, aglio e basilico.', 4.00, 'Tostare il pane e condire a crudo.', 5, 'bruschetta.jpg'),
 (8, 'Tagliere Misto', 'Selezione di salumi e formaggi locali accompagnati da miele e noci.', 12.00, 'Affettare e disporre armonicamente su legno.', 10, 'tagliere.jpg'),
 (4, 'Patatine Fritte', 'Porzione abbondante di patatine super croccanti e dorate.', 4.00, 'Friggere a 180 gradi per 5 minuti.', 5, 'patatine.jpg'),
@@ -207,36 +244,24 @@ INSERT INTO PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIO
 (18, 'Birra Bionda', '33cl, birra bionda artigianale locale, fresca e beverina.', 3.50, 'Prendere dal frigo e stappare al momento.', 1, 'birra.jpg'),
 (21, 'Acqua Naturale', 'Bottiglia da 50cl fresca di frigorifero.', 1.00, 'Prendere dal frigo.', 1, 'acqua.jpg');
 
--- ==========================================
 -- COLLEGHIAMO PRODOTTI ALLE OPZIONI
--- ==========================================
--- Pizze (Impasti e aggiunte)
-INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
+INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES
 (1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
 (2, 1), (2, 2), (2, 3), (2, 4),
-(3, 1), (3, 2), (3, 3);
-
--- Patatine (Salse)
-INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
-(4, 10), (4, 11), (4, 12);
-
--- Hamburger (Cottura e Salse)
-INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
-(13, 13), (13, 14), (13, 15), (13, 10), (13, 11), (13, 12);
-
--- Cheesecake (Gusti Dolci)
-INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
-(17, 6), (17, 7), (17, 8), (17, 9);
-
--- Coca Cola (Ghiaccio e Limone)
-INSERT INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES 
+(3, 1), (3, 2), (3, 3),
+(4, 10), (4, 11), (4, 12),
+(13, 13), (13, 14), (13, 15), (13, 10), (13, 11), (13, 12),
+(17, 6), (17, 7), (17, 8), (17, 9),
 (5, 16), (5, 17), (5, 18);
 
--- Ordini di Test
-INSERT INTO ORDINE (ID, DATA_ORDINE, ORARIO_CONSEGNA, PREZZO_TOTALE, STATO, METODO_PAGAMENTO, INDIRIZZO_CONSEGNA, UTENTE_ID) VALUES 
+-- ORDINI DI TEST
+INSERT INTO ORDINE (ID, DATA_ORDINE, ORARIO_CONSEGNA, PREZZO_TOTALE, STATO, METODO_PAGAMENTO, INDIRIZZO_CONSEGNA, UTENTE_ID) VALUES
 (1, '2026-05-26', '20:00:00', 14.50, 'IN_CONSEGNA', 'CARTA_CREDITO', 'Via Roma, 10', 2),
 (2, '2026-05-26', '20:30:00', 21.00, 'IN_PREPARAZIONE', 'CONTANTI', 'Piazza Napoli, 5', 3);
 
-INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES 
-(1, 1, 1), (1, 5, 1), (1, 6, 1),
-(2, 2, 2), (2, 4, 1);
+INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES
+(1, 1, 1),
+(1, 5, 1),
+(1, 6, 1),
+(2, 2, 2),
+(2, 4, 1);

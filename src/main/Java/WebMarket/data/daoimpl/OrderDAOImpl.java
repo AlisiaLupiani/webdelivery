@@ -39,9 +39,9 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     public void init() throws DataException {
         try {
             super.init();
-            sOrderById = getConnection().prepareStatement("SELECT FROM" + TABLE + "WHERE ID=?");
-            sOrderByDate = getConnection().prepareStatement("SELECT FROM" + TABLE + "WHERE DATA_ORDINE =?");
-            sOrderByClient = getConnection().prepareStatement("SELECT FROM" + TABLE + "WHERE UTENTE_ID =?");
+            sOrderById = getConnection().prepareStatement("SELECT FROM" + TABLE + " WHERE ID=?");
+            sOrderByDate = getConnection().prepareStatement("SELECT FROM" + TABLE + " WHERE DATA_ORDINE =?");
+            sOrderByClient = getConnection().prepareStatement("SELECT FROM" + TABLE + " WHERE UTENTE_ID =?");
             sAllOrders = getConnection().prepareStatement("SELECT FROM" + TABLE);
             sAddOrder = getConnection().prepareStatement(
                     "INSERT INTO" + TABLE

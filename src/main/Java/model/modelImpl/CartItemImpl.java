@@ -1,52 +1,120 @@
 package model.modelImpl;
+
 import model.CartItem;
-import model.ProductOption; // Sostituito Option con ProductOption
 import model.Product;
+import model.ProductOption;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CartItemImpl implements CartItem {
+
+    private int key;
+    private int cartId;
+    private int productId;
     private Product prodotto;
-    private List<ProductOption> opzioniScelte; // Sostituito qui
+    private List<ProductOption> opzioniScelte;
     private int quantita;
+    private double prezzoUnitario;
+    private int version;
 
     public CartItemImpl() {
         this.opzioniScelte = new ArrayList<>();
+        this.quantita = 1;
+        this.version = 1;
     }
 
     @Override
-    public Product getProdotto() { return prodotto; }
+    public int getKey() {
+        return key;
+    }
 
     @Override
-    public void setProdotto(Product prodotto) { this.prodotto = prodotto; }
+    public void setKey(int key) {
+        this.key = key;
+    }
 
     @Override
-    public List<ProductOption> getOpzioniScelte() { return opzioniScelte; }
+    public int getCartId() {
+        return cartId;
+    }
 
     @Override
-    public void setOpzioniScelte(List<ProductOption> opzioniScelte) { this.opzioniScelte = opzioniScelte; }
+    public void setCartId(int cartId) {
+        this.cartId = cartId;
+    }
 
     @Override
-    public void addOpzione(ProductOption opzione) { this.opzioniScelte.add(opzione); }
+    public int getProductId() {
+        return productId;
+    }
 
     @Override
-    public int getQuantita() { return quantita; }
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
 
     @Override
-    public void setQuantita(int quantita) { this.quantita = quantita; }
+    public Product getProdotto() {
+        return prodotto;
+    }
+
+    @Override
+    public void setProdotto(Product prodotto) {
+        this.prodotto = prodotto;
+
+        if (prodotto != null) {
+            this.productId = prodotto.getKey();
+        }
+    }
+
+    @Override
+    public List<ProductOption> getOpzioniScelte() {
+        return opzioniScelte;
+    }
+
+    @Override
+    public void setOpzioniScelte(List<ProductOption> opzioniScelte) {
+        this.opzioniScelte = opzioniScelte;
+    }
+
+    @Override
+    public void addOpzione(ProductOption opzione) {
+        this.opzioniScelte.add(opzione);
+    }
+
+    @Override
+    public int getQuantita() {
+        return quantita;
+    }
+
+    @Override
+    public void setQuantita(int quantita) {
+        this.quantita = quantita;
+    }
+
+    @Override
+    public double getPrezzoUnitario() {
+        return prezzoUnitario;
+    }
+
+    @Override
+    public void setPrezzoUnitario(double prezzoUnitario) {
+        this.prezzoUnitario = prezzoUnitario;
+    }
+
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     @Override
     public double getPrezzoTotaleRiga() {
-        double prezzoBase = (prodotto != null) ? prodotto.getPrice() : 0.0;
-        double prezzoOpzioni = 0.0;
-        
-        for (ProductOption opzione : opzioniScelte) {
-            // ATTENZIONE: Se qui ti dà ancora errore, controlla come si chiama 
-            // il metodo getter dentro la tua classe ProductOption. 
-            // Potrebbe chiamarsi getPrice() o in un altro modo!
-            prezzoOpzioni += opzione.getAddictionalPrice(); 
-        }
-        
-        return (prezzoBase + prezzoOpzioni) * quantita;
+        return prezzoUnitario * quantita;
     }
 }

@@ -9,50 +9,50 @@
 </head>
 <body>
 
-  <header class="navbar" style="justify-content: space-between;">
-        <div style="display: flex; align-items: center;">
-            <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
-            <h1>WebDelivery</h1>
-            
-            <div class="dropdown">
-                <button class="dropbtn">📂 Scegli Categoria ▾</button>
-                <div class="dropdown-content">
-                    <a href="#antipasti">🍅 Antipasti & Sfizi</a>
-                    <a href="#fritti">🍟 Friggitoria</a>
-                    <a href="#primi">🍝 Primi Piatti</a>
-                    <a href="#pizze-classiche">🍕 Pizze Classiche</a>
-                    <a href="#pizze-speciali">✨ Pizze Speciali</a>
-                    <a href="#panini">🍔 Panini & Burger</a>
-                    <a href="#piadine">🥙 Focacce & Piadine</a>
-                    <a href="#dolci">🍰 Dolci della Casa</a>
-                    <a href="#bevande">🥤 Bevande & Birre</a>
-                </div>
+<header class="navbar" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center;">
+        <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h1>WebDelivery</h1>
+
+        <div class="dropdown">
+            <button class="dropbtn">📂 Scegli Categoria ▾</button>
+            <div class="dropdown-content">
+                <a href="#antipasti">🍅 Antipasti & Sfizi</a>
+                <a href="#fritti">🍟 Friggitoria</a>
+                <a href="#primi">🍝 Primi Piatti</a>
+                <a href="#pizze-classiche">🍕 Pizze Classiche</a>
+                <a href="#pizze-speciali">✨ Pizze Speciali</a>
+                <a href="#panini">🍔 Panini & Burger</a>
+                <a href="#piadine">🥙 Focacce & Piadine</a>
+                <a href="#dolci">🍰 Dolci della Casa</a>
+                <a href="#bevande">🥤 Bevande & Birre</a>
             </div>
         </div>
-        
-        <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch;">
-            <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none; text-align: center;">🏠 Home</a>
-            
-            <button onclick="toggleCart()" class="btn" style="background: white; color: #ff5722; border: none; cursor: pointer; box-shadow: none; font-weight: bold;">
-                🛒 Carrello
-                <#if carrello?? && carrello.elementi?has_content>
-                    <span style="background: #ff5722; color: white; border-radius: 50%; padding: 2px 8px; margin-left: 5px; font-size: 0.9em;">
-                        ${carrello.elementi?size}
-                    </span>
-                </#if>
-            </button>
-        </div>
-    </header>
+    </div>
 
-    <main>
-        <h2>Il nostro Menù Digitale</h2>
-        <p class="subtitle">Scopri i sapori autentici del nostro Ristorante, Pizzeria e Panineria.</p>
+    <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch;">
+        <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none; text-align: center;">🏠 Home</a>
 
-        <h3 id="antipasti" class="section-title">🍅 Antipasti & Sfizi</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("bruschetta") || nameLower?contains("tagliere") || nameLower?contains("antipasto")>
+        <button onclick="toggleCart()" class="btn" style="background: white; color: #ff5722; border: none; cursor: pointer; box-shadow: none; font-weight: bold;">
+            🛒 Carrello
+            <#if carrello?? && carrello.elementi?has_content>
+                <span style="background: #ff5722; color: white; border-radius: 50%; padding: 2px 8px; margin-left: 5px; font-size: 0.9em;">
+                    ${carrello.elementi?size}
+                </span>
+            </#if>
+        </button>
+    </div>
+</header>
+
+<main>
+    <h2>Il nostro Menù Digitale</h2>
+    <p class="subtitle">Scopri i sapori autentici del nostro Ristorante, Pizzeria e Panineria.</p>
+
+    <h3 id="antipasti" class="section-title">🍅 Antipasti & Sfizi</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("bruschetta") || nameLower?contains("tagliere") || nameLower?contains("antipasto")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -62,15 +62,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="fritti" class="section-title">🍟 Friggitoria</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("patatine") || nameLower?contains("crocchette") || nameLower?contains("arancin")>
+    <h3 id="fritti" class="section-title">🍟 Friggitoria</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("patatine") || nameLower?contains("crocchette") || nameLower?contains("arancin")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -80,15 +80,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="primi" class="section-title">🍝 Primi Piatti</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("lasagna") || nameLower?contains("spaghetti") || nameLower?contains("pasta") || nameLower?contains("maccheroni")>
+    <h3 id="primi" class="section-title">🍝 Primi Piatti</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("lasagna") || nameLower?contains("spaghetti") || nameLower?contains("pasta") || nameLower?contains("maccheroni")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -98,15 +98,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="pizze-classiche" class="section-title">🍕 Pizze Classiche</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("margherita") || nameLower?contains("diavola") || nameLower?contains("capricciosa") || nameLower?contains("marinara")>
+    <h3 id="pizze-classiche" class="section-title">🍕 Pizze Classiche</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("margherita") || nameLower?contains("diavola") || nameLower?contains("capricciosa") || nameLower?contains("marinara")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -116,15 +116,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="pizze-speciali" class="section-title">✨ Pizze Speciali</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("bufalina") || nameLower?contains("pistacchio") || nameLower?contains("speciale")>
+    <h3 id="pizze-speciali" class="section-title">✨ Pizze Speciali</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("bufalina") || nameLower?contains("pistacchio") || nameLower?contains("speciale")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -134,15 +134,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="panini" class="section-title">🍔 Panini & Burger</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("burger") || nameLower?contains("salsiccia")>
+    <h3 id="panini" class="section-title">🍔 Panini & Burger</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("burger") || nameLower?contains("salsiccia")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -152,15 +152,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="piadine" class="section-title">🥙 Focacce & Piadine</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("piadina") || nameLower?contains("focaccia")>
+    <h3 id="piadine" class="section-title">🥙 Focacce & Piadine</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("piadina") || nameLower?contains("focaccia")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -170,15 +170,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="dolci" class="section-title">🍰 Dolci della Casa</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("tiramisu") || nameLower?contains("cheesecake") || nameLower?contains("dolce")>
+    <h3 id="dolci" class="section-title">🍰 Dolci della Casa</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("tiramisu") || nameLower?contains("cheesecake") || nameLower?contains("dolce")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -188,15 +188,15 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
 
-        <h3 id="bevande" class="section-title">🥤 Bevande & Birre</h3>
-        <div class="menu-grid">
-            <#list prodotti as prodotto>
-                <#assign nameLower = prodotto.name?lower_case>
-                <#if nameLower?contains("coca") || nameLower?contains("acqua") || nameLower?contains("birra") || nameLower?contains("bibita")>
+    <h3 id="bevande" class="section-title">🥤 Bevande & Birre</h3>
+    <div class="menu-grid">
+        <#list prodotti as prodotto>
+            <#assign nameLower = prodotto.name?lower_case>
+            <#if nameLower?contains("coca") || nameLower?contains("acqua") || nameLower?contains("birra") || nameLower?contains("bibita")>
                 <div class="product-card">
                     <img src="/webdelivery/img/${prodotto.image}" alt="${prodotto.name}" class="product-img" onerror="this.src='/webdelivery/img/placeholder.jpg'">
                     <div class="card-content">
@@ -206,17 +206,16 @@
                         <a href="/webdelivery/dettaglio?id=${prodotto.id}" class="btn">Scegli & Personalizza 🛠️</a>
                     </div>
                 </div>
-                </#if>
-            </#list>
-        </div>
+            </#if>
+        </#list>
+    </div>
+</main>
 
-    </main>
 <style>
-    /* LA BARRA LATERALE (nascosta a destra) */
     .sidebar-cart {
         position: fixed;
         top: 0;
-        right: -400px; /* Nascosta fuori dallo schermo */
+        right: -400px;
         width: 340px;
         height: 100vh;
         background-color: #ffffff;
@@ -226,21 +225,70 @@
         z-index: 1000;
         transition: right 0.4s ease-in-out;
     }
-    
-    /* Classe che attiva l'apertura quando clicchi il bottone */
-    .sidebar-cart.open { right: 0; }
-    
-    /* Il tasto 'X' per chiudere il carrello */
-    .close-cart-btn { float: right; background: none; border: none; font-size: 1.5em; cursor: pointer; color: #888; margin-top: -5px; }
-    .close-cart-btn:hover { color: #ff5722; }
 
-    /* Stili interni del carrello */
-    .sidebar-cart h3 { margin-top: 0; color: #ff5722; border-bottom: 2px solid #f8f9fa; padding-bottom: 15px; }
-    .cart-item-mini { border-bottom: 1px dashed #ccc; padding: 15px 0; font-size: 0.9em; }
-    .badge-qta { background: #ff5722; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 8px; }
-    .cart-totale-mini { font-size: 1.4em; font-weight: 700; color: #333; margin-top: 25px; text-align: right; }
-    .btn-cassa { display: block; background-color: #28a745; color: white; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 15px; text-decoration: none; }
-    .btn-cassa:hover { background-color: #218838; }
+    .sidebar-cart.open {
+        right: 0;
+    }
+
+    .close-cart-btn {
+        float: right;
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #888;
+        margin-top: -5px;
+    }
+
+    .close-cart-btn:hover {
+        color: #ff5722;
+    }
+
+    .sidebar-cart h3 {
+        margin-top: 0;
+        color: #ff5722;
+        border-bottom: 2px solid #f8f9fa;
+        padding-bottom: 15px;
+    }
+
+    .cart-item-mini {
+        border-bottom: 1px dashed #ccc;
+        padding: 15px 0;
+        font-size: 0.9em;
+    }
+
+    .badge-qta {
+        background: #ff5722;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+
+    .cart-totale-mini {
+        font-size: 1.4em;
+        font-weight: 700;
+        color: #333;
+        margin-top: 25px;
+        text-align: right;
+    }
+
+    .btn-cassa {
+        display: block;
+        background-color: #28a745;
+        color: white;
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-top: 15px;
+        text-decoration: none;
+    }
+
+    .btn-cassa:hover {
+        background-color: #218838;
+    }
 </style>
 
 <div class="sidebar-cart" id="sideCart">
@@ -250,7 +298,11 @@
     <#if carrello?? && carrello.elementi?has_content>
         <#list carrello.elementi as item>
             <div class="cart-item-mini">
-                <strong><span class="badge-qta">${item.quantita}x</span> ${item.prodotto.name!""}</strong>
+                <strong>
+                    <span class="badge-qta">${item.quantita}x</span>
+                    ${item.prodotto.name!""}
+                </strong>
+
                 <div style="color: #777; font-size: 0.85em; margin-top: 6px; padding-left: 30px;">
                     <#if item.opzioniScelte?has_content>
                         <#list item.opzioniScelte as opzione>
@@ -260,6 +312,7 @@
                         <i>Nessuna aggiunta</i>
                     </#if>
                 </div>
+
                 <div style="text-align: right; font-weight: 600; margin-top: 8px; color: #ff5722;">
                     € ${item.prezzoTotaleRiga}
                 </div>
@@ -269,6 +322,7 @@
         <div class="cart-totale-mini">
             Totale: € ${carrello.prezzoTotaleCarrello}
         </div>
+
         <a href="/webdelivery/cart" class="btn-cassa">Vai alla Cassa ➔</a>
 
     <#else>
@@ -284,5 +338,6 @@
         document.getElementById("sideCart").classList.toggle("open");
     }
 </script>
+
 </body>
 </html>
