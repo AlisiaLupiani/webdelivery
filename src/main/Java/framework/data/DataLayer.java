@@ -4,7 +4,21 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
+
+import WebMarket.data.daoimpl.CartDAOImpl;
+import WebMarket.data.daoimpl.CartItemDAOImpl;
+import WebMarket.data.daoimpl.ConsumationDAOImpl;
+import WebMarket.data.daoimpl.FoodDAOImpl;
+import WebMarket.data.daoimpl.IngredientDAOImpl;
+import WebMarket.data.daoimpl.LogOrderStateDAOImpl;
+import WebMarket.data.daoimpl.OrderDAOImpl;
+import WebMarket.data.daoimpl.ProductDAOImpl;
+import WebMarket.data.daoimpl.ProductOptionDAOImpl;
+import WebMarket.data.daoimpl.ProductOptionGroupDAOImpl;
+import WebMarket.data.daoimpl.UserDAOImpl;
+
 
 /**
  *
@@ -35,7 +49,18 @@ public class DataLayer implements AutoCloseable {
     }
 
     public void init() throws DataException {
-        //call registerDAO for your own DAOs
+        this.registerDAO(model.Cart.class, new CartDAOImpl(this));
+        this.registerDAO(model.CartItem.class, new CartItemDAOImpl(this));
+        this.registerDAO(model.Consumation.class, new ConsumationDAOImpl(this));
+        this.registerDAO(model.Food.class, new FoodDAOImpl(this));
+        this.registerDAO(model.Ingredient.class, new IngredientDAOImpl(this));
+        this.registerDAO(model.LogOrderState.class, new LogOrderStateDAOImpl(this));
+        this.registerDAO(model.Order.class, new OrderDAOImpl(this));
+        this.registerDAO(model.Product.class, new ProductDAOImpl(this));
+        this.registerDAO(model.ProductOption.class, new ProductOptionDAOImpl(this));
+        this.registerDAO(model.ProductOptionGroup.class, new ProductOptionGroupDAOImpl(this));
+        this.registerDAO(model.User.class, new UserDAOImpl(this));
+
     }
 
     public void destroy() {

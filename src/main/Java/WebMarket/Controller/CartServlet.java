@@ -1,52 +1,26 @@
 package WebMarket.Controller;
 
-import framework.controller.AbstractBaseController;
-import framework.data.DataLayer;
-import framework.view.TemplateResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
 import WebMarket.data.dao.ProductDAO;
 import WebMarket.data.dao.ProductOptionDAO;
-
-import WebMarket.data.daoimpl.CartDAOImpl;
-import WebMarket.data.daoimpl.CartItemDAOImpl;
-import WebMarket.data.daoimpl.ProductDAOImpl;
-import WebMarket.data.daoimpl.ProductOptionDAOImpl;
-
+import framework.data.DataLayer;
+import framework.view.TemplateResult;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.Cart;
 import model.CartItem;
 import model.Product;
 import model.ProductOption;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
-import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
-
 @jakarta.servlet.annotation.WebServlet(name = "CartServlet", urlPatterns = {"/cart"})
-public class CartServlet extends AbstractBaseController {
+public class CartServlet extends WebDeliveryBaseController {
 
-    @Override
-    protected DataLayer createDataLayer(DataSource ds) throws ServletException {
-        try {
-            DataLayer dl = new framework.data.DataLayer(ds);
-
-            dl.registerDAO(model.Product.class, new ProductDAOImpl(dl));
-            dl.registerDAO(model.ProductOption.class, new ProductOptionDAOImpl(dl));
-            dl.registerDAO(model.Cart.class, new CartDAOImpl(dl));
-            dl.registerDAO(model.CartItem.class, new CartItemDAOImpl(dl));
-
-            return dl;
-
-        } catch (Exception ex) {
-            throw new ServletException(ex);
-        }
-    }
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {

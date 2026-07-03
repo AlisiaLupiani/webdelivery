@@ -1,24 +1,13 @@
 package WebMarket.Controller;
 
-import framework.controller.AbstractBaseController;
-import framework.data.DataLayer;
+
 import framework.view.TemplateResult;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 @jakarta.servlet.annotation.WebServlet(name = "HomeServlet", urlPatterns = {"/home"})
-public class HomeServlet extends AbstractBaseController {
+public class HomeServlet extends WebDeliveryBaseController {
 
-    @Override
-    protected DataLayer createDataLayer(DataSource ds) throws ServletException {
-        try {
-            return new framework.data.DataLayer(ds);
-        } catch (Exception ex) {
-            throw new ServletException(ex);
-        }
-    }
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {

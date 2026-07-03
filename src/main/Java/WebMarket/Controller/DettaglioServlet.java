@@ -1,49 +1,23 @@
 package WebMarket.Controller;
 
-import framework.controller.AbstractBaseController;
-import framework.data.DataLayer;
-import framework.view.TemplateResult;
+
+import java.util.List;
 
 import WebMarket.data.dao.ProductDAO;
-import WebMarket.data.dao.ProductOptionGroupDAO;
 import WebMarket.data.dao.ProductOptionDAO;
-import WebMarket.data.daoimpl.ProductDAOImpl;
-import WebMarket.data.daoimpl.ProductOptionGroupDAOImpl;
-import WebMarket.data.daoimpl.ProductOptionDAOImpl;
-
-import model.Product;
-import model.ProductOptionGroup;
-import model.ProductOption;
-
-import jakarta.servlet.ServletException;
+import WebMarket.data.dao.ProductOptionGroupDAO;
+import framework.data.DataLayer;
+import framework.view.TemplateResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import javax.sql.DataSource;
+import model.Product;
+import model.ProductOption;
+import model.ProductOptionGroup;
 
 @jakarta.servlet.annotation.WebServlet(name = "DettaglioServlet", urlPatterns = {"/dettaglio"})
-public class DettaglioServlet extends AbstractBaseController {
+public class DettaglioServlet extends WebDeliveryBaseController {
 
-    // 1. RIEMPIAMO LA CASSETTA DEGLI ATTREZZI CON I 3 DAO NECESSARI
-    @Override
-    protected DataLayer createDataLayer(DataSource ds) throws ServletException {
-        try {
-            DataLayer dl = new framework.data.DataLayer(ds);
-            
-            // Attrezzo per il prodotto
-            dl.registerDAO(model.Product.class, new ProductDAOImpl(dl));
-            // Attrezzo per i gruppi (es. Salse, Cottura)
-            dl.registerDAO(model.ProductOptionGroup.class, new ProductOptionGroupDAOImpl(dl));
-            // Attrezzo per le singole opzioni (es. Ketchup, Ben Cotta)
-            dl.registerDAO(model.ProductOption.class, new ProductOptionDAOImpl(dl));
-            
-            return dl;
-        } catch (Exception ex) {
-            throw new ServletException(ex);
-        }
-    }
-
-    // 2. IL CUORE DELLA SERVLET
+   
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {

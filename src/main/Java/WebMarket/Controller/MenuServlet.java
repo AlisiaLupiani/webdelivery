@@ -2,47 +2,22 @@ package WebMarket.Controller;
 
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
 import WebMarket.data.dao.ProductDAO;
-
-import WebMarket.data.daoimpl.CartDAOImpl;
-import WebMarket.data.daoimpl.CartItemDAOImpl;
-import WebMarket.data.daoimpl.ProductDAOImpl;
-
-import framework.controller.AbstractBaseController;
 import framework.data.DataLayer;
 import framework.view.TemplateResult;
-
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import model.Cart;
 import model.CartItem;
 import model.Product;
 
 @jakarta.servlet.annotation.WebServlet(name = "MenuServlet", urlPatterns = {"/menu"})
-public class MenuServlet extends AbstractBaseController {
+public class MenuServlet extends WebDeliveryBaseController {
 
-    @Override
-    protected DataLayer createDataLayer(DataSource ds) throws ServletException {
-        try {
-            DataLayer dl = new framework.data.DataLayer(ds);
 
-            dl.registerDAO(model.Product.class, new ProductDAOImpl(dl));
-            dl.registerDAO(model.Cart.class, new CartDAOImpl(dl));
-            dl.registerDAO(model.CartItem.class, new CartItemDAOImpl(dl));
-
-            return dl;
-
-        } catch (Exception ex) {
-            throw new ServletException(ex);
-        }
-    }
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {

@@ -1,33 +1,18 @@
 package WebMarket.Controller;
 
-import javax.sql.DataSource;
-
 import java.util.List;
 
 import WebMarket.data.dao.UserDAO;
-import WebMarket.data.daoimpl.UserDAOImpl;
-import framework.controller.AbstractBaseController;
 import framework.data.DataLayer;
 import framework.security.SecurityHelpers;
 import framework.view.TemplateResult;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.User;
 
 @jakarta.servlet.annotation.WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
-public class LoginServlet extends AbstractBaseController {
+public class LoginServlet extends WebDeliveryBaseController {
 
-    @Override
-    protected DataLayer createDataLayer(DataSource ds) throws ServletException {
-        try {
-            DataLayer dl = new framework.data.DataLayer(ds);
-            dl.registerDAO(model.User.class, new UserDAOImpl(dl));
-            return dl;
-        } catch (Exception ex) {
-            throw new ServletException(ex);
-        }
-    }
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
