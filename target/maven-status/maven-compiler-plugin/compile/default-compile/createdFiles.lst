@@ -9,6 +9,7 @@ model\Ingredient.class
 framework\security\SecurityHelpers.class
 framework\data\OptimisticLockException.class
 WebMarket\data\daoimpl\CartItemDAOImpl.class
+framework\data\WebDeliveryBaseController.class
 model\Product.class
 WebMarket\Controller\MenuServlet.class
 model\modelImpl\FoodImpl.class
@@ -63,6 +64,7 @@ WebMarket\data\dao\ProductOptionDAO.class
 framework\data\DataCache.class
 model\modelImpl\ProductImpl.class
 model\modelImpl\LogOrderStateImpl.class
+WebMarket\Controller\WebDeliveryBaseController.class
 WebMarket\data\proxy\LogOrderStateProxy.class
 model\modelImpl\ConsumationImpl.class
 WebMarket\data\daoimpl\ConsumationDAOImpl.class

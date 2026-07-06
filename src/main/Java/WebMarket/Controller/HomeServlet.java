@@ -11,12 +11,12 @@ public class HomeServlet extends WebDeliveryBaseController {
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        jakarta.servlet.http.HttpSession sessioneFantasma = request.getSession(false);
-        if (sessioneFantasma != null && sessioneFantasma.getAttribute("session-start-ts") == null) {
-            sessioneFantasma.invalidate(); // Boom! Distrutta.
+        jakarta.servlet.http.HttpSession existingSession = request.getSession(false);
+        if (existingSession != null && existingSession.getAttribute("session-start-ts") == null) {
+            existingSession.invalidate(); 
         }
         try {
-            // ECCO LA MAGIA: Inseriamo il testo nella variabile che l'HTML sta aspettando!
+            
             request.setAttribute("messaggio_benvenuto", "Ciao! Il motore Java e i template stanno comunicando alla perfezione! 🚀");
             
             TemplateResult templateEngine = new TemplateResult(getServletContext());

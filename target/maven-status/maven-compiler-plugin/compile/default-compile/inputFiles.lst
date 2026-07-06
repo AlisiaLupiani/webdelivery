@@ -9,6 +9,7 @@ c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\data\DataItemProxy.
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\data\DataItemProxyImpl.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\data\DataLayer.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\data\OptimisticLockException.java
+c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\data\WebDeliveryBaseController.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\security\SecurityHelpers.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\utils\ServletHelpers.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\framework\view\HTMLResult.java
@@ -51,6 +52,7 @@ c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\LoginSer
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\MenuServlet.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\RootServlet.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\TestServlet.java
+c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\WebDeliveryBaseController.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\data\dao\CartDAO.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\data\dao\CartItemDAO.java
 c:\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\data\dao\ConsumationDAO.java
