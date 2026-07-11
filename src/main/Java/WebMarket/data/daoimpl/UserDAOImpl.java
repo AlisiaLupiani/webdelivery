@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +19,6 @@ import model.Client;
 import model.Proprietor;
 import model.Staff;
 import model.User;
-
-
-
-
-
-
 
 public class UserDAOImpl extends DAO implements UserDAO {
 
@@ -48,33 +43,32 @@ public class UserDAOImpl extends DAO implements UserDAO {
             sAllUsers = getConnection().prepareStatement("SELECT * FROM " + TABLE);
 
             sAddUser = getConnection().prepareStatement(
-                "INSERT INTO " + TABLE + "(NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO, VERSION) VALUES (?, ?, ?, ?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + TABLE + " (NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO, VERSION) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
 
             sUpdateUser = getConnection().prepareStatement(
-                "UPDATE " + TABLE + " SET NOME = ?, COGNOME = ?, EMAIL = ?, PASSWORD = ?, RUOLO = ?, INDIRIZZO = ?, TELEFONO = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
+                    "UPDATE " + TABLE + " SET NOME = ?, COGNOME = ?, EMAIL = ?, PASSWORD = ?, RUOLO = ?, INDIRIZZO = ?, TELEFONO = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
 
             sDeleteUser = getConnection().prepareStatement(
-                "DELETE FROM " + TABLE + " WHERE ID = ?");
+                    "DELETE FROM " + TABLE + " WHERE ID = ?");
 
         } catch (SQLException e) {
-            throw new DataException("Error initializing WebMarket data layer", e);
+            throw new DataException("Error initializing UserDAO", e);
         }
     }
 
     @Override
     public void destroy() throws DataException {
         try {
-            if(sUserById != null) sUserById.close();
-            if(sUserByEmail != null) sUserByEmail.close();
-            if(sAllUsers != null) sAllUsers.close();
-            if(sAddUser != null) sAddUser.close();
-            if(sUpdateUser != null) sUpdateUser.close();
-            if(sDeleteUser != null) sDeleteUser.close();
+            if (sUserById != null) sUserById.close();
+            if (sUserByEmail != null) sUserByEmail.close();
+            if (sAllUsers != null) sAllUsers.close();
+            if (sAddUser != null) sAddUser.close();
+            if (sUpdateUser != null) sUpdateUser.close();
+            if (sDeleteUser != null) sDeleteUser.close();
             super.destroy();
-            
         } catch (SQLException e) {
-            throw new DataException("Error closing WebMarket data layer", e);
+            throw new DataException("Error closing UserDAO", e);
         }
     }
 
@@ -102,20 +96,21 @@ public class UserDAOImpl extends DAO implements UserDAO {
     @Override
     public User getUserByEmail(String email) throws DataException {
         User user = null;
-        if (getDataLayer().getCache().has(User.class, email)) {
-            user = getDataLayer().getCache().get(User.class, email);
-        } else {
-            try {
-                sUserByEmail.setString(1, email);
-                try (ResultSet resultSet = sUserByEmail.executeQuery()) {
-                    if (resultSet.next()) {
+        try {
+            sUserByEmail.setString(1, email);
+            try (ResultSet resultSet = sUserByEmail.executeQuery()) {
+                if (resultSet.next()) {
+                    int id = resultSet.getInt("ID");
+                    if (getDataLayer().getCache().has(User.class, id)) {
+                        user = getDataLayer().getCache().get(User.class, id);
+                    } else {
                         user = createUser(resultSet);
                         getDataLayer().getCache().add(User.class, user);
                     }
                 }
-            } catch (SQLException e) {
-                throw new DataException("Unable to find user by email", e);
             }
+        } catch (SQLException e) {
+            throw new DataException("Unable to find user by email", e);
         }
         return user;
     }
@@ -148,26 +143,11 @@ public class UserDAOImpl extends DAO implements UserDAO {
             sAddUser.setString(2, user.getSurname());
             sAddUser.setString(3, user.getEmail());
             sAddUser.setString(4, user.getPassword());
-            
-            // Inserisco il ruolo
-            if(user instanceof Client) sAddUser.setString(5, "CLIENTE");
-            else if(user instanceof Staff) sAddUser.setString(5, "STAFF");
-            else if(user instanceof Proprietor) sAddUser.setString(5, "ADMIN");
-            else sAddUser.setString(5, "CLIENTE");
+            sAddUser.setString(5, getRole(user));
+            setClientFields(sAddUser, user, 6, 7);
 
-            // Se è un cliente, gestisco i campi aggiuntivi
-            if(!(user instanceof Client)){
-                sAddUser.setNull(6, java.sql.Types.VARCHAR);
-                sAddUser.setNull(7, java.sql.Types.VARCHAR);
-            }else{
-
-                sAddUser.setString(6, ((Client)user).getAddress());
-                sAddUser.setString(7, ((Client)user).getPhone());
-            }
-            
-            // Gestisco la versone
             long initialVersion = 1;
-            sAddUser.setLong(5, initialVersion);
+            sAddUser.setLong(8, initialVersion);
 
             if (sAddUser.executeUpdate() == 1) {
                 try (ResultSet resultSet = sAddUser.getGeneratedKeys()) {
@@ -192,36 +172,20 @@ public class UserDAOImpl extends DAO implements UserDAO {
             sUpdateUser.setString(2, user.getSurname());
             sUpdateUser.setString(3, user.getEmail());
             sUpdateUser.setString(4, user.getPassword());
+            sUpdateUser.setString(5, getRole(user));
+            setClientFields(sUpdateUser, user, 6, 7);
 
-             // Modifico il ruolo
-            if(user instanceof Client) sAddUser.setString(5, "CLIENTE");
-            else if(user instanceof Staff) sAddUser.setString(5, "STAFF");
-            else if(user instanceof Proprietor) sAddUser.setString(5, "ADMIN");
-            else sAddUser.setString(5, "CLIENTE");
-
-            // Se è un cliente, gestisco i campi aggiuntivi
-            if(!(user instanceof Client)){
-                sAddUser.setNull(6, java.sql.Types.VARCHAR);
-                sAddUser.setNull(7, java.sql.Types.VARCHAR);
-            }else{
-                sAddUser.setString(6, ((Client)user).getAddress());
-                sAddUser.setString(7, ((Client)user).getPhone());
-            }
-
-            // Gestisco la versione
             long currentVersion = user.getVersion();
             long nextVersion = currentVersion + 1;
             sUpdateUser.setLong(8, nextVersion);
-
-            // Gestisco l'optimistical lock
             sUpdateUser.setInt(9, user.getKey());
             sUpdateUser.setLong(10, currentVersion);
 
             if (sUpdateUser.executeUpdate() == 0) {
                 throw new DataException("Optimistic locking failed: user modified by another process");
-            } else {
-                user.setVersion(nextVersion);
             }
+            user.setVersion(nextVersion);
+            getDataLayer().getCache().add(User.class, user);
         } catch (SQLException e) {
             throw new DataException("Unable to update user", e);
         }
@@ -240,15 +204,37 @@ public class UserDAOImpl extends DAO implements UserDAO {
         }
     }
 
+    private String getRole(User user) {
+        if (user instanceof Proprietor) {
+            return "ADMIN";
+        }
+        if (user instanceof Staff) {
+            return "STAFF";
+        }
+        return "CLIENTE";
+    }
+
+    private void setClientFields(PreparedStatement statement, User user, int addressIndex, int phoneIndex) throws SQLException {
+        if (user instanceof Client) {
+            statement.setString(addressIndex, ((Client) user).getAddress());
+            statement.setString(phoneIndex, ((Client) user).getPhone());
+        } else {
+            statement.setNull(addressIndex, Types.VARCHAR);
+            statement.setNull(phoneIndex, Types.VARCHAR);
+        }
+    }
+
     protected User createUser(ResultSet rs) throws SQLException {
-        User user = null;
-        
-        // Istanzio l'oggetto in base al ruolo
-        String ruolo = rs.getString("RUOLO"); 
-        
-        if(ruolo.equals("STAFF")) user = new StaffProxy(dataLayer);
-        else if(ruolo.equals("ADMIN")) user = new ProprietorProxy(dataLayer);
-        else user = new ClientProxy(dataLayer);
+        String ruolo = rs.getString("RUOLO");
+        User user;
+
+        if ("STAFF".equals(ruolo)) {
+            user = new StaffProxy(dataLayer);
+        } else if ("ADMIN".equals(ruolo)) {
+            user = new ProprietorProxy(dataLayer);
+        } else {
+            user = new ClientProxy(dataLayer);
+        }
 
         user.setKey(rs.getInt("ID"));
         user.setVersion(rs.getLong("VERSION"));
@@ -257,11 +243,10 @@ public class UserDAOImpl extends DAO implements UserDAO {
         user.setEmail(rs.getString("EMAIL"));
         user.setPassword(rs.getString("PASSWORD"));
 
-        if(ruolo == "CLIENTE"){
-            ((Client)user).setAddress(rs.getString("INDIRIZZO"));
-            ((Client)user).setPhone(rs.getString("TELEFONO"));
+        if (user instanceof Client) {
+            ((Client) user).setAddress(rs.getString("INDIRIZZO"));
+            ((Client) user).setPhone(rs.getString("TELEFONO"));
         }
-
 
         return user;
     }

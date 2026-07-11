@@ -39,7 +39,8 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             
             sProductById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID=?");
             
-            sProductByOrder = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ORDINE_ID = ?");
+            sProductByOrder = getConnection().prepareStatement(
+                "SELECT p.* FROM " + TABLE + " p INNER JOIN ORDINE_PRODOTTO op ON p.ID = op.PRODOTTO_ID WHERE op.ORDINE_ID = ?");
             
             sAllProducts = getConnection().prepareStatement("SELECT * FROM " + TABLE);
 
@@ -124,11 +125,10 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
                     int productId = rs.getInt("ID");
                     
                     if(getDataLayer().getCache().has(Product.class, productId)){
-                        products.add(getDataLayer().getCache().get(Product.class, productId));
+                        p = getDataLayer().getCache().get(Product.class, productId);
                     }else{
                         p = createProduct(rs);
                         getDataLayer().getCache().add(Product.class, p);
-                        
                     }
                     products.add(p);
                 }

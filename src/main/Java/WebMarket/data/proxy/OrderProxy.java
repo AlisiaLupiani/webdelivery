@@ -5,11 +5,13 @@ import java.time.LocalTime;
 import java.util.List;
 
 import WebMarket.data.dao.ProductDAO;
+import WebMarket.data.dao.UserDAO;
 import framework.data.DataLayer;
 import model.Client;
 import model.OrderState;
 import model.PaymentMethod;
 import model.Product;
+import model.User;
 import model.modelImpl.OrderImpl;
 
 
@@ -25,6 +27,7 @@ public class OrderProxy extends OrderImpl {
         this.dataLayer = dl;
         this.isDirty = false;
         this.idUtente = 0;
+        super.setProducts(null);
     }
 
     public void setIdUtente(Integer id) {
@@ -74,6 +77,22 @@ public class OrderProxy extends OrderImpl {
     }
 
     @Override
+    public Client getClient() {
+        if (super.getClient() == null && idUtente != null && idUtente > 0) {
+            try {
+                UserDAO userDAO = (UserDAO) dataLayer.getDAO(User.class);
+                User user = userDAO.getUserById(idUtente);
+                if (user instanceof Client) {
+                    super.setClient((Client) user);
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return super.getClient();
+    }
+
+    @Override
     public void setProducts(List<Product> products) {
         super.setProducts(products);
         this.isDirty = true;
@@ -89,7 +108,7 @@ public class OrderProxy extends OrderImpl {
                 super.setProducts(lista);
                 
             } catch (Exception e) {
-                e.printStackTrace();
+                return null;
             }
         }
          return super.getProducts();

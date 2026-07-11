@@ -81,20 +81,18 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
         log.setDateTime(rs.getTimestamp("TIMESTAMP").toLocalDateTime());
          
         String statoFromDalDb = rs.getString("STATO_FROM");
-    if (statoFromDalDb != null) {
-    
-        log.setStateFrom(OrderState.valueOf(statoFromDalDb));
-    }
+        if (statoFromDalDb != null) {
+            log.setStateFrom(OrderState.valueOf(statoFromDalDb));
+        }
         String statoToDalDb = rs.getString("STATO_TO");
         if (statoToDalDb != null) {
             log.setStateTo(OrderState.valueOf(statoToDalDb));
-        
+        }
         log.setIdOrder(rs.getInt("ORDINE_ID")); 
         log.setIdStaff(rs.getInt("UTENTE_ID"));  
         log.setVersion(rs.getLong("VERSION"));
         
         log.setClean();
-        }
 
         return log;
     }
@@ -153,9 +151,9 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
     @Override
     public void addLogOrderState(LogOrderState log) throws DataException {
         try {
-            sAddLog.setTimestamp(1, Timestamp.valueOf(log.getDateTime().toString()));
-            sAddLog.setString(2, log.getStateFrom().name());
-            sAddLog.setString(3, log.getStateTo().name());
+            sAddLog.setTimestamp(1, Timestamp.valueOf(log.getDateTime()));
+            sAddLog.setString(2, log.getStateFrom() != null ? log.getStateFrom().name() : null);
+            sAddLog.setString(3, log.getStateTo() != null ? log.getStateTo().name() : null);
             sAddLog.setInt(4, log.getOrder().getKey());
             sAddLog.setInt(5, log.getStaff().getKey());
             
@@ -182,9 +180,9 @@ public class LogOrderStateDAOImpl extends DAO implements LogOrderStateDAO {
             long currentVersion = log.getVersion();
             long nextVersion = currentVersion + 1;
 
-            sUpdateLog.setTimestamp(1, Timestamp.valueOf(log.getDateTime().toString()));
-            sUpdateLog.setString(2, log.getStateFrom().toString());
-            sUpdateLog.setString(3, log.getStateTo().toString());
+            sUpdateLog.setTimestamp(1, Timestamp.valueOf(log.getDateTime()));
+            sUpdateLog.setString(2, log.getStateFrom() != null ? log.getStateFrom().name() : null);
+            sUpdateLog.setString(3, log.getStateTo() != null ? log.getStateTo().name() : null);
             sUpdateLog.setInt(4, log.getOrder().getKey());
             sUpdateLog.setInt(5, log.getStaff().getKey());
             sUpdateLog.setLong(6, nextVersion);
