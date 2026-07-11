@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.SecretKeyFactory;
@@ -16,6 +17,9 @@ import javax.crypto.spec.PBEKeySpec;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import model.Client;
+import model.Proprietor;
+import model.Staff;
 import model.User;
 
 public class SecurityHelpers {
@@ -114,15 +118,31 @@ public class SecurityHelpers {
         //if a session already exists, remove it and recreate a new one
         disposeSession(request);
         HttpSession s = request.getSession(true);
-        s.setAttribute("username", u.getName());
+        s.setAttribute("username", u.getEmail());
+        s.setAttribute("name", u.getName());
         s.setAttribute("surname", u.getSurname());
-        s.setAttribute("userid", u.getId());
+        s.setAttribute("userid", u.getKey());
+        s.setAttribute("roles", getRolesForUser(u));
         
         //
         s.setAttribute("ip", request.getRemoteHost());
         //
         s.setAttribute("session-start-ts", LocalDateTime.now());
+        s.setAttribute("last-action-ts", LocalDateTime.now());
         return s;
+    }
+
+    public static List<String> getRolesForUser(User u) {
+        if (u instanceof Proprietor) {
+            return List.of("ADMIN");
+        }
+        if (u instanceof Staff) {
+            return List.of("STAFF");
+        }
+        if (u instanceof Client) {
+            return List.of("CLIENTE");
+        }
+        return List.of();
     }
 
     public static void disposeSession(HttpServletRequest request) {

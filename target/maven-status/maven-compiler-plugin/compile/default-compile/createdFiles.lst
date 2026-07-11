@@ -17,9 +17,11 @@ WebMarket\data\dao\UserDAO.class
 WebMarket\data\daoimpl\ProductOptionDAOImpl.class
 framework\utils\ServletHelpers.class
 model\User.class
+WebMarket\Controller\RegisterServlet.class
 model\modelImpl\StaffImpl.class
 model\modelImpl\CartImpl.class
 framework\data\DataItemImpl.class
+WebMarket\data\WebDeliveryDataLayer.class
 model\modelImpl\ClientImpl.class
 framework\view\TemplateResult.class
 model\ProductOptionGroup.class
@@ -55,6 +57,7 @@ model\modelImpl\CartItemImpl.class
 WebMarket\data\daoimpl\UserDAOImpl.class
 model\PaymentMethod.class
 model\Consumation.class
+WebMarket\Controller\LogoutServlet.class
 WebMarket\data\dao\CartDAO.class
 WebMarket\data\proxy\IngredientProxy.class
 WebMarket\data\proxy\UserProxy.class

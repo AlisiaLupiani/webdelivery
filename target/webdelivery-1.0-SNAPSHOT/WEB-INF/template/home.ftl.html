@@ -28,6 +28,14 @@
     <header class="navbar">
         <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
         <h1>WebDelivery</h1>
+        <div style="margin-left: auto; display: flex; gap: 10px;">
+            <#if logininfo?? && logininfo.userid??>
+                <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
+            <#else>
+                <a href="/webdelivery/login" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Accedi</a>
+                <a href="/webdelivery/register" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Registrati</a>
+            </#if>
+        </div>
     </header>
 
     <main>

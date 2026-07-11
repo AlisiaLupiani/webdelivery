@@ -13,6 +13,11 @@
     <param-value>jdbc/webdelivery</param-value>
   </context-param>
 
+  <context-param>
+    <param-name>security.protect.patterns</param-name>
+    <param-value>/cart=CLIENTE</param-value>
+  </context-param>
+
   <listener>
     <listener-class>framework.application.ApplicationInitializer</listener-class>
   </listener>

@@ -1,7 +1,5 @@
 package WebMarket.Controller;
 
-import java.util.List;
-
 import WebMarket.data.dao.UserDAO;
 import framework.data.DataLayer;
 import framework.security.SecurityHelpers;
@@ -24,7 +22,7 @@ public class LoginServlet extends WebDeliveryBaseController {
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
 
-            String emailInserita = request.getParameter("email");
+            String emailInserita = normalize(request.getParameter("email"));
             String passwordInserita = request.getParameter("password");
 
             DataLayer dl = (DataLayer) request.getAttribute("datalayer");
@@ -32,21 +30,16 @@ public class LoginServlet extends WebDeliveryBaseController {
 
             User utente = userDAO.getUserByEmail(emailInserita);
 
-            if (utente != null && utente.getPassword().equals(passwordInserita)) {
+            if (utente != null && isPasswordValid(passwordInserita, utente)) {
 
                 SecurityHelpers.createSession(request, utente);
 
-                // Dati corretti usati anche dal carrello persistente
-                request.getSession().setAttribute("userid", utente.getKey());
-                request.getSession().setAttribute("username", emailInserita);
-
-                // AbstractBaseController si aspetta una List<String>, non una String
-                request.getSession().setAttribute("roles", List.of("ADMIN"));
-
                 response.sendRedirect("home");
+                return;
 
             } else {
                 request.setAttribute("errore", "Email o password non validi. Riprova.");
+                request.setAttribute("email", emailInserita);
 
                 TemplateResult templateEngine = new TemplateResult(getServletContext());
                 templateEngine.activate("login.ftl.html", request, response);
@@ -56,5 +49,15 @@ public class LoginServlet extends WebDeliveryBaseController {
             TemplateResult templateEngine = new TemplateResult(getServletContext());
             templateEngine.activate("login.ftl.html", request, response);
         }
+    }
+
+    private boolean isPasswordValid(String submittedPassword, User user) {
+        // Scelta temporanea di progetto: il database di sviluppo contiene password
+        // in chiaro per mantenere accessibili gli utenti di test esistenti.
+        return submittedPassword != null && submittedPassword.equals(user.getPassword());
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim();
     }
 }
