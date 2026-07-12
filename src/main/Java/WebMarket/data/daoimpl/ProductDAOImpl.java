@@ -83,6 +83,7 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
         p.setProcedure(rs.getString("PROCEDURA"));
         p.setPreparationTime(rs.getInt("TEMPO_PREPARAZIONE"));
         p.setImage(rs.getString("IMMAGINE"));
+        p.setCategory(rs.getString("CATEGORIA"));
         p.setVersion(rs.getLong("VERSION"));
 
         p.setClean();

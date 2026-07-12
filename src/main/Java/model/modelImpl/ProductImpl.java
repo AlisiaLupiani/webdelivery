@@ -16,6 +16,7 @@ public class ProductImpl implements Product {
     protected String procedure;
     protected List<Ingredient> ingredients;
     protected long version;
+    protected String category;
 
     public ProductImpl() {
         this.key = 0;
@@ -27,6 +28,7 @@ public class ProductImpl implements Product {
         this.procedure = "";
         this.ingredients = new ArrayList<>();
         this.version = 0;
+        this.category = "Altro";
     }
 
     // Metodi per la Chiave (DataItem)
@@ -80,4 +82,10 @@ public class ProductImpl implements Product {
     public long getVersion() { return version; }
     @Override
     public void setVersion(long version) { this.version = version; }
+
+    @Override
+public String getCategory() { return category; }
+
+@Override
+public void setCategory(String category) { this.category = category; }
 }

@@ -54,4 +54,9 @@ public class ProductProxy extends ProductImpl {
     public void setClean() {
         this.isDirty = false;
     }
+    @Override
+public void setCategory(String category) {
+    super.setCategory(category);
+    this.isDirty = true;
+}
 }

@@ -30,6 +30,8 @@ public interface Product extends Consumation, DataItem<Integer> {
     
     public List<Ingredient> getIngredients();
     public void setIngredients(List<Ingredient> ingredients);
-
+    
+    public String getCategory();
+    public void setCategory(String category);
     
 }

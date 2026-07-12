@@ -1,6 +1,9 @@
 package WebMarket.Controller;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
@@ -17,8 +20,6 @@ import model.Product;
 @jakarta.servlet.annotation.WebServlet(name = "MenuServlet", urlPatterns = {"/menu"})
 public class MenuServlet extends WebDeliveryBaseController {
 
-
-
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {
@@ -29,7 +30,22 @@ public class MenuServlet extends WebDeliveryBaseController {
             CartItemDAO cartItemDAO = (CartItemDAO) dl.getDAO(CartItem.class);
 
             List<Product> listaProdotti = productDAO.getAllProducts();
-            request.setAttribute("prodotti", listaProdotti);
+
+            Map<String, List<Product>> prodottiPerCategoria = new LinkedHashMap<>();
+
+            for (Product prodotto : listaProdotti) {
+                String categoria = prodotto.getCategory();
+
+                if (categoria == null || categoria.isBlank()) {
+                    categoria = "Altro";
+                }
+
+                prodottiPerCategoria
+                        .computeIfAbsent(categoria, k -> new ArrayList<>())
+                        .add(prodotto);
+            }
+
+            request.setAttribute("prodottiPerCategoria", prodottiPerCategoria);
 
             HttpSession session = request.getSession(false);
 
