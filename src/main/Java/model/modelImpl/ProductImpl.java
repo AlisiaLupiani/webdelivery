@@ -3,6 +3,8 @@ package model.modelImpl;
 import model.Product;
 import model.Ingredient;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 
 public class ProductImpl implements Product {

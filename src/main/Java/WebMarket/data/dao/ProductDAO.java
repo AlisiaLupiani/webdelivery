@@ -5,6 +5,7 @@ import java.util.List;
 import framework.data.DataException;
 import model.Product;
 import model.Order;
+import java.util.Map;
 
 public interface ProductDAO {
 
@@ -19,4 +20,6 @@ public interface ProductDAO {
     void updateProduct(Product product) throws DataException;
 
     void deleteProduct(Product product) throws DataException;
+
+    List<Map<String, Object>> getOrderProductDetails(Order order) throws DataException;
 }

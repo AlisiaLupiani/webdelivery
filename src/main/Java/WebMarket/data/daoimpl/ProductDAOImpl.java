@@ -7,6 +7,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.HashMap;
+import java.util.Map;
 import WebMarket.data.dao.ProductDAO;
 import WebMarket.data.proxy.ProductProxy;
 import framework.data.DAO;
@@ -25,6 +27,9 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
     private PreparedStatement sAddProduct;
     private PreparedStatement sUpdateProduct;
     private PreparedStatement sDeleteProduct;
+    private PreparedStatement sOrderProductDetails;
+private PreparedStatement sIngredientsByProduct;
+    
     private static final String TABLE = "PRODOTTO";
 
 
@@ -52,6 +57,21 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             
             sDeleteProduct = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID=?");
 
+            sOrderProductDetails = getConnection().prepareStatement(
+    "SELECT p.*, op.QUANTITA AS ORDINE_QUANTITA " +
+    "FROM ORDINE_PRODOTTO op " +
+    "JOIN PRODOTTO p ON op.PRODOTTO_ID = p.ID " +
+    "WHERE op.ORDINE_ID = ? " +
+    "ORDER BY p.NOME"
+);
+
+sIngredientsByProduct = getConnection().prepareStatement(
+    "SELECT i.NOME, pi.QUANTITA " +
+    "FROM PRODOTTO_INGREDIENTE pi " +
+    "JOIN INGREDIENTE i ON pi.INGREDIENTE_ID = i.ID " +
+    "WHERE pi.PRODOTTO_ID = ? " +
+    "ORDER BY i.NOME"
+);
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductDAO", ex);
         }
@@ -66,6 +86,8 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             if(sAddProduct != null) sAddProduct.close();
             if(sUpdateProduct != null) sUpdateProduct.close();
             if(sDeleteProduct != null) sDeleteProduct.close();
+            if (sOrderProductDetails != null) sOrderProductDetails.close();
+if (sIngredientsByProduct != null) sIngredientsByProduct.close();
 
             super.destroy();
         }catch(SQLException ex){
@@ -228,4 +250,47 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
         }
     
     }
+
+    @Override
+public List<Map<String, Object>> getOrderProductDetails(Order order) throws DataException {
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    try {
+        sOrderProductDetails.setInt(1, order.getKey());
+
+        try (ResultSet rs = sOrderProductDetails.executeQuery()) {
+            while (rs.next()) {
+                Product prodotto = createProduct(rs);
+
+                Map<String, Object> riga = new HashMap<>();
+                riga.put("prodotto", prodotto);
+                riga.put("quantita", rs.getInt("ORDINE_QUANTITA"));
+                riga.put("ingredienti", getIngredientsByProductId(prodotto.getKey()));
+
+                result.add(riga);
+            }
+        }
+    } catch (SQLException e) {
+        throw new DataException("Errore recupero dettagli prodotti ordine", e);
+    }
+
+    return result;
+}
+
+private List<Map<String, String>> getIngredientsByProductId(int productId) throws SQLException {
+    List<Map<String, String>> result = new ArrayList<>();
+
+    sIngredientsByProduct.setInt(1, productId);
+
+    try (ResultSet rs = sIngredientsByProduct.executeQuery()) {
+        while (rs.next()) {
+            Map<String, String> ingrediente = new HashMap<>();
+            ingrediente.put("nome", rs.getString("NOME"));
+            ingrediente.put("quantita", rs.getString("QUANTITA"));
+            result.add(ingrediente);
+        }
+    }
+
+    return result;
+}
 }
