@@ -53,6 +53,7 @@ C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\
 C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\LogoutServlet.java
 C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\MenuServlet.java
 C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\OrdineConfermatoServlet.java
+C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\ProfiloServlet.java
 C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\RegisterServlet.java
 C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\RootServlet.java
 C:\apache-tomcat-9.0.117-windows-x64\apache-tomcat-9.0.117\webdelivery\src\main\java\WebMarket\Controller\TestServlet.java

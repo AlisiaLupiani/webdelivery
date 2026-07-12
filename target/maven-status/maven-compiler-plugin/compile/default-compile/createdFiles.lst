@@ -2,6 +2,7 @@ WebMarket\data\proxy\ProprietorProxy.class
 framework\controller\AbstractBaseController.class
 WebMarket\Controller\LoginServlet.class
 WebMarket\data\daoimpl\ProductOptionGroupDAOImpl.class
+WebMarket\Controller\ProfiloServlet.class
 model\modelImpl\UserImpl.class
 WebMarket\data\proxy\ProductOptionGroupProxy.class
 model\modelImpl\ProductOptionImpl.class

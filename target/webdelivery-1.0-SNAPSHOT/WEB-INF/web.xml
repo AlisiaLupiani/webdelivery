@@ -15,7 +15,7 @@
 
   <context-param>
     <param-name>security.protect.patterns</param-name>
-    <param-value>/cart=CLIENTE</param-value>
+<param-value>/cart=CLIENTE;/profilo=CLIENTE;/cassa=CLIENTE;/ordine-confermato=CLIENTE</param-value>
   </context-param>
 
   <listener>
