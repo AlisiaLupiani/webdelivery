@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cassa - WebDelivery</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            color: #333;
+        }
+
+        .checkout-page {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1.4fr 0.8fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .checkout-box {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        }
+
+        .checkout-box h2 {
+            color: #ff5722;
+            margin-top: 0;
+            text-align: left;
+            font-size: 26px;
+        }
+
+        .checkout-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .checkout-table th,
+        .checkout-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .checkout-table th {
+            background-color: #f6f6f6;
+            color: #555;
+        }
+
+        .options-list {
+            margin: 6px 0 0;
+            padding-left: 18px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin: 14px 0;
+            font-size: 16px;
+        }
+
+        .summary-row strong {
+            color: #333;
+        }
+
+        .summary-total {
+            border-top: 1px solid #eee;
+            padding-top: 18px;
+            margin-top: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+
+        .form-group {
+            margin-top: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .btn-confirm {
+            width: 100%;
+            margin-top: 22px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background-color: #218838;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 18px;
+            color: #ff5722;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+        }
+
+        @media (max-width: 850px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+    <h1>WebDelivery</h1>
+
+    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+        <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Home</a>
+        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menù</a>
+        <a href="/webdelivery/cart" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Carrello</a>
+    </div>
+</header>
+
+<main class="checkout-page">
+    <h2>Conferma ordine</h2>
+
+    <#if carrello?? && carrello.elementi?has_content>
+        <div class="checkout-layout">
+
+            <section class="checkout-box">
+                <h2>Riepilogo</h2>
+
+                <table class="checkout-table">
+                    <thead>
+                        <tr>
+                            <th>Prodotto</th>
+                            <th>Personalizzazioni</th>
+                            <th>Q.tà</th>
+                            <th>Prezzo</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <#list carrello.elementi as item>
+                            <tr>
+                                <td>
+                                    <strong>${item.prodotto.name!""}</strong>
+                                </td>
+
+                                <td>
+                                    <#if item.opzioniScelte?has_content>
+                                        <ul class="options-list">
+                                            <#list item.opzioniScelte as opzione>
+                                                <li>${opzione.name!""} (+ € ${opzione.addictionalPrice!"0.00"})</li>
+                                            </#list>
+                                        </ul>
+                                    <#else>
+                                        <span style="color: #999; font-style: italic;">Nessuna</span>
+                                    </#if>
+                                </td>
+
+                                <td>${item.quantita}</td>
+                                <td>€ ${item.prezzoTotaleRiga}</td>
+                            </tr>
+                        </#list>
+                    </tbody>
+                </table>
+
+                <a href="/webdelivery/cart" class="btn-back">← Torna al carrello</a>
+            </section>
+
+            <aside class="checkout-box">
+                <h2>Dati consegna</h2>
+
+                <div class="summary-row">
+                    <span>Tempo stimato</span>
+                    <strong>${tempoStimato!0} minuti</strong>
+                </div>
+
+                <div class="summary-row summary-total">
+                    <span>Totale</span>
+                    <strong>€ ${carrello.prezzoTotaleCarrello}</strong>
+                </div>
+
+                <form action="/webdelivery/cassa" method="POST">
+                    <div class="form-group">
+                        <label for="indirizzo">Indirizzo di consegna</label>
+                        <input type="text"
+                               id="indirizzo"
+                               name="indirizzo"
+                               required
+                               value="<#if cliente??>${cliente.address!''}</#if>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orario_consegna">Orario preferito</label>
+                        <input type="time"
+                               id="orario_consegna"
+                               name="orario_consegna"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="metodo_pagamento">Metodo di pagamento</label>
+                        <select id="metodo_pagamento" name="metodo_pagamento" required>
+                            <option value="CASH">Contanti alla consegna</option>
+                            <option value="VISA">Carta Visa</option>
+                            <option value="MASTERCARD">Mastercard</option>
+                            <option value="PAYPAL">PayPal</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-confirm">Conferma ordine</button>
+                </form>
+            </aside>
+
+        </div>
+    <#else>
+        <div class="checkout-box empty-message">
+            <h2>Il carrello è vuoto</h2>
+            <p>Aggiungi prodotti dal menù prima di procedere alla cassa.</p>
+            <a href="/webdelivery/menu" class="btn">Vai al Menù</a>
+        </div>
+    </#if>
+</main>
+
+<#include "footer.ftl.html">
+
+</body>
+</html>

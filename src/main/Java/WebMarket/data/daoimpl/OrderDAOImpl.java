@@ -28,6 +28,7 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     private PreparedStatement sAddOrder;
     private PreparedStatement sUpdateOrder;
     private PreparedStatement sDeleteOrder;
+    private PreparedStatement sAddProductToOrder;
     private static final String TABLE = "ORDINE";
 
     public OrderDAOImpl(DataLayer d) {
@@ -51,7 +52,10 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
                     "UPDATE " + TABLE + " SET DATA_ORDINE = ?, ORARIO_CONSEGNA = ?, PREZZO_TOTALE = ?, STATO = ?, METODO_PAGAMENTO = ?, INDIRIZZO_CONSEGNA = ?, UTENTE_ID = ?, VERSION = ? WHERE ID = ? AND VERSION = ?");
 
             sDeleteOrder = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID = ? AND VERSION = ?");
-
+            sAddProductToOrder = getConnection().prepareStatement(
+    "INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES (?, ?, ?) " +
+    "ON DUPLICATE KEY UPDATE QUANTITA = QUANTITA + VALUES(QUANTITA)"
+);
         } catch (SQLException ex) {
             throw new DataException("Error initializing OrderDAO", ex);
         }
@@ -67,6 +71,7 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             if (sAddOrder != null) sAddOrder.close();
             if (sUpdateOrder != null) sUpdateOrder.close();
             if (sDeleteOrder != null) sDeleteOrder.close();
+            if (sAddProductToOrder != null) sAddProductToOrder.close();
             super.destroy();
         } catch (SQLException e) {
             throw new DataException("Error closing OrderDAO", e);
@@ -225,7 +230,17 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             throw new DataException("Unable to delete order", e);
         }
     }
-
+@Override
+public void addProductToOrder(int orderId, int productId, int quantity) throws DataException {
+    try {
+        sAddProductToOrder.setInt(1, orderId);
+        sAddProductToOrder.setInt(2, productId);
+        sAddProductToOrder.setInt(3, quantity);
+        sAddProductToOrder.executeUpdate();
+    } catch (SQLException ex) {
+        throw new DataException("Errore addProductToOrder", ex);
+    }
+}
     private Order getOrCreateOrder(ResultSet rs) throws SQLException {
         Integer id = rs.getInt("ID");
         if (getDataLayer().getCache().has(Order.class, id)) {

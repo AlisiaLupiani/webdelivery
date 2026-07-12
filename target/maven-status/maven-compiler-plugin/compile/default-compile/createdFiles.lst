@@ -7,6 +7,7 @@ WebMarket\data\proxy\ProductOptionGroupProxy.class
 model\modelImpl\ProductOptionImpl.class
 model\Ingredient.class
 framework\security\SecurityHelpers.class
+WebMarket\Controller\OrdineConfermatoServlet.class
 framework\data\OptimisticLockException.class
 WebMarket\data\daoimpl\CartItemDAOImpl.class
 framework\data\WebDeliveryBaseController.class
@@ -27,6 +28,7 @@ framework\view\TemplateResult.class
 model\ProductOptionGroup.class
 framework\view\HTMLResult$HTML_Version.class
 WebMarket\data\proxy\FoodProxy.class
+WebMarket\Controller\CassaServlet.class
 WebMarket\data\proxy\ProductProxy.class
 model\Food.class
 WebMarket\data\daoimpl\IngredientDAOImpl.class
