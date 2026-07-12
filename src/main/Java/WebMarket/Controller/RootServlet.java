@@ -14,6 +14,6 @@ public class RootServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Appena arriva, lo rimbalziamo verso la pagina di login
-        response.sendRedirect("login");
+        response.sendRedirect("home");
     }
 }

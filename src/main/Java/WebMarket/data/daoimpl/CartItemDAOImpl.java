@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
+import WebMarket.data.proxy.ProductOptionProxy;
+import model.ProductOption;
 import WebMarket.data.dao.CartItemDAO;
 import WebMarket.data.proxy.ProductProxy;
 import framework.data.DAO;
@@ -24,6 +25,7 @@ public class CartItemDAOImpl extends DAO implements CartItemDAO {
     private PreparedStatement sUpdateQuantity;
     private PreparedStatement sRemoveItem;
     private PreparedStatement sClearCart;
+    private PreparedStatement sOptionsByCartItemId;
 
     private static final String TABLE = "CARRELLO_PRODOTTO";
 
@@ -68,6 +70,13 @@ public class CartItemDAOImpl extends DAO implements CartItemDAO {
                             "(CARRELLO_PRODOTTO_ID, CARATTERISTICA_ID) VALUES (?, ?)"
             );
 
+            sOptionsByCartItemId = getConnection().prepareStatement(
+        "SELECT c.ID, c.NOME, c.DESCRIZIONE, c.PREZZO, c.IS_DEFAULT, c.GRUPPO_ID, c.VERSION " +
+        "FROM CARRELLO_PRODOTTO_CARATTERISTICA cpc " +
+        "JOIN CARATTERISTICA c ON cpc.CARATTERISTICA_ID = c.ID " +
+        "WHERE cpc.CARRELLO_PRODOTTO_ID=?"
+);
+
             sUpdateQuantity = getConnection().prepareStatement(
                     "UPDATE " + TABLE + " SET QUANTITA=?, VERSION=VERSION+1 WHERE ID=?"
             );
@@ -94,6 +103,7 @@ public class CartItemDAOImpl extends DAO implements CartItemDAO {
             if (sUpdateQuantity != null) sUpdateQuantity.close();
             if (sRemoveItem != null) sRemoveItem.close();
             if (sClearCart != null) sClearCart.close();
+            if (sOptionsByCartItemId != null) sOptionsByCartItemId.close();
 
             super.destroy();
 
@@ -135,25 +145,53 @@ public class CartItemDAOImpl extends DAO implements CartItemDAO {
         return item;
     }
 
+    private List<ProductOption> getOptionsByCartItemId(int cartItemId) throws SQLException {
+    List<ProductOption> options = new ArrayList<>();
+
+    sOptionsByCartItemId.setInt(1, cartItemId);
+
+    try (ResultSet rs = sOptionsByCartItemId.executeQuery()) {
+        while (rs.next()) {
+            ProductOptionProxy option = new ProductOptionProxy(getDataLayer());
+
+            option.setKey(rs.getInt("ID"));
+            option.setName(rs.getString("NOME"));
+            option.setDescription(rs.getString("DESCRIZIONE"));
+            option.setAddictionalPrice(rs.getDouble("PREZZO"));
+            option.setDefault(rs.getBoolean("IS_DEFAULT"));
+            option.setIdProductOptionGroup(rs.getInt("GRUPPO_ID"));
+            option.setVersion(rs.getLong("VERSION"));
+
+            option.setClean();
+            options.add(option);
+        }
+    }
+
+    return options;
+}
     @Override
-    public List<CartItem> getItemsByCartId(int cartId) throws DataException {
-        List<CartItem> items = new ArrayList<>();
+public List<CartItem> getItemsByCartId(int cartId) throws DataException {
+    List<CartItem> items = new ArrayList<>();
 
-        try {
-            sItemsByCartId.setInt(1, cartId);
+    try {
+        sItemsByCartId.setInt(1, cartId);
 
-            try (ResultSet rs = sItemsByCartId.executeQuery()) {
-                while (rs.next()) {
-                    items.add(createCartItem(rs));
-                }
+        try (ResultSet rs = sItemsByCartId.executeQuery()) {
+            while (rs.next()) {
+                items.add(createCartItem(rs));
             }
-
-        } catch (SQLException ex) {
-            throw new DataException("Errore getItemsByCartId", ex);
         }
 
-        return items;
+        for (CartItem item : items) {
+            item.setOpzioniScelte(getOptionsByCartItemId(item.getKey()));
+        }
+
+    } catch (SQLException ex) {
+        throw new DataException("Errore getItemsByCartId", ex);
     }
+
+    return items;
+}
 
     @Override
     public CartItem addItem(int cartId, int productId, int quantity, double prezzoUnitario) throws DataException {

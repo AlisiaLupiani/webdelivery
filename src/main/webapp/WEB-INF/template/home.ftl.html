@@ -28,14 +28,16 @@
     <header class="navbar">
         <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
         <h1>WebDelivery</h1>
-        <div style="margin-left: auto; display: flex; gap: 10px;">
-            <#if logininfo?? && logininfo.userid??>
-                <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
-            <#else>
-                <a href="/webdelivery/login" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Accedi</a>
-                <a href="/webdelivery/register" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Registrati</a>
-            </#if>
-        </div>
+      <div style="margin-left: auto; display: flex; flex-direction: row; align-items: center; gap: 10px;">
+    <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Home</a>
+
+    <#if logininfo?? && logininfo.userid??>
+        <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
+    <#else>
+        <a href="/webdelivery/login" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Accedi</a>
+        <a href="/webdelivery/register" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Registrati</a>
+    </#if>
+</div>
     </header>
 
     <main>
@@ -50,6 +52,7 @@
             <a href="/webdelivery/menu" class="btn" style="font-size: 20px; padding: 15px 40px;">Scopri il Menù e Ordina 🍕</a>
         </div>
     </main>
+<#include "footer.ftl.html">
 
 </body>
 </html>
