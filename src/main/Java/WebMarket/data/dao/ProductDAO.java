@@ -1,11 +1,11 @@
 package WebMarket.data.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import framework.data.DataException;
-import model.Product;
 import model.Order;
-import java.util.Map;
+import model.Product;
 
 public interface ProductDAO {
 
@@ -22,4 +22,10 @@ public interface ProductDAO {
     void deleteProduct(Product product) throws DataException;
 
     List<Map<String, Object>> getOrderProductDetails(Order order) throws DataException;
+
+    List<Map<String, String>> getIngredientsByProductId(int productId) throws DataException;
+
+    void addIngredientToProduct(int productId, int ingredientId, String quantity) throws DataException;
+
+    void removeIngredientFromProduct(int productId, int ingredientId) throws DataException;
 }

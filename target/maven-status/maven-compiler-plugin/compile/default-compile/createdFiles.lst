@@ -1,6 +1,7 @@
 framework\controller\AbstractBaseController.class
 WebMarket\Controller\LoginServlet.class
 WebMarket\data\daoimpl\ProductOptionGroupDAOImpl.class
+WebMarket\Controller\AdminDashboardServlet.class
 model\modelImpl\ProductOptionImpl.class
 model\Ingredient.class
 framework\security\SecurityHelpers.class
@@ -54,6 +55,7 @@ WebMarket\data\dao\ConsumationDAO.class
 WebMarket\data\proxy\ProprietorProxy.class
 WebMarket\Controller\ProfiloServlet.class
 model\modelImpl\UserImpl.class
+WebMarket\Controller\AdminProdottiServlet.class
 WebMarket\data\proxy\ProductOptionGroupProxy.class
 framework\data\OptimisticLockException.class
 WebMarket\data\daoimpl\CartItemDAOImpl.class

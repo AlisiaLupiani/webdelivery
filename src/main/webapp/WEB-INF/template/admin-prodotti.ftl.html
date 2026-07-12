@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestione Menu - WebDelivery</title>
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7f6; color: #333; }
+        main { max-width: 1150px; margin: 35px auto; padding: 0 20px; }
+        .panel { background: white; padding: 26px; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); margin-top: 22px; }
+        h2, h3 { color: #ff8c00; margin-top: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { font-weight: bold; color: #333; }
+        input, textarea, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; box-sizing: border-box; }
+        textarea { min-height: 90px; resize: vertical; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+        th { background: #f1f1f1; }
+        .btn-save { background: #ff8c00; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-save:hover { background: #e07b00; }
+        .btn-small { display: inline-block; padding: 8px 12px; border-radius: 5px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; font-size: 14px; }
+        .btn-edit { background: #ff8c00; color: white; }
+        .btn-delete { background: #c62828; color: white; }
+        .btn-cancel { background: #777; color: white; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .msg-ok { background: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 6px; margin-bottom: 18px; border: 1px solid #c8e6c9; }
+        .msg-error { background: #ffebee; color: #c62828; padding: 12px; border-radius: 6px; margin-bottom: 18px; border: 1px solid #ffcdd2; }
+        .category { font-weight: bold; color: #ff8c00; }
+        .price { font-weight: bold; color: #2e7d32; }
+        .hint { color: #666; margin-top: 0; }
+        .ingredient-box { border: 1px solid #eee; border-radius: 8px; padding: 18px; margin-top: 18px; background: #fffdf9; }
+        .table-wrap { width: 100%; overflow-x: auto; }
+
+        @media (max-width: 800px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: auto; }
+            header.navbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="navbar" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center;">
+        <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h1>Gestione Menu</h1>
+    </div>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="/webdelivery/admin" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Dashboard</a>
+        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menu pubblico</a>
+        <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
+    </div>
+</header>
+
+<main>
+    <h2>Prodotti del menu</h2>
+
+    <#if successo??>
+        <div class="msg-ok">${successo}</div>
+    </#if>
+
+    <#if errore??>
+        <div class="msg-error">${errore}</div>
+    </#if>
+
+    <section class="panel">
+        <#if prodottoEdit??>
+            <h3>Modifica prodotto</h3>
+        <#else>
+            <h3>Aggiungi prodotto</h3>
+        </#if>
+
+        <form action="/webdelivery/admin-prodotti" method="POST">
+            <#if prodottoEdit??>
+                <input type="hidden" name="id" value="${prodottoEdit.id}">
+            </#if>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" required value="<#if prodottoEdit??>${prodottoEdit.name!""}</#if>">
+                </div>
+
+                <div class="form-group">
+                    <label for="categoria">Categoria</label>
+                    <select id="categoria" name="categoria">
+                        <#assign categoriaAttuale = "">
+                        <#if prodottoEdit??>
+                            <#assign categoriaAttuale = prodottoEdit.category!"">
+                        </#if>
+
+                        <option value="Antipasti & Sfizi" <#if categoriaAttuale == "Antipasti & Sfizi">selected</#if>>Antipasti & Sfizi</option>
+                        <option value="Friggitoria" <#if categoriaAttuale == "Friggitoria">selected</#if>>Friggitoria</option>
+                        <option value="Primi Piatti" <#if categoriaAttuale == "Primi Piatti">selected</#if>>Primi Piatti</option>
+                        <option value="Pizze Classiche" <#if categoriaAttuale == "Pizze Classiche">selected</#if>>Pizze Classiche</option>
+                        <option value="Pizze Speciali" <#if categoriaAttuale == "Pizze Speciali">selected</#if>>Pizze Speciali</option>
+                        <option value="Panini & Burger" <#if categoriaAttuale == "Panini & Burger">selected</#if>>Panini & Burger</option>
+                        <option value="Focacce & Piadine" <#if categoriaAttuale == "Focacce & Piadine">selected</#if>>Focacce & Piadine</option>
+                        <option value="Dolci della Casa" <#if categoriaAttuale == "Dolci della Casa">selected</#if>>Dolci della Casa</option>
+                        <option value="Bevande & Birre" <#if categoriaAttuale == "Bevande & Birre">selected</#if>>Bevande & Birre</option>
+                        <option value="Altro" <#if categoriaAttuale == "Altro" || categoriaAttuale == "">selected</#if>>Altro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="prezzo">Prezzo</label>
+                    <input type="number" step="0.01" min="0" id="prezzo" name="prezzo" required value="<#if prodottoEdit??>${prodottoEdit.price!0}</#if>">
+                </div>
+
+                <div class="form-group">
+                    <label for="tempo_preparazione">Tempo preparazione minuti</label>
+                    <input type="number" min="0" id="tempo_preparazione" name="tempo_preparazione" value="<#if prodottoEdit??>${prodottoEdit.preparationTime!0}</#if>">
+                </div>
+
+                <div class="form-group full">
+                    <label for="immagine">Nome file immagine</label>
+                    <input type="text" id="immagine" name="immagine" placeholder="es. margherita.jpg" value="<#if prodottoEdit??>${prodottoEdit.image!""}</#if>">
+                </div>
+
+                <div class="form-group full">
+                    <label for="descrizione">Descrizione</label>
+                    <textarea id="descrizione" name="descrizione"><#if prodottoEdit??>${prodottoEdit.description!""}</#if></textarea>
+                </div>
+
+                <div class="form-group full">
+                    <label for="procedura">Procedura preparazione</label>
+                    <textarea id="procedura" name="procedura"><#if prodottoEdit??>${prodottoEdit.procedure!""}</#if></textarea>
+                </div>
+            </div>
+
+            <div style="margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="submit" class="btn-save">
+                    <#if prodottoEdit??>Salva modifiche<#else>Aggiungi prodotto</#if>
+                </button>
+
+                <#if prodottoEdit??>
+                    <a href="/webdelivery/admin-prodotti" class="btn-small btn-cancel">Annulla modifica</a>
+                </#if>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h3>Gestione ingredienti</h3>
+
+        <div class="ingredient-box">
+            <h3>Nuovo ingrediente</h3>
+            <p class="hint">Aggiungi qui gli ingredienti disponibili, poi li puoi collegare ai prodotti dalla tendina.</p>
+
+            <form action="/webdelivery/admin-prodotti" method="POST">
+                <input type="hidden" name="action" value="add_ingredient_catalog">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nome_ingrediente">Nome ingrediente</label>
+                        <input type="text" id="nome_ingrediente" name="nome_ingrediente" placeholder="es. Mozzarella">
+                    </div>
+
+                    <div class="form-group" style="justify-content: end;">
+                        <button type="submit" class="btn-save">Aggiungi ingrediente</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="ingredient-box">
+            <#if prodottoEdit??>
+                <h3>Ingredienti di ${prodottoEdit.name!""}</h3>
+
+                <form action="/webdelivery/admin-prodotti" method="POST">
+                    <input type="hidden" name="action" value="add_product_ingredient">
+                    <input type="hidden" name="product_id" value="${prodottoEdit.id}">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ingredient_id">Scegli ingrediente</label>
+                            <select id="ingredient_id" name="ingredient_id" required>
+                                <option value="">Seleziona ingrediente</option>
+                                <#if ingredienti?? && ingredienti?has_content>
+                                    <#list ingredienti as ingrediente>
+                                        <option value="${ingrediente.id}">${ingrediente.name!""}</option>
+                                    </#list>
+                                </#if>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantita">Quantità</label>
+                            <input type="text" id="quantita" name="quantita" placeholder="es. 100g, 2 fette, q.b.">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 18px;">
+                        <button type="submit" class="btn-save">Collega ingrediente</button>
+                    </div>
+                </form>
+
+                <#if ingredientiProdotto?? && ingredientiProdotto?has_content>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ingrediente</th>
+                                    <th>Quantità</th>
+                                    <th>Azione</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <#list ingredientiProdotto as ingrediente>
+                                    <tr>
+                                        <td>${ingrediente.nome!""}</td>
+                                        <td>${ingrediente.quantita!""}</td>
+                                        <td>
+                                            <form action="/webdelivery/admin-prodotti" method="POST" style="margin: 0;">
+                                                <input type="hidden" name="action" value="remove_product_ingredient">
+                                                <input type="hidden" name="product_id" value="${prodottoEdit.id}">
+                                                <input type="hidden" name="ingredient_id" value="${ingrediente.id}">
+                                                <button type="submit" class="btn-small btn-delete">Rimuovi</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </#list>
+                            </tbody>
+                        </table>
+                    </div>
+                <#else>
+                    <p class="hint">Questo prodotto non ha ancora ingredienti collegati.</p>
+                </#if>
+            <#else>
+                <h3>Ingredienti del prodotto</h3>
+                <p class="hint">Per collegare ingredienti, premi Modifica su un prodotto esistente. Per un prodotto nuovo, prima salvalo e poi aggiungi gli ingredienti.</p>
+            </#if>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h3>Elenco prodotti</h3>
+
+        <#if prodotti?? && prodotti?has_content>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Prodotto</th>
+                            <th>Categoria</th>
+                            <th>Prezzo</th>
+                            <th>Tempo</th>
+                            <th>Immagine</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list prodotti as prodotto>
+                            <tr>
+                                <td>
+                                    <strong>${prodotto.name!""}</strong><br>
+                                    <span>${prodotto.description!""}</span>
+                                </td>
+                                <td><span class="category">${prodotto.category!"Altro"}</span></td>
+                                <td><span class="price">&euro; ${(prodotto.price!0)?string("0.00")}</span></td>
+                                <td>${prodotto.preparationTime!"0"} min</td>
+                                <td>${prodotto.image!""}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a class="btn-small btn-edit" href="/webdelivery/admin-prodotti?edit=${prodotto.id}">Modifica</a>
+
+                                        <form action="/webdelivery/admin-prodotti" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="${prodotto.id}">
+                                            <button type="submit" class="btn-small btn-delete">Elimina</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </#list>
+                    </tbody>
+                </table>
+            </div>
+        <#else>
+            <p>Non ci sono prodotti nel menu.</p>
+        </#if>
+    </section>
+</main>
+
+<#include "footer.ftl.html">
+
+</body>
+</html>

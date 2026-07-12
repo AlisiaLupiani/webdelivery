@@ -5,10 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 import WebMarket.data.dao.ProductDAO;
 import WebMarket.data.proxy.ProductProxy;
 import framework.data.DAO;
@@ -16,8 +16,6 @@ import framework.data.DataException;
 import framework.data.DataLayer;
 import model.Order;
 import model.Product;
-
-
 
 public class ProductDAOImpl extends DAO implements ProductDAO {
 
@@ -28,10 +26,11 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
     private PreparedStatement sUpdateProduct;
     private PreparedStatement sDeleteProduct;
     private PreparedStatement sOrderProductDetails;
-private PreparedStatement sIngredientsByProduct;
-    
-    private static final String TABLE = "PRODOTTO";
+    private PreparedStatement sIngredientsByProduct;
+    private PreparedStatement sAddIngredientToProduct;
+    private PreparedStatement sRemoveIngredientFromProduct;
 
+    private static final String TABLE = "PRODOTTO";
 
     public ProductDAOImpl(DataLayer d) {
         super(d);
@@ -40,38 +39,65 @@ private PreparedStatement sIngredientsByProduct;
     @Override
     public void init() throws DataException {
         try {
-            super.init(); 
-            
-            sProductById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID=?");
-            
+            super.init();
+
+            sProductById = getConnection().prepareStatement(
+                    "SELECT * FROM " + TABLE + " WHERE ID=?"
+            );
+
             sProductByOrder = getConnection().prepareStatement(
-                "SELECT p.* FROM " + TABLE + " p INNER JOIN ORDINE_PRODOTTO op ON p.ID = op.PRODOTTO_ID WHERE op.ORDINE_ID = ?");
-            
-            sAllProducts = getConnection().prepareStatement("SELECT * FROM " + TABLE);
+                    "SELECT p.* FROM " + TABLE + " p " +
+                    "INNER JOIN ORDINE_PRODOTTO op ON p.ID = op.PRODOTTO_ID " +
+                    "WHERE op.ORDINE_ID = ?"
+            );
+
+            sAllProducts = getConnection().prepareStatement(
+                    "SELECT * FROM " + TABLE + " ORDER BY CATEGORIA, NOME"
+            );
 
             sAddProduct = getConnection().prepareStatement(
-                "INSERT INTO " + TABLE + " (NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIONE, IMMAGINE, VERSION) VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + TABLE + " " +
+                    "(NOME, DESCRIZIONE, PREZZO, PROCEDURA, TEMPO_PREPARAZIONE, IMMAGINE, CATEGORIA, VERSION) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
 
             sUpdateProduct = getConnection().prepareStatement(
-                "UPDATE " + TABLE + " SET NOME=?, PREZZO=?, DESCRIZIONE=?, PROCEDURA=?, TEMPO_PREPARAZIONE=?, IMMAGINE=?, VERSION=? WHERE ID=? AND VERSION=?");
-            
-            sDeleteProduct = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID=?");
+                    "UPDATE " + TABLE + " SET " +
+                    "NOME=?, PREZZO=?, DESCRIZIONE=?, PROCEDURA=?, TEMPO_PREPARAZIONE=?, IMMAGINE=?, CATEGORIA=?, VERSION=? " +
+                    "WHERE ID=? AND VERSION=?"
+            );
+
+            sDeleteProduct = getConnection().prepareStatement(
+                    "DELETE FROM " + TABLE + " WHERE ID=?"
+            );
 
             sOrderProductDetails = getConnection().prepareStatement(
-    "SELECT p.*, op.QUANTITA AS ORDINE_QUANTITA " +
-    "FROM ORDINE_PRODOTTO op " +
-    "JOIN PRODOTTO p ON op.PRODOTTO_ID = p.ID " +
-    "WHERE op.ORDINE_ID = ? " +
-    "ORDER BY p.NOME"
-);
+                    "SELECT p.*, op.QUANTITA AS ORDINE_QUANTITA " +
+                    "FROM ORDINE_PRODOTTO op " +
+                    "JOIN PRODOTTO p ON op.PRODOTTO_ID = p.ID " +
+                    "WHERE op.ORDINE_ID = ? " +
+                    "ORDER BY p.NOME"
+            );
 
-sIngredientsByProduct = getConnection().prepareStatement(
-    "SELECT i.NOME, pi.QUANTITA " +
-    "FROM PRODOTTO_INGREDIENTE pi " +
-    "JOIN INGREDIENTE i ON pi.INGREDIENTE_ID = i.ID " +
-    "WHERE pi.PRODOTTO_ID = ? " +
-    "ORDER BY i.NOME"
-);
+            sIngredientsByProduct = getConnection().prepareStatement(
+                    "SELECT i.ID, i.NOME, pi.QUANTITA " +
+                    "FROM PRODOTTO_INGREDIENTE pi " +
+                    "JOIN INGREDIENTE i ON pi.INGREDIENTE_ID = i.ID " +
+                    "WHERE pi.PRODOTTO_ID = ? " +
+                    "ORDER BY i.NOME"
+            );
+
+            sAddIngredientToProduct = getConnection().prepareStatement(
+                    "INSERT INTO PRODOTTO_INGREDIENTE (PRODOTTO_ID, INGREDIENTE_ID, QUANTITA) " +
+                    "VALUES (?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE QUANTITA = VALUES(QUANTITA)"
+            );
+
+            sRemoveIngredientFromProduct = getConnection().prepareStatement(
+                    "DELETE FROM PRODOTTO_INGREDIENTE WHERE PRODOTTO_ID = ? AND INGREDIENTE_ID = ?"
+            );
+
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductDAO", ex);
         }
@@ -79,25 +105,27 @@ sIngredientsByProduct = getConnection().prepareStatement(
 
     @Override
     public void destroy() throws DataException {
-        try{
-            if(sProductById != null) sProductById.close();
-            if(sProductByOrder != null) sProductByOrder.close();
-            if(sAllProducts != null) sAllProducts.close();
-            if(sAddProduct != null) sAddProduct.close();
-            if(sUpdateProduct != null) sUpdateProduct.close();
-            if(sDeleteProduct != null) sDeleteProduct.close();
+        try {
+            if (sProductById != null) sProductById.close();
+            if (sProductByOrder != null) sProductByOrder.close();
+            if (sAllProducts != null) sAllProducts.close();
+            if (sAddProduct != null) sAddProduct.close();
+            if (sUpdateProduct != null) sUpdateProduct.close();
+            if (sDeleteProduct != null) sDeleteProduct.close();
             if (sOrderProductDetails != null) sOrderProductDetails.close();
-if (sIngredientsByProduct != null) sIngredientsByProduct.close();
+            if (sIngredientsByProduct != null) sIngredientsByProduct.close();
+            if (sAddIngredientToProduct != null) sAddIngredientToProduct.close();
+            if (sRemoveIngredientFromProduct != null) sRemoveIngredientFromProduct.close();
 
             super.destroy();
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             throw new DataException("Errore chiusura ProductDAO", ex);
         }
     }
 
-
     protected Product createProduct(ResultSet rs) throws SQLException {
         ProductProxy p = new ProductProxy(getDataLayer());
+
         p.setKey(rs.getInt("ID"));
         p.setName(rs.getString("NOME"));
         p.setDescription(rs.getString("DESCRIZIONE"));
@@ -111,81 +139,88 @@ if (sIngredientsByProduct != null) sIngredientsByProduct.close();
         p.setClean();
 
         return p;
-    
     }
 
     @Override
     public Product getProductById(int product_key) throws DataException {
-         Product product = null;
-        if(getDataLayer().getCache().has(Product.class, product_key)){
+        Product product = null;
+
+        if (getDataLayer().getCache().has(Product.class, product_key)) {
             product = getDataLayer().getCache().get(Product.class, product_key);
-        }else{
+        } else {
             try {
                 sProductById.setInt(1, product_key);
-                try (ResultSet rs = sProductById.executeQuery()){;
-                    if(rs.next()){
+
+                try (ResultSet rs = sProductById.executeQuery()) {
+                    if (rs.next()) {
                         product = createProduct(rs);
                         getDataLayer().getCache().add(Product.class, product);
                     }
                 }
             } catch (SQLException e) {
                 throw new DataException("Errore getProductById", e);
-
             }
         }
+
         return product;
     }
 
-@Override
-    public List<Product> getProductsByOrder(Order order) throws DataException { 
+    @Override
+    public List<Product> getProductsByOrder(Order order) throws DataException {
         List<Product> products = new ArrayList<>();
+
         try {
-            sProductByOrder.setInt(1, order.getKey()); 
-            
+            sProductByOrder.setInt(1, order.getKey());
+
             try (ResultSet rs = sProductByOrder.executeQuery()) {
                 while (rs.next()) {
-                    Product p = null;
+                    Product p;
                     int productId = rs.getInt("ID");
-                    
-                    if(getDataLayer().getCache().has(Product.class, productId)){
+
+                    if (getDataLayer().getCache().has(Product.class, productId)) {
                         p = getDataLayer().getCache().get(Product.class, productId);
-                    }else{
+                    } else {
                         p = createProduct(rs);
                         getDataLayer().getCache().add(Product.class, p);
                     }
+
                     products.add(p);
                 }
             }
-        } catch(SQLException e){
+        } catch (SQLException e) {
             throw new DataException("Errore getProductsByOrder", e);
         }
+
         return products;
     }
 
     @Override
     public List<Product> getAllProducts() throws DataException {
-        List<Product> res = new ArrayList<>(); 
-        try(ResultSet rs = sAllProducts.executeQuery()){
-            while(rs.next()){ 
+        List<Product> res = new ArrayList<>();
+
+        try (ResultSet rs = sAllProducts.executeQuery()) {
+            while (rs.next()) {
                 Product product;
                 Integer id = rs.getInt("ID");
-                if(getDataLayer().getCache().has(Product.class, id)){
+
+                if (getDataLayer().getCache().has(Product.class, id)) {
                     product = getDataLayer().getCache().get(Product.class, id);
-                }else{
+                } else {
                     product = createProduct(rs);
                     getDataLayer().getCache().add(Product.class, product);
                 }
+
                 res.add(product);
             }
-            
         } catch (SQLException e) {
             throw new DataException("Errore getAllProducts", e);
         }
-        
+
         return res;
     }
 
-    @Override public void addProduct(Product product) throws DataException {
+    @Override
+    public void addProduct(Product product) throws DataException {
         try {
             sAddProduct.setString(1, product.getName());
             sAddProduct.setString(2, product.getDescription());
@@ -193,28 +228,29 @@ if (sIngredientsByProduct != null) sIngredientsByProduct.close();
             sAddProduct.setString(4, product.getProcedure());
             sAddProduct.setInt(5, product.getPreparationTime());
             sAddProduct.setString(6, product.getImage());
+            sAddProduct.setString(7, product.getCategory());
 
             long initialVersion = 1;
-            sAddProduct.setLong(7, initialVersion);
+            sAddProduct.setLong(8, initialVersion);
 
             if (sAddProduct.executeUpdate() == 1) {
-                try(ResultSet resultSet = sAddProduct.getGeneratedKeys()) {
+                try (ResultSet resultSet = sAddProduct.getGeneratedKeys()) {
                     if (resultSet.next()) {
                         Integer newKey = resultSet.getInt(1);
                         product.setKey(newKey);
                         product.setVersion(initialVersion);
                     }
                 }
+
                 getDataLayer().getCache().add(Product.class, product);
             }
         } catch (SQLException e) {
             throw new DataException("Unable to add product", e);
         }
-
     }
 
-
-    @Override public void updateProduct(Product product) throws DataException {
+    @Override
+    public void updateProduct(Product product) throws DataException {
         try {
             sUpdateProduct.setString(1, product.getName());
             sUpdateProduct.setDouble(2, product.getPrice());
@@ -222,75 +258,109 @@ if (sIngredientsByProduct != null) sIngredientsByProduct.close();
             sUpdateProduct.setString(4, product.getProcedure());
             sUpdateProduct.setInt(5, product.getPreparationTime());
             sUpdateProduct.setString(6, product.getImage());
+            sUpdateProduct.setString(7, product.getCategory());
 
             long currentVersion = product.getVersion();
             long nextVersion = currentVersion + 1;
-            sUpdateProduct.setLong(7, nextVersion);
-            sUpdateProduct.setInt(8, product.getKey());
-            sUpdateProduct.setLong(9, currentVersion);
+
+            sUpdateProduct.setLong(8, nextVersion);
+            sUpdateProduct.setInt(9, product.getKey());
+            sUpdateProduct.setLong(10, currentVersion);
 
             if (sUpdateProduct.executeUpdate() == 0) {
                 throw new DataException("Optimistic locking failed: product modified by another process");
-            } else {
-                product.setVersion(nextVersion);
-            }        
-        } catch(SQLException e) {
+            }
+
+            product.setVersion(nextVersion);
+            getDataLayer().getCache().add(Product.class, product);
+
+        } catch (SQLException e) {
             throw new DataException("Unable to update product", e);
         }
-
     }
-    @Override public void deleteProduct(Product product) throws DataException {
+
+    @Override
+    public void deleteProduct(Product product) throws DataException {
         try {
             sDeleteProduct.setInt(1, product.getKey());
+
             if (sDeleteProduct.executeUpdate() > 0) {
                 getDataLayer().getCache().delete(Product.class, product.getKey());
             }
         } catch (SQLException e) {
             throw new DataException("Unable to delete product", e);
         }
-    
     }
 
     @Override
-public List<Map<String, Object>> getOrderProductDetails(Order order) throws DataException {
-    List<Map<String, Object>> result = new ArrayList<>();
+    public List<Map<String, Object>> getOrderProductDetails(Order order) throws DataException {
+        List<Map<String, Object>> result = new ArrayList<>();
 
-    try {
-        sOrderProductDetails.setInt(1, order.getKey());
+        try {
+            sOrderProductDetails.setInt(1, order.getKey());
 
-        try (ResultSet rs = sOrderProductDetails.executeQuery()) {
-            while (rs.next()) {
-                Product prodotto = createProduct(rs);
+            try (ResultSet rs = sOrderProductDetails.executeQuery()) {
+                while (rs.next()) {
+                    Product prodotto = createProduct(rs);
 
-                Map<String, Object> riga = new HashMap<>();
-                riga.put("prodotto", prodotto);
-                riga.put("quantita", rs.getInt("ORDINE_QUANTITA"));
-                riga.put("ingredienti", getIngredientsByProductId(prodotto.getKey()));
+                    Map<String, Object> riga = new HashMap<>();
+                    riga.put("prodotto", prodotto);
+                    riga.put("quantita", rs.getInt("ORDINE_QUANTITA"));
+                    riga.put("ingredienti", getIngredientsByProductId(prodotto.getKey()));
 
-                result.add(riga);
+                    result.add(riga);
+                }
             }
+        } catch (SQLException e) {
+            throw new DataException("Errore recupero dettagli prodotti ordine", e);
         }
-    } catch (SQLException e) {
-        throw new DataException("Errore recupero dettagli prodotti ordine", e);
+
+        return result;
     }
 
-    return result;
-}
+    @Override
+    public List<Map<String, String>> getIngredientsByProductId(int productId) throws DataException {
+        List<Map<String, String>> result = new ArrayList<>();
 
-private List<Map<String, String>> getIngredientsByProductId(int productId) throws SQLException {
-    List<Map<String, String>> result = new ArrayList<>();
+        try {
+            sIngredientsByProduct.setInt(1, productId);
 
-    sIngredientsByProduct.setInt(1, productId);
+            try (ResultSet rs = sIngredientsByProduct.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, String> ingrediente = new HashMap<>();
+                    ingrediente.put("id", String.valueOf(rs.getInt("ID")));
+                    ingrediente.put("nome", rs.getString("NOME"));
+                    ingrediente.put("quantita", rs.getString("QUANTITA"));
+                    result.add(ingrediente);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore recupero ingredienti prodotto", e);
+        }
 
-    try (ResultSet rs = sIngredientsByProduct.executeQuery()) {
-        while (rs.next()) {
-            Map<String, String> ingrediente = new HashMap<>();
-            ingrediente.put("nome", rs.getString("NOME"));
-            ingrediente.put("quantita", rs.getString("QUANTITA"));
-            result.add(ingrediente);
+        return result;
+    }
+
+    @Override
+    public void addIngredientToProduct(int productId, int ingredientId, String quantity) throws DataException {
+        try {
+            sAddIngredientToProduct.setInt(1, productId);
+            sAddIngredientToProduct.setInt(2, ingredientId);
+            sAddIngredientToProduct.setString(3, quantity);
+            sAddIngredientToProduct.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataException("Errore collegamento ingrediente prodotto", e);
         }
     }
 
-    return result;
-}
+    @Override
+    public void removeIngredientFromProduct(int productId, int ingredientId) throws DataException {
+        try {
+            sRemoveIngredientFromProduct.setInt(1, productId);
+            sRemoveIngredientFromProduct.setInt(2, ingredientId);
+            sRemoveIngredientFromProduct.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataException("Errore rimozione ingrediente prodotto", e);
+        }
+    }
 }
