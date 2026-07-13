@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordine Confermato - WebDelivery</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            color: #333;
+        }
+
+        .confirm-page {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .confirm-box {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background-color: #28a745;
+            color: white;
+            font-size: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-box h2 {
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .confirm-box p {
+            color: #666;
+            margin-bottom: 28px;
+        }
+
+        .order-summary {
+            max-width: 620px;
+            margin: 0 auto;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-row span {
+            color: #666;
+        }
+
+        .summary-row strong {
+            color: #333;
+            text-align: right;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 600px) {
+            .confirm-box {
+                padding: 26px 18px;
+            }
+
+            .summary-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .summary-row strong {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+    <h1>WebDelivery</h1>
+
+    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+        <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Home</a>
+        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menù</a>
+        <a href="/webdelivery/cart" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Carrello</a>
+    </div>
+</header>
+
+<main class="confirm-page">
+    <div class="confirm-box">
+        <div class="success-icon">✓</div>
+
+        <h2>Ordine confermato</h2>
+        <p>Grazie! Il tuo ordine è stato registrato correttamente.</p>
+
+        <#if ordine??>
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span>Numero ordine</span>
+                    <strong>#${ordine.id}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Stato</span>
+                    <strong><span class="status-badge">${ordine.orderState!"INSERITO"}</span></strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Data ordine</span>
+                    <strong>${ordine.date!""}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Orario consegna</span>
+                    <strong>${ordine.deliveryTime!""}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Indirizzo consegna</span>
+                    <strong>${ordine.deliveryAddress!""}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Metodo pagamento</span>
+                    <strong>${ordine.paymentMethod!""}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Totale</span>
+                    <strong>€ ${ordine.price!"0.00"}</strong>
+                </div>
+            </div>
+        <#else>
+            <p>Non è stato possibile caricare i dettagli dell'ordine.</p>
+        </#if>
+
+        <div class="actions">
+            <a href="/webdelivery/menu" class="btn">Torna al Menù</a>
+            <a href="/webdelivery/home" class="btn btn-secondary">Home</a>
+        </div>
+    </div>
+</main>
+
+<#include "footer.ftl.html">
+
+</body>
+</html>

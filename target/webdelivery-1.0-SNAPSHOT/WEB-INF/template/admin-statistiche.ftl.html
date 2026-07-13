@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistiche - WebDelivery</title>
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7f6; color: #333; }
+        main { max-width: 1150px; margin: 35px auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
+        .card, .panel { background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+        .card { padding: 22px; }
+        .panel { padding: 26px; margin-top: 24px; }
+        h2, h3 { color: #ff8c00; margin-top: 0; }
+        .label { color: #777; font-weight: bold; font-size: 0.9em; }
+        .value { font-size: 2em; color: #ff8c00; font-weight: bold; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+        th { background: #f1f1f1; }
+        .table-wrap { width: 100%; overflow-x: auto; }
+        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .badge { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #fff3cd; color: #856404; font-weight: bold; }
+        .money { color: #2e7d32; font-weight: bold; }
+        .empty { color: #777; font-style: italic; }
+
+        @media (max-width: 900px) {
+            .grid, .two-columns { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .grid, .two-columns { grid-template-columns: 1fr; }
+            header.navbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="navbar" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center;">
+        <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h1>Statistiche</h1>
+    </div>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="/webdelivery/admin" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Dashboard</a>
+        <a href="/webdelivery/admin-prodotti" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menu</a>
+        <a href="/webdelivery/admin-staff" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Staff</a>
+        <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
+    </div>
+</header>
+
+<main>
+    <h2>Statistiche proprietario</h2>
+
+    <div class="grid">
+        <div class="card">
+            <div class="label">Ordini totali</div>
+            <div class="value">${totaleOrdini!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Ordini attivi</div>
+            <div class="value">${ordiniAttivi!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Ordini consegnati</div>
+            <div class="value">${ordiniConsegnati!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Incasso totale</div>
+            <div class="value">&euro; ${(incassoTotale!0)?string("0.00")}</div>
+        </div>
+    </div>
+
+    <div class="two-columns">
+        <section class="panel">
+            <h3>Ordini per stato</h3>
+
+            <#if ordiniPerStato?? && ordiniPerStato?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Stato</th>
+                                <th>Ordini</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list ordiniPerStato as riga>
+                                <tr>
+                                    <td><span class="badge">${riga.stato!""}</span></td>
+                                    <td>${riga.quantita!0}</td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Nessun dato disponibile.</p>
+            </#if>
+        </section>
+
+        <section class="panel">
+            <h3>Metodi di pagamento</h3>
+
+            <#if pagamenti?? && pagamenti?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metodo</th>
+                                <th>Ordini</th>
+                                <th>Incasso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list pagamenti as riga>
+                                <tr>
+                                    <td>${riga.metodo!""}</td>
+                                    <td>${riga.ordini!0}</td>
+                                    <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Nessun dato disponibile.</p>
+            </#if>
+        </section>
+    </div>
+
+    <section class="panel">
+        <h3>Prodotti piu venduti</h3>
+
+        <#if prodottiVenduti?? && prodottiVenduti?has_content>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Prodotto</th>
+                            <th>Categoria</th>
+                            <th>Quantita venduta</th>
+                            <th>Incasso stimato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list prodottiVenduti as riga>
+                            <tr>
+                                <td><strong>${riga.nome!""}</strong></td>
+                                <td>${riga.categoria!"Altro"}</td>
+                                <td>${riga.quantita!0}</td>
+                                <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                            </tr>
+                        </#list>
+                    </tbody>
+                </table>
+            </div>
+        <#else>
+            <p class="empty">Non ci sono prodotti venduti.</p>
+        </#if>
+    </section>
+
+    <section class="panel">
+        <h3>Incasso per giorno</h3>
+
+        <#if incassoPerGiorno?? && incassoPerGiorno?has_content>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Ordini</th>
+                            <th>Incasso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list incassoPerGiorno as riga>
+                            <tr>
+                                <td>${riga.data!""}</td>
+                                <td>${riga.ordini!0}</td>
+                                <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                            </tr>
+                        </#list>
+                    </tbody>
+                </table>
+            </div>
+        <#else>
+            <p class="empty">Non ci sono ordini.</p>
+        </#if>
+    </section>
+
+    <div class="two-columns">
+        <section class="panel">
+            <h3>Vendite per categoria</h3>
+
+            <#if categorie?? && categorie?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Quantita</th>
+                                <th>Incasso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list categorie as riga>
+                                <tr>
+                                    <td>${riga.categoria!"Altro"}</td>
+                                    <td>${riga.quantita!0}</td>
+                                    <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Nessun dato disponibile.</p>
+            </#if>
+        </section>
+
+        <section class="panel">
+            <h3>Clienti piu attivi</h3>
+
+            <#if clienti?? && clienti?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Ordini</th>
+                                <th>Totale speso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list clienti as riga>
+                                <tr>
+                                    <td>
+                                        <strong>${riga.nome!""}</strong><br>
+                                        <span>${riga.email!""}</span>
+                                    </td>
+                                    <td>${riga.ordini!0}</td>
+                                    <td><span class="money">&euro; ${(riga.speso!0)?string("0.00")}</span></td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Nessun cliente disponibile.</p>
+            </#if>
+        </section>
+    </div>
+</main>
+
+<#include "footer.ftl.html">
+
+</body>
+</html>

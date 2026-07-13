@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestione Staff - WebDelivery</title>
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7f6; color: #333; }
+        main { max-width: 1050px; margin: 35px auto; padding: 0 20px; }
+        .panel { background: white; padding: 26px; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); margin-top: 22px; }
+        h2, h3 { color: #ff8c00; margin-top: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-weight: bold; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background: #f1f1f1; }
+        .btn-save { background: #ff8c00; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-small { display: inline-block; padding: 8px 12px; border-radius: 5px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; font-size: 14px; }
+        .btn-edit { background: #ff8c00; color: white; }
+        .btn-delete { background: #c62828; color: white; }
+        .btn-cancel { background: #777; color: white; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .msg-ok { background: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 6px; margin-bottom: 18px; border: 1px solid #c8e6c9; }
+        .msg-error { background: #ffebee; color: #c62828; padding: 12px; border-radius: 6px; margin-bottom: 18px; border: 1px solid #ffcdd2; }
+        .hint { color: #777; margin-top: 8px; }
+        @media (max-width: 800px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="navbar" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center;">
+        <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h1>Gestione Staff</h1>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+        <a href="/webdelivery/admin" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Dashboard</a>
+        <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
+    </div>
+</header>
+
+<main>
+    <h2>Account staff</h2>
+
+    <#if successo??>
+        <div class="msg-ok">${successo}</div>
+    </#if>
+
+    <#if errore??>
+        <div class="msg-error">${errore}</div>
+    </#if>
+
+    <section class="panel">
+        <#if staffEdit??>
+            <h3>Modifica staff</h3>
+        <#else>
+            <h3>Aggiungi staff</h3>
+        </#if>
+
+        <form action="/webdelivery/admin-staff" method="POST">
+            <#if staffEdit??>
+                <input type="hidden" name="id" value="${staffEdit.key}">
+            </#if>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" required value="<#if staffEdit??>${staffEdit.name!""}</#if>">
+                </div>
+
+                <div class="form-group">
+                    <label for="cognome">Cognome</label>
+                    <input type="text" id="cognome" name="cognome" required value="<#if staffEdit??>${staffEdit.surname!""}</#if>">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required value="<#if staffEdit??>${staffEdit.email!""}</#if>">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" <#if !staffEdit??>required</#if>>
+                    <#if staffEdit??>
+                        <small class="hint">Lascia vuoto per mantenere la password attuale.</small>
+                    </#if>
+                </div>
+            </div>
+
+            <div style="margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="submit" class="btn-save">
+                    <#if staffEdit??>Salva modifiche<#else>Crea staff</#if>
+                </button>
+
+                <#if staffEdit??>
+                    <a href="/webdelivery/admin-staff" class="btn-small btn-cancel">Annulla modifica</a>
+                </#if>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h3>Staff registrato</h3>
+
+        <#if staffList?? && staffList?has_content>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Ruolo</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <#list staffList as staff>
+                        <tr>
+                            <td>${staff.name!""} ${staff.surname!""}</td>
+                            <td>${staff.email!""}</td>
+                            <td>STAFF</td>
+                            <td>
+                                <div class="actions">
+                                    <form action="/webdelivery/admin-staff" method="GET" style="margin: 0;">
+                                        <input type="hidden" name="edit" value="${staff.key}">
+                                        <button type="submit" class="btn-small btn-edit">Modifica</button>
+                                    </form>
+
+                                    <form action="/webdelivery/admin-staff" method="POST" style="margin: 0;">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="${staff.key}">
+                                        <button type="submit" class="btn-small btn-delete">Elimina</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </#list>
+                </tbody>
+            </table>
+        <#else>
+            <p>Non ci sono account staff.</p>
+        </#if>
+    </section>
+</main>
+
+<#include "footer.ftl.html">
+
+</body>
+</html>

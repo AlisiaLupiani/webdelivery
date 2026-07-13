@@ -96,4 +96,6 @@ model\Order.class
 model\OrderState.class
 framework\data\DataException.class
 WebMarket\Controller\HomeServlet.class
+WebMarket\Controller\AdminStaffServlet.class
 model\modelImpl\OrderImpl.class
+WebMarket\Controller\AdminStatisticheServlet.class

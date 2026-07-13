@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - WebDelivery</title>
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7f6; color: #333; }
+        main { max-width: 1150px; margin: 35px auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
+        .card, .panel { background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+        .card { padding: 22px; }
+        .panel { padding: 26px; margin-top: 24px; }
+        .label { color: #777; font-weight: bold; font-size: 0.9em; }
+        .value { font-size: 2em; color: #ff8c00; font-weight: bold; margin-top: 8px; }
+        h2, h3 { color: #ff8c00; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background: #f1f1f1; }
+        .badge { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #fff3cd; color: #856404; font-weight: bold; }
+        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .quick-card { border: 1px solid #eee; border-radius: 8px; padding: 18px; background: #fff; }
+        .quick-card strong { display: block; color: #333; margin-bottom: 8px; }
+        .quick-card span { color: #777; font-size: 0.95em; }
+        .quick-link { display: block; text-decoration: none; color: inherit; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+        .quick-link:hover { transform: translateY(-2px); border-color: #ff8c00; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+        .state-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        @media (max-width: 900px) {
+            .grid, .quick-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 600px) {
+            .grid, .quick-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="navbar" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center;">
+        <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h1>WebDelivery Admin</h1>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menu</a>
+        <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
+    </div>
+</header>
+
+<main>
+    <h2>Dashboard proprietario</h2>
+
+    <div class="grid">
+        <div class="card">
+            <div class="label">Ordini totali</div>
+            <div class="value">${totaleOrdini!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Ordini attivi</div>
+            <div class="value">${ordiniAttivi!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Prodotti menu</div>
+            <div class="value">${totaleProdotti!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Incasso totale</div>
+            <div class="value">€ ${(incassoTotale!0)?string("0.00")}</div>
+        </div>
+    </div>
+
+    <section class="panel">
+        <h3>Gestione</h3>
+
+        <div class="quick-grid">
+            <a class="quick-card quick-link" href="/webdelivery/admin-prodotti">
+                <strong>Gestione menu</strong>
+                <span>Prodotti, prezzi, categorie e tempi di preparazione.</span>
+            </a>
+
+            <a class="quick-card quick-link" href="/webdelivery/admin-staff">
+                <strong>Gestione staff</strong>
+                <span>Creazione e controllo degli account del personale.</span>
+            </a>
+
+            <a class="quick-card quick-link" href="/webdelivery/admin-statistiche">
+                <strong>Statistiche</strong>
+                <span>Vendite, ordini per giorno e prodotti più richiesti.</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h3>Stato ordini</h3>
+
+        <#if ordiniPerStato??>
+            <#list ordiniPerStato?keys as stato>
+                <div class="state-row">
+                    <strong>${stato}</strong>
+                    <span>${ordiniPerStato[stato]}</span>
+                </div>
+            </#list>
+        </#if>
+    </section>
+
+    <section class="panel">
+        <h3>Utenti</h3>
+
+        <div class="grid">
+            <div class="card">
+                <div class="label">Clienti</div>
+                <div class="value">${totaleClienti!0}</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Staff</div>
+                <div class="value">${totaleStaff!0}</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Admin</div>
+                <div class="value">${totaleAdmin!0}</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Utenti totali</div>
+                <div class="value">${totaleUtenti!0}</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h3>Ultimi ordini</h3>
+
+        <#if ultimiOrdini?? && ultimiOrdini?has_content>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ordine</th>
+                        <th>Data</th>
+                        <th>Consegna</th>
+                        <th>Stato</th>
+                        <th>Totale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <#list ultimiOrdini as ordine>
+                        <tr>
+                            <td>#${ordine.id}</td>
+                            <td>${ordine.date!""}</td>
+                            <td>${ordine.deliveryTime!""}</td>
+                            <td><span class="badge">${ordine.orderState!""}</span></td>
+                            <td>€ ${(ordine.price!0)?string("0.00")}</td>
+                        </tr>
+                    </#list>
+                </tbody>
+            </table>
+        <#else>
+            <p>Non ci sono ancora ordini.</p>
+        </#if>
+    </section>
+</main>
+
+<#include "footer.ftl.html">
+
+</body>
+</html>
