@@ -1,5 +1,7 @@
 package WebMarket.Controller;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -44,13 +46,22 @@ public class AdminStatisticheServlet extends WebDeliveryBaseController {
 
         List<Order> ordini = orderDAO.getAllOrders();
 
+        LocalDate dataSelezionata = resolveDataSelezionata(request.getParameter("data"), ordini);
+        YearMonth meseSelezionato = YearMonth.from(dataSelezionata);
+
         int ordiniAttivi = 0;
         int ordiniConsegnati = 0;
+        int ordiniGiornoSelezionato = 0;
+        int ordiniMeseSelezionato = 0;
+
         double incassoTotale = 0.0;
         double incassoConsegnato = 0.0;
+        double incassoGiornoSelezionato = 0.0;
+        double incassoMeseSelezionato = 0.0;
 
         Map<String, Map<String, Object>> ordiniPerStato = new LinkedHashMap<>();
         Map<String, Map<String, Object>> incassoPerGiorno = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> incassoPerMese = new LinkedHashMap<>();
         Map<String, Map<String, Object>> prodottiVenduti = new LinkedHashMap<>();
         Map<String, Map<String, Object>> categorie = new LinkedHashMap<>();
         Map<String, Map<String, Object>> clienti = new LinkedHashMap<>();
@@ -80,20 +91,49 @@ public class AdminStatisticheServlet extends WebDeliveryBaseController {
                 row.put("quantita", getInt(row, "quantita") + 1);
             }
 
-            String data = ordine.getDate() != null ? ordine.getDate().toString() : "Senza data";
-            Map<String, Object> giornoRow = incassoPerGiorno.get(data);
-            if (giornoRow == null) {
-                giornoRow = new LinkedHashMap<>();
-                giornoRow.put("data", data);
-                giornoRow.put("ordini", 0);
-                giornoRow.put("incasso", 0.0);
-                incassoPerGiorno.put(data, giornoRow);
+            LocalDate dataOrdine = ordine.getDate();
+
+            if (dataOrdine != null) {
+                YearMonth meseOrdine = YearMonth.from(dataOrdine);
+
+                String meseKey = meseOrdine.toString();
+                Map<String, Object> meseRow = incassoPerMese.get(meseKey);
+                if (meseRow == null) {
+                    meseRow = new LinkedHashMap<>();
+                    meseRow.put("mese", meseKey);
+                    meseRow.put("ordini", 0);
+                    meseRow.put("incasso", 0.0);
+                    incassoPerMese.put(meseKey, meseRow);
+                }
+                meseRow.put("ordini", getInt(meseRow, "ordini") + 1);
+                meseRow.put("incasso", getDouble(meseRow, "incasso") + prezzoOrdine);
+
+                if (dataOrdine.equals(dataSelezionata)) {
+                    ordiniGiornoSelezionato++;
+                    incassoGiornoSelezionato += prezzoOrdine;
+                }
+
+                if (meseOrdine.equals(meseSelezionato)) {
+                    ordiniMeseSelezionato++;
+                    incassoMeseSelezionato += prezzoOrdine;
+
+                    String dataKey = dataOrdine.toString();
+                    Map<String, Object> giornoRow = incassoPerGiorno.get(dataKey);
+                    if (giornoRow == null) {
+                        giornoRow = new LinkedHashMap<>();
+                        giornoRow.put("data", dataKey);
+                        giornoRow.put("ordini", 0);
+                        giornoRow.put("incasso", 0.0);
+                        incassoPerGiorno.put(dataKey, giornoRow);
+                    }
+                    giornoRow.put("ordini", getInt(giornoRow, "ordini") + 1);
+                    giornoRow.put("incasso", getDouble(giornoRow, "incasso") + prezzoOrdine);
+                }
             }
-            giornoRow.put("ordini", getInt(giornoRow, "ordini") + 1);
-            giornoRow.put("incasso", getDouble(giornoRow, "incasso") + prezzoOrdine);
 
             PaymentMethod metodo = ordine.getPaymentMethod();
             String metodoPagamento = metodo != null ? metodo.name() : "NON_SPECIFICATO";
+
             Map<String, Object> pagamentoRow = pagamenti.get(metodoPagamento);
             if (pagamentoRow == null) {
                 pagamentoRow = new LinkedHashMap<>();
@@ -107,6 +147,7 @@ public class AdminStatisticheServlet extends WebDeliveryBaseController {
 
             Client cliente = ordine.getClient();
             String clienteKey = cliente != null ? String.valueOf(cliente.getKey()) : "0";
+
             Map<String, Object> clienteRow = clienti.get(clienteKey);
             if (clienteRow == null) {
                 clienteRow = new LinkedHashMap<>();
@@ -133,6 +174,7 @@ public class AdminStatisticheServlet extends WebDeliveryBaseController {
                 double incassoProdotto = prezzoProdotto * quantita;
 
                 String prodottoKey = String.valueOf(prodotto.getKey());
+
                 Map<String, Object> prodottoRow = prodottiVenduti.get(prodottoKey);
                 if (prodottoRow == null) {
                     prodottoRow = new LinkedHashMap<>();
@@ -163,10 +205,20 @@ public class AdminStatisticheServlet extends WebDeliveryBaseController {
         }
 
         List<Map<String, Object>> prodottiRows = new ArrayList<>(prodottiVenduti.values());
-        prodottiRows.sort(Comparator.comparingInt(row -> -getInt(row, "quantita")));
+        prodottiRows.sort((a, b) -> Integer.compare(getInt(b, "quantita"), getInt(a, "quantita")));
+
+        List<Map<String, Object>> prodottiMenoRows = new ArrayList<>(prodottiVenduti.values());
+        prodottiMenoRows.sort((a, b) -> Integer.compare(getInt(a, "quantita"), getInt(b, "quantita")));
 
         List<Map<String, Object>> clientiRows = new ArrayList<>(clienti.values());
-        clientiRows.sort(Comparator.comparingDouble(row -> -getDouble(row, "speso")));
+        clientiRows.sort((a, b) -> Double.compare(getDouble(b, "speso"), getDouble(a, "speso")));
+
+        request.setAttribute("dataSelezionata", dataSelezionata.toString());
+        request.setAttribute("meseSelezionato", meseSelezionato.toString());
+        request.setAttribute("ordiniGiornoSelezionato", ordiniGiornoSelezionato);
+        request.setAttribute("incassoGiornoSelezionato", incassoGiornoSelezionato);
+        request.setAttribute("ordiniMeseSelezionato", ordiniMeseSelezionato);
+        request.setAttribute("incassoMeseSelezionato", incassoMeseSelezionato);
 
         request.setAttribute("totaleOrdini", ordini.size());
         request.setAttribute("ordiniAttivi", ordiniAttivi);
@@ -175,13 +227,32 @@ public class AdminStatisticheServlet extends WebDeliveryBaseController {
         request.setAttribute("incassoConsegnato", incassoConsegnato);
         request.setAttribute("ordiniPerStato", new ArrayList<>(ordiniPerStato.values()));
         request.setAttribute("incassoPerGiorno", new ArrayList<>(incassoPerGiorno.values()));
+        request.setAttribute("incassoPerMese", new ArrayList<>(incassoPerMese.values()));
         request.setAttribute("prodottiVenduti", prodottiRows);
+        request.setAttribute("prodottiMenoVenduti", prodottiMenoRows);
         request.setAttribute("categorie", new ArrayList<>(categorie.values()));
         request.setAttribute("clienti", clientiRows);
         request.setAttribute("pagamenti", new ArrayList<>(pagamenti.values()));
 
         TemplateResult templateEngine = new TemplateResult(getServletContext());
         templateEngine.activate("admin-statistiche.ftl.html", request, response);
+    }
+
+    private LocalDate resolveDataSelezionata(String dataParam, List<Order> ordini) {
+        if (dataParam != null && !dataParam.isBlank()) {
+            try {
+                return LocalDate.parse(dataParam);
+            } catch (Exception ignored) {
+            }
+        }
+
+        for (Order ordine : ordini) {
+            if (ordine.getDate() != null) {
+                return ordine.getDate();
+            }
+        }
+
+        return LocalDate.now();
     }
 
     private int getQuantity(Object value) {

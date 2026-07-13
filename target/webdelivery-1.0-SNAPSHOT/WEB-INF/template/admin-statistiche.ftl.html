@@ -4,34 +4,236 @@
     <meta charset="UTF-8">
     <title>Statistiche - WebDelivery</title>
     <link rel="stylesheet" href="/webdelivery/style/prova.css">
-    <style>
-        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7f6; color: #333; }
-        main { max-width: 1150px; margin: 35px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
-        .card, .panel { background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
-        .card { padding: 22px; }
-        .panel { padding: 26px; margin-top: 24px; }
-        h2, h3 { color: #ff8c00; margin-top: 0; }
-        .label { color: #777; font-weight: bold; font-size: 0.9em; }
-        .value { font-size: 2em; color: #ff8c00; font-weight: bold; margin-top: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
-        th { background: #f1f1f1; }
-        .table-wrap { width: 100%; overflow-x: auto; }
-        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .badge { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #fff3cd; color: #856404; font-weight: bold; }
-        .money { color: #2e7d32; font-weight: bold; }
-        .empty { color: #777; font-style: italic; }
+   <style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f7f6;
+        color: #333;
+    }
 
-        @media (max-width: 900px) {
-            .grid, .two-columns { grid-template-columns: 1fr 1fr; }
+    main {
+        max-width: 1150px;
+        margin: 35px auto;
+        padding: 0 20px;
+    }
+
+    h2 {
+        color: #ff8c00;
+        margin: 0 0 28px;
+        text-align: center;
+        font-size: 2.1em;
+    }
+
+    h3 {
+        color: #ff8c00;
+        margin: 0 0 22px;
+    }
+
+    .panel {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        padding: 26px;
+        margin: 28px 0;
+    }
+
+    .card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        padding: 22px;
+        min-height: 105px;
+        box-sizing: border-box;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+        margin: 28px 0;
+    }
+
+    .two-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        margin: 28px 0;
+        align-items: start;
+    }
+
+    .label {
+        color: #777;
+        font-weight: bold;
+        font-size: 0.95em;
+    }
+
+    .value {
+        font-size: 2em;
+        color: #ff8c00;
+        font-weight: bold;
+        margin-top: 10px;
+        line-height: 1.15;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 18px;
+        background: white;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th {
+        background: #f1f1f1;
+        color: #333;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #fff3cd;
+        color: #856404;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .money {
+        color: #2e7d32;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .empty {
+        color: #777;
+        font-style: italic;
+        margin-bottom: 0;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        margin-bottom: 18px;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .filter-group label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    .filter-group input {
+        padding: 11px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 15px;
+        min-width: 180px;
+        box-sizing: border-box;
+    }
+
+    .filter-btn,
+    .reset-link {
+        display: inline-block;
+        padding: 12px 18px;
+        border-radius: 6px;
+        border: none;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .filter-btn {
+        background: #ff8c00;
+        color: white;
+    }
+
+    .filter-btn:hover {
+        background: #e07b00;
+    }
+
+    .reset-link {
+        background: #eee;
+        color: #333;
+    }
+
+    .reset-link:hover {
+        background: #ddd;
+    }
+
+    .selected-month {
+        color: #777;
+        margin: 8px 0 0;
+        font-size: 1em;
+    }
+
+    @media (max-width: 900px) {
+        .grid,
+        .two-columns {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        main {
+            margin: 24px auto;
+            padding: 0 14px;
         }
 
-        @media (max-width: 600px) {
-            .grid, .two-columns { grid-template-columns: 1fr; }
-            header.navbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+        h2 {
+            font-size: 1.7em;
         }
-    </style>
+
+        .grid,
+        .two-columns {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .panel {
+            padding: 20px;
+            margin: 22px 0;
+        }
+
+        header.navbar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .filter-form {
+            align-items: stretch;
+        }
+
+        .filter-group input,
+        .filter-btn,
+        .reset-link {
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+    }
+</style>
 </head>
 <body>
 
@@ -45,12 +247,31 @@
         <a href="/webdelivery/admin" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Dashboard</a>
         <a href="/webdelivery/admin-prodotti" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menu</a>
         <a href="/webdelivery/admin-staff" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Staff</a>
+        <a href="/webdelivery/admin-ordini" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Ordini</a>
         <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
     </div>
 </header>
 
 <main>
     <h2>Statistiche proprietario</h2>
+
+    <section class="panel">
+        <h3>Filtro incassi</h3>
+
+        <form action="/webdelivery/admin-statistiche" method="GET" class="filter-form">
+            <div class="filter-group">
+                <label for="data">Data riferimento</label>
+                <input type="date" id="data" name="data" value="${dataSelezionata!''}">
+            </div>
+
+            <button type="submit" class="filter-btn">Aggiorna</button>
+            <a href="/webdelivery/admin-statistiche" class="reset-link">Ultima data disponibile</a>
+        </form>
+
+        <p class="selected-month">
+            Mese analizzato: <strong>${meseSelezionato!""}</strong>
+        </p>
+    </section>
 
     <div class="grid">
         <div class="card">
@@ -71,6 +292,28 @@
         <div class="card">
             <div class="label">Incasso totale</div>
             <div class="value">&euro; ${(incassoTotale!0)?string("0.00")}</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="label">Ordini del giorno</div>
+            <div class="value">${ordiniGiornoSelezionato!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Incasso del giorno</div>
+            <div class="value">&euro; ${(incassoGiornoSelezionato!0)?string("0.00")}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Ordini del mese</div>
+            <div class="value">${ordiniMeseSelezionato!0}</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Incasso del mese</div>
+            <div class="value">&euro; ${(incassoMeseSelezionato!0)?string("0.00")}</div>
         </div>
     </div>
 
@@ -132,65 +375,129 @@
         </section>
     </div>
 
-    <section class="panel">
-        <h3>Prodotti piu venduti</h3>
+    <div class="two-columns">
+        <section class="panel">
+            <h3>Incasso giornaliero nel mese selezionato</h3>
 
-        <#if prodottiVenduti?? && prodottiVenduti?has_content>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Prodotto</th>
-                            <th>Categoria</th>
-                            <th>Quantita venduta</th>
-                            <th>Incasso stimato</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <#list prodottiVenduti as riga>
+            <#if incassoPerGiorno?? && incassoPerGiorno?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
                             <tr>
-                                <td><strong>${riga.nome!""}</strong></td>
-                                <td>${riga.categoria!"Altro"}</td>
-                                <td>${riga.quantita!0}</td>
-                                <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                <th>Data</th>
+                                <th>Ordini</th>
+                                <th>Incasso</th>
                             </tr>
-                        </#list>
-                    </tbody>
-                </table>
-            </div>
-        <#else>
-            <p class="empty">Non ci sono prodotti venduti.</p>
-        </#if>
-    </section>
+                        </thead>
+                        <tbody>
+                            <#list incassoPerGiorno as riga>
+                                <tr>
+                                    <td>${riga.data!""}</td>
+                                    <td>${riga.ordini!0}</td>
+                                    <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Non ci sono ordini nel mese selezionato.</p>
+            </#if>
+        </section>
 
-    <section class="panel">
-        <h3>Incasso per giorno</h3>
+        <section class="panel">
+            <h3>Incasso mensile</h3>
 
-        <#if incassoPerGiorno?? && incassoPerGiorno?has_content>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Ordini</th>
-                            <th>Incasso</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <#list incassoPerGiorno as riga>
+            <#if incassoPerMese?? && incassoPerMese?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>${riga.data!""}</td>
-                                <td>${riga.ordini!0}</td>
-                                <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                <th>Mese</th>
+                                <th>Ordini</th>
+                                <th>Incasso</th>
                             </tr>
-                        </#list>
-                    </tbody>
-                </table>
-            </div>
-        <#else>
-            <p class="empty">Non ci sono ordini.</p>
-        </#if>
-    </section>
+                        </thead>
+                        <tbody>
+                            <#list incassoPerMese as riga>
+                                <tr>
+                                    <td>${riga.mese!""}</td>
+                                    <td>${riga.ordini!0}</td>
+                                    <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Non ci sono ordini.</p>
+            </#if>
+        </section>
+    </div>
+
+    <div class="two-columns">
+        <section class="panel">
+            <h3>Prodotti piu venduti</h3>
+
+            <#if prodottiVenduti?? && prodottiVenduti?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Prodotto</th>
+                                <th>Categoria</th>
+                                <th>Quantita</th>
+                                <th>Incasso stimato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list prodottiVenduti as riga>
+                                <tr>
+                                    <td><strong>${riga.nome!""}</strong></td>
+                                    <td>${riga.categoria!"Altro"}</td>
+                                    <td>${riga.quantita!0}</td>
+                                    <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Non ci sono prodotti venduti.</p>
+            </#if>
+        </section>
+
+        <section class="panel">
+            <h3>Prodotti meno venduti</h3>
+
+            <#if prodottiMenoVenduti?? && prodottiMenoVenduti?has_content>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Prodotto</th>
+                                <th>Categoria</th>
+                                <th>Quantita</th>
+                                <th>Incasso stimato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list prodottiMenoVenduti as riga>
+                                <tr>
+                                    <td><strong>${riga.nome!""}</strong></td>
+                                    <td>${riga.categoria!"Altro"}</td>
+                                    <td>${riga.quantita!0}</td>
+                                    <td><span class="money">&euro; ${(riga.incasso!0)?string("0.00")}</span></td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <p class="empty">Non ci sono prodotti venduti.</p>
+            </#if>
+        </section>
+    </div>
 
     <div class="two-columns">
         <section class="panel">

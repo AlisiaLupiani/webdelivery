@@ -5,6 +5,7 @@ import java.util.List;
 import WebMarket.data.dao.OrderDAO;
 import WebMarket.data.dao.UserDAO;
 import framework.data.DataLayer;
+import framework.security.SecurityHelpers;
 import framework.view.TemplateResult;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -117,9 +118,7 @@ public class ProfiloServlet extends WebDeliveryBaseController {
             return;
         }
 
-        // Scelta temporanea di progetto: il database di sviluppo contiene password
-        // in chiaro per mantenere accessibili gli utenti di test esistenti.
-        if (!vecchiaPassword.equals(cliente.getPassword())) {
+        if (!isPasswordValid(vecchiaPassword, cliente.getPassword())) {
             request.setAttribute("errore", "La vecchia password non e' corretta.");
             mostraProfilo(request, response, orderDAO, cliente);
             return;
@@ -131,7 +130,7 @@ public class ProfiloServlet extends WebDeliveryBaseController {
             return;
         }
 
-        cliente.setPassword(nuovaPassword);
+        cliente.setPassword(SecurityHelpers.getPasswordHashPBKDF2(nuovaPassword));
         userDAO.updateUser(cliente);
 
         response.sendRedirect("profilo?success=password");
@@ -158,6 +157,23 @@ public class ProfiloServlet extends WebDeliveryBaseController {
 
         TemplateResult templateEngine = new TemplateResult(getServletContext());
         templateEngine.activate("profilo.ftl.html", request, response);
+    }
+
+    private boolean isPasswordValid(String submittedPassword, String storedPassword) throws Exception {
+        if (submittedPassword == null || storedPassword == null) {
+            return false;
+        }
+
+        if (isPBKDF2Hash(storedPassword)) {
+            return SecurityHelpers.checkPasswordHashPBKDF2(submittedPassword, storedPassword);
+        }
+
+        // Compatibilita' temporanea con gli utenti vecchi ancora salvati in chiaro.
+        return submittedPassword.equals(storedPassword);
+    }
+
+    private boolean isPBKDF2Hash(String password) {
+        return password != null && password.matches("^[0-9a-fA-F]{96}$");
     }
 
     private String normalize(String value) {

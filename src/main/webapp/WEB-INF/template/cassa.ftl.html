@@ -110,6 +110,23 @@
             font-family: inherit;
         }
 
+        .error-msg {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ffcdd2;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .delivery-hint {
+            color: #777;
+            font-size: 14px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
         .btn-confirm {
             width: 100%;
             margin-top: 22px;
@@ -122,6 +139,11 @@
 
         .btn-confirm:hover {
             background-color: #218838;
+        }
+
+        .btn-confirm:disabled {
+            background-color: #bdbdbd;
+            cursor: not-allowed;
         }
 
         .btn-back {
@@ -154,7 +176,7 @@
 
     <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
         <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Home</a>
-        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menù</a>
+        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menu</a>
         <a href="/webdelivery/cart" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Carrello</a>
     </div>
 </header>
@@ -189,7 +211,7 @@
                                     <#if item.opzioniScelte?has_content>
                                         <ul class="options-list">
                                             <#list item.opzioniScelte as opzione>
-                                                <li>${opzione.name!""} (+ € ${opzione.addictionalPrice!"0.00"})</li>
+                                                <li>${opzione.name!""} (+ &euro; ${opzione.addictionalPrice!"0.00"})</li>
                                             </#list>
                                         </ul>
                                     <#else>
@@ -198,17 +220,21 @@
                                 </td>
 
                                 <td>${item.quantita}</td>
-                                <td>€ ${item.prezzoTotaleRiga}</td>
+                                <td>&euro; ${item.prezzoTotaleRiga}</td>
                             </tr>
                         </#list>
                     </tbody>
                 </table>
 
-                <a href="/webdelivery/cart" class="btn-back">← Torna al carrello</a>
+                <a href="/webdelivery/cart" class="btn-back">Torna al carrello</a>
             </section>
 
             <aside class="checkout-box">
                 <h2>Dati consegna</h2>
+
+                <#if erroreOrario??>
+                    <div class="error-msg">${erroreOrario}</div>
+                </#if>
 
                 <div class="summary-row">
                     <span>Tempo stimato</span>
@@ -217,7 +243,7 @@
 
                 <div class="summary-row summary-total">
                     <span>Totale</span>
-                    <strong>€ ${carrello.prezzoTotaleCarrello}</strong>
+                    <strong>&euro; ${carrello.prezzoTotaleCarrello}</strong>
                 </div>
 
                 <form action="/webdelivery/cassa" method="POST">
@@ -227,7 +253,7 @@
                                id="indirizzo"
                                name="indirizzo"
                                required
-                               value="<#if cliente??>${cliente.address!''}</#if>">
+                               value="${indirizzoInserito!cliente.address!''}">
                     </div>
 
                     <div class="form-group">
@@ -235,20 +261,34 @@
                         <input type="time"
                                id="orario_consegna"
                                name="orario_consegna"
-                               required>
+                               required
+                               min="${orarioMinimo!''}"
+                               max="${orarioChiusura!''}"
+                               value="${orarioInserito!orarioMinimo!''}">
+
+                        <p class="delivery-hint">
+                            Puoi scegliere un orario tra
+                            <strong>${orarioMinimo!""}</strong>
+                            e
+                            <strong>${orarioChiusura!""}</strong>.
+                        </p>
                     </div>
 
                     <div class="form-group">
                         <label for="metodo_pagamento">Metodo di pagamento</label>
                         <select id="metodo_pagamento" name="metodo_pagamento" required>
-                            <option value="CASH">Contanti alla consegna</option>
-                            <option value="VISA">Carta Visa</option>
-                            <option value="MASTERCARD">Mastercard</option>
-                            <option value="PAYPAL">PayPal</option>
+                            <option value="CASH" <#if metodoPagamentoInserito?? && metodoPagamentoInserito == "CASH">selected</#if>>Contanti alla consegna</option>
+                            <option value="VISA" <#if metodoPagamentoInserito?? && metodoPagamentoInserito == "VISA">selected</#if>>Carta Visa</option>
+                            <option value="MASTERCARD" <#if metodoPagamentoInserito?? && metodoPagamentoInserito == "MASTERCARD">selected</#if>>Mastercard</option>
+                            <option value="PAYPAL" <#if metodoPagamentoInserito?? && metodoPagamentoInserito == "PAYPAL">selected</#if>>PayPal</option>
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-confirm">Conferma ordine</button>
+                    <button type="submit"
+                            class="btn btn-confirm"
+                            <#if ordinePossibile?? && ordinePossibile == false>disabled</#if>>
+                        Conferma ordine
+                    </button>
                 </form>
             </aside>
 
@@ -256,8 +296,8 @@
     <#else>
         <div class="checkout-box empty-message">
             <h2>Il carrello è vuoto</h2>
-            <p>Aggiungi prodotti dal menù prima di procedere alla cassa.</p>
-            <a href="/webdelivery/menu" class="btn">Vai al Menù</a>
+            <p>Aggiungi prodotti dal menu prima di procedere alla cassa.</p>
+            <a href="/webdelivery/menu" class="btn">Vai al Menu</a>
         </div>
     </#if>
 </main>

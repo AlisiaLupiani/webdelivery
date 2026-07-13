@@ -2,6 +2,7 @@ package WebMarket.Controller;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import WebMarket.data.dao.CartDAO;
@@ -29,6 +30,9 @@ import model.modelImpl.OrderImpl;
 @WebServlet(name = "CassaServlet", urlPatterns = {"/cassa"})
 public class CassaServlet extends WebDeliveryBaseController {
 
+    private static final LocalTime ORARIO_CHIUSURA = LocalTime.of(23, 0);
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession(false);
@@ -53,6 +57,8 @@ public class CassaServlet extends WebDeliveryBaseController {
             return;
         }
 
+        Client cliente = (Client) utente;
+
         Cart carrello = cartDAO.getActiveCartByUserId(userId);
 
         if (carrello == null) {
@@ -70,16 +76,53 @@ public class CassaServlet extends WebDeliveryBaseController {
         carrello.setElementi(elementi);
 
         int tempoStimato = calcolaTempoStimato(elementi);
+        LocalTime orarioMinimo = calcolaOrarioMinimo(tempoStimato);
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
+            String indirizzo = request.getParameter("indirizzo");
+            String orarioParam = request.getParameter("orario_consegna");
+            String metodoPagamentoParam = request.getParameter("metodo_pagamento");
+
+            request.setAttribute("indirizzoInserito", indirizzo);
+            request.setAttribute("orarioInserito", orarioParam);
+            request.setAttribute("metodoPagamentoInserito", metodoPagamentoParam);
+
+            LocalTime orarioConsegna;
+
+            try {
+                orarioConsegna = LocalTime.parse(orarioParam);
+            } catch (Exception ex) {
+                request.setAttribute("erroreOrario", "Orario di consegna non valido.");
+                mostraCassa(request, response, cliente, carrello, tempoStimato, orarioMinimo);
+                return;
+            }
+
+            if (orarioMinimo.isAfter(ORARIO_CHIUSURA)) {
+                request.setAttribute("erroreOrario", "Non e' piu possibile ordinare oggi: il tempo stimato supera l'orario di chiusura.");
+                mostraCassa(request, response, cliente, carrello, tempoStimato, orarioMinimo);
+                return;
+            }
+
+            if (orarioConsegna.isBefore(orarioMinimo)) {
+                request.setAttribute("erroreOrario", "L'orario scelto e' troppo presto. Puoi scegliere dalle " + formatTime(orarioMinimo) + " in poi.");
+                mostraCassa(request, response, cliente, carrello, tempoStimato, orarioMinimo);
+                return;
+            }
+
+            if (orarioConsegna.isAfter(ORARIO_CHIUSURA)) {
+                request.setAttribute("erroreOrario", "L'orario scelto supera l'orario di chiusura delle " + formatTime(ORARIO_CHIUSURA) + ".");
+                mostraCassa(request, response, cliente, carrello, tempoStimato, orarioMinimo);
+                return;
+            }
+
             Order ordine = new OrderImpl();
 
-            ordine.setClient((Client) utente);
+            ordine.setClient(cliente);
             ordine.setDate(LocalDate.now());
-            ordine.setDeliveryTime(LocalTime.parse(request.getParameter("orario_consegna")));
+            ordine.setDeliveryTime(orarioConsegna);
             ordine.setPrice(carrello.getPrezzoTotaleCarrello());
-            ordine.setDeliveryAddress(request.getParameter("indirizzo"));
-            ordine.setPaymentMethod(PaymentMethod.valueOf(request.getParameter("metodo_pagamento")));
+            ordine.setDeliveryAddress(indirizzo);
+            ordine.setPaymentMethod(PaymentMethod.valueOf(metodoPagamentoParam));
             ordine.setOrderState(OrderState.INSERITO);
 
             orderDAO.addOrder(ordine);
@@ -101,7 +144,7 @@ public class CassaServlet extends WebDeliveryBaseController {
             try {
                 EmailService.sendOrderConfirmation(
                         getServletContext(),
-                        (Client) utente,
+                        cliente,
                         ordine,
                         elementi,
                         tempoStimato
@@ -116,12 +159,44 @@ public class CassaServlet extends WebDeliveryBaseController {
             return;
         }
 
-        request.setAttribute("cliente", utente);
+        mostraCassa(request, response, cliente, carrello, tempoStimato, orarioMinimo);
+    }
+
+    private void mostraCassa(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Client cliente,
+            Cart carrello,
+            int tempoStimato,
+            LocalTime orarioMinimo) throws Exception {
+
+        request.setAttribute("cliente", cliente);
         request.setAttribute("carrello", carrello);
         request.setAttribute("tempoStimato", tempoStimato);
+        request.setAttribute("orarioMinimo", formatTime(orarioMinimo));
+        request.setAttribute("orarioChiusura", formatTime(ORARIO_CHIUSURA));
+        request.setAttribute("ordinePossibile", !orarioMinimo.isAfter(ORARIO_CHIUSURA));
+
+        if (orarioMinimo.isAfter(ORARIO_CHIUSURA) && request.getAttribute("erroreOrario") == null) {
+            request.setAttribute("erroreOrario", "Non e' piu possibile ordinare oggi: il tempo stimato supera l'orario di chiusura.");
+        }
 
         TemplateResult templateEngine = new TemplateResult(getServletContext());
         templateEngine.activate("cassa.ftl.html", request, response);
+    }
+
+    private LocalTime calcolaOrarioMinimo(int tempoStimato) {
+        LocalTime minimo = LocalTime.now().plusMinutes(tempoStimato);
+
+        if (minimo.getSecond() > 0 || minimo.getNano() > 0) {
+            minimo = minimo.plusMinutes(1);
+        }
+
+        return minimo.withSecond(0).withNano(0);
+    }
+
+    private String formatTime(LocalTime time) {
+        return time.format(TIME_FORMATTER);
     }
 
     private int calcolaTempoStimato(List<CartItem> elementi) {

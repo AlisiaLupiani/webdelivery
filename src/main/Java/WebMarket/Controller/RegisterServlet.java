@@ -63,9 +63,7 @@ public class RegisterServlet extends WebDeliveryBaseController {
         client.setName(name);
         client.setSurname(surname);
         client.setEmail(email);
-        // Scelta temporanea di progetto: salviamo la password in chiaro per
-        // restare compatibili con il database di sviluppo e gli utenti di test.
-        client.setPassword(password);
+      client.setPassword(SecurityHelpers.getPasswordHashPBKDF2(password));
         client.setAddress(address);
         client.setPhone(phone);
 
