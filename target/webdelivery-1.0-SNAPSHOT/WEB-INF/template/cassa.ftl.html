@@ -284,11 +284,23 @@
                         </select>
                     </div>
 
-                    <button type="submit"
-                            class="btn btn-confirm"
-                            <#if ordinePossibile?? && ordinePossibile == false>disabled</#if>>
-                        Conferma ordine
-                    </button>
+                    <div style="display: flex; justify-content: center; gap: 14px; margin-top: 28px; flex-wrap: wrap;">
+    <button type="submit"
+            name="action"
+            value="conferma"
+            class="btn btn-confirm"
+            style="min-width: 180px;">
+        Conferma ordine
+    </button>
+
+    <button type="submit"
+            name="action"
+            value="annulla"
+            class="btn btn-cancel"
+            style="min-width: 180px; background: #777; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+        Annulla ordine
+    </button>
+</div>
                 </form>
             </aside>
 

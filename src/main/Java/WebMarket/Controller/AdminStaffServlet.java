@@ -5,6 +5,7 @@ import java.util.List;
 
 import WebMarket.data.dao.UserDAO;
 import framework.data.DataLayer;
+import framework.security.SecurityHelpers;
 import framework.view.TemplateResult;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -97,7 +98,7 @@ public class AdminStaffServlet extends WebDeliveryBaseController {
         staff.setEmail(email);
 
         if (!password.isEmpty()) {
-            staff.setPassword(password);
+            staff.setPassword(SecurityHelpers.getPasswordHashPBKDF2(password));
         }
 
         if (idParam.isEmpty()) {

@@ -29,7 +29,11 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
     private PreparedStatement sIngredientsByProduct;
     private PreparedStatement sAddIngredientToProduct;
     private PreparedStatement sRemoveIngredientFromProduct;
-private PreparedStatement sOptionsByOrderProduct;   
+    private PreparedStatement sOptionsByOrderProduct;
+    private PreparedStatement sOptionsByProduct;
+    private PreparedStatement sAddOptionToProduct;
+    private PreparedStatement sRemoveOptionFromProduct;
+
     private static final String TABLE = "PRODOTTO";
 
     public ProductDAOImpl(DataLayer d) {
@@ -97,14 +101,33 @@ private PreparedStatement sOptionsByOrderProduct;
             sRemoveIngredientFromProduct = getConnection().prepareStatement(
                     "DELETE FROM PRODOTTO_INGREDIENTE WHERE PRODOTTO_ID = ? AND INGREDIENTE_ID = ?"
             );
-        sOptionsByOrderProduct = getConnection().prepareStatement(
-        "SELECT c.ID, c.NOME, c.DESCRIZIONE, c.PREZZO, c.IS_DEFAULT, g.NOME AS GRUPPO " +
-        "FROM ORDINE_PRODOTTO_CARATTERISTICA opc " +
-        "JOIN CARATTERISTICA c ON opc.CARATTERISTICA_ID = c.ID " +
-        "JOIN GRUPPO g ON c.GRUPPO_ID = g.ID " +
-        "WHERE opc.ORDINE_ID = ? AND opc.PRODOTTO_ID = ? " +
-        "ORDER BY g.NOME, c.NOME"
-);
+
+            sOptionsByOrderProduct = getConnection().prepareStatement(
+                    "SELECT c.ID, c.NOME, c.DESCRIZIONE, c.PREZZO, c.IS_DEFAULT, g.NOME AS GRUPPO " +
+                    "FROM ORDINE_PRODOTTO_CARATTERISTICA opc " +
+                    "JOIN CARATTERISTICA c ON opc.CARATTERISTICA_ID = c.ID " +
+                    "JOIN GRUPPO g ON c.GRUPPO_ID = g.ID " +
+                    "WHERE opc.ORDINE_ID = ? AND opc.PRODOTTO_ID = ? " +
+                    "ORDER BY g.NOME, c.NOME"
+            );
+
+            sOptionsByProduct = getConnection().prepareStatement(
+                    "SELECT c.ID, c.NOME, c.DESCRIZIONE, c.PREZZO, c.IS_DEFAULT, g.NOME AS GRUPPO " +
+                    "FROM PRODOTTO_CARATTERISTICA pc " +
+                    "JOIN CARATTERISTICA c ON pc.CARATTERISTICA_ID = c.ID " +
+                    "JOIN GRUPPO g ON c.GRUPPO_ID = g.ID " +
+                    "WHERE pc.PRODOTTO_ID = ? " +
+                    "ORDER BY g.NOME, c.NOME"
+            );
+
+            sAddOptionToProduct = getConnection().prepareStatement(
+                    "INSERT IGNORE INTO PRODOTTO_CARATTERISTICA (PRODOTTO_ID, CARATTERISTICA_ID) VALUES (?, ?)"
+            );
+
+            sRemoveOptionFromProduct = getConnection().prepareStatement(
+                    "DELETE FROM PRODOTTO_CARATTERISTICA WHERE PRODOTTO_ID = ? AND CARATTERISTICA_ID = ?"
+            );
+
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductDAO", ex);
         }
@@ -123,7 +146,11 @@ private PreparedStatement sOptionsByOrderProduct;
             if (sIngredientsByProduct != null) sIngredientsByProduct.close();
             if (sAddIngredientToProduct != null) sAddIngredientToProduct.close();
             if (sRemoveIngredientFromProduct != null) sRemoveIngredientFromProduct.close();
-if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
+            if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
+            if (sOptionsByProduct != null) sOptionsByProduct.close();
+            if (sAddOptionToProduct != null) sAddOptionToProduct.close();
+            if (sRemoveOptionFromProduct != null) sRemoveOptionFromProduct.close();
+
             super.destroy();
         } catch (SQLException ex) {
             throw new DataException("Errore chiusura ProductDAO", ex);
@@ -131,21 +158,21 @@ if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
     }
 
     protected Product createProduct(ResultSet rs) throws SQLException {
-        ProductProxy p = new ProductProxy(getDataLayer());
+        ProductProxy product = new ProductProxy(getDataLayer());
 
-        p.setKey(rs.getInt("ID"));
-        p.setName(rs.getString("NOME"));
-        p.setDescription(rs.getString("DESCRIZIONE"));
-        p.setPrice(rs.getDouble("PREZZO"));
-        p.setProcedure(rs.getString("PROCEDURA"));
-        p.setPreparationTime(rs.getInt("TEMPO_PREPARAZIONE"));
-        p.setImage(rs.getString("IMMAGINE"));
-        p.setCategory(rs.getString("CATEGORIA"));
-        p.setVersion(rs.getLong("VERSION"));
+        product.setKey(rs.getInt("ID"));
+        product.setName(rs.getString("NOME"));
+        product.setDescription(rs.getString("DESCRIZIONE"));
+        product.setPrice(rs.getDouble("PREZZO"));
+        product.setProcedure(rs.getString("PROCEDURA"));
+        product.setPreparationTime(rs.getInt("TEMPO_PREPARAZIONE"));
+        product.setImage(rs.getString("IMMAGINE"));
+        product.setCategory(rs.getString("CATEGORIA"));
+        product.setVersion(rs.getLong("VERSION"));
 
-        p.setClean();
+        product.setClean();
 
-        return p;
+        return product;
     }
 
     @Override
@@ -181,17 +208,17 @@ if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
 
             try (ResultSet rs = sProductByOrder.executeQuery()) {
                 while (rs.next()) {
-                    Product p;
+                    Product product;
                     int productId = rs.getInt("ID");
 
                     if (getDataLayer().getCache().has(Product.class, productId)) {
-                        p = getDataLayer().getCache().get(Product.class, productId);
+                        product = getDataLayer().getCache().get(Product.class, productId);
                     } else {
-                        p = createProduct(rs);
-                        getDataLayer().getCache().add(Product.class, p);
+                        product = createProduct(rs);
+                        getDataLayer().getCache().add(Product.class, product);
                     }
 
-                    products.add(p);
+                    products.add(product);
                 }
             }
         } catch (SQLException e) {
@@ -203,7 +230,7 @@ if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
 
     @Override
     public List<Product> getAllProducts() throws DataException {
-        List<Product> res = new ArrayList<>();
+        List<Product> result = new ArrayList<>();
 
         try (ResultSet rs = sAllProducts.executeQuery()) {
             while (rs.next()) {
@@ -217,13 +244,13 @@ if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
                     getDataLayer().getCache().add(Product.class, product);
                 }
 
-                res.add(product);
+                result.add(product);
             }
         } catch (SQLException e) {
             throw new DataException("Errore getAllProducts", e);
         }
 
-        return res;
+        return result;
     }
 
     @Override
@@ -308,14 +335,15 @@ if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
 
             try (ResultSet rs = sOrderProductDetails.executeQuery()) {
                 while (rs.next()) {
-                    Product prodotto = createProduct(rs);
+                    Product product = createProduct(rs);
 
-                    Map<String, Object> riga = new HashMap<>();
-                    riga.put("prodotto", prodotto);
-                    riga.put("quantita", rs.getInt("ORDINE_QUANTITA"));
-                    riga.put("ingredienti", getIngredientsByProductId(prodotto.getKey()));
-riga.put("personalizzazioni", getOptionsByOrderProduct(order.getKey(), prodotto.getKey()));
-                    result.add(riga);
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("prodotto", product);
+                    row.put("quantita", rs.getInt("ORDINE_QUANTITA"));
+                    row.put("ingredienti", getIngredientsByProductId(product.getKey()));
+                    row.put("personalizzazioni", getOptionsByOrderProduct(order.getKey(), product.getKey()));
+
+                    result.add(row);
                 }
             }
         } catch (SQLException e) {
@@ -334,11 +362,11 @@ riga.put("personalizzazioni", getOptionsByOrderProduct(order.getKey(), prodotto.
 
             try (ResultSet rs = sIngredientsByProduct.executeQuery()) {
                 while (rs.next()) {
-                    Map<String, String> ingrediente = new HashMap<>();
-                    ingrediente.put("id", String.valueOf(rs.getInt("ID")));
-                    ingrediente.put("nome", rs.getString("NOME"));
-                    ingrediente.put("quantita", rs.getString("QUANTITA"));
-                    result.add(ingrediente);
+                    Map<String, String> ingredient = new HashMap<>();
+                    ingredient.put("id", String.valueOf(rs.getInt("ID")));
+                    ingredient.put("nome", rs.getString("NOME"));
+                    ingredient.put("quantita", rs.getString("QUANTITA"));
+                    result.add(ingredient);
                 }
             }
         } catch (SQLException e) {
@@ -371,29 +399,77 @@ riga.put("personalizzazioni", getOptionsByOrderProduct(order.getKey(), prodotto.
         }
     }
 
-    private List<Map<String, Object>> getOptionsByOrderProduct(int orderId, int productId) throws DataException {
-    List<Map<String, Object>> result = new ArrayList<>();
+    @Override
+    public List<Map<String, Object>> getOptionsByProductId(int productId) throws DataException {
+        List<Map<String, Object>> result = new ArrayList<>();
 
-    try {
-        sOptionsByOrderProduct.setInt(1, orderId);
-        sOptionsByOrderProduct.setInt(2, productId);
+        try {
+            sOptionsByProduct.setInt(1, productId);
 
-        try (ResultSet rs = sOptionsByOrderProduct.executeQuery()) {
-            while (rs.next()) {
-                Map<String, Object> opzione = new HashMap<>();
-                opzione.put("id", rs.getInt("ID"));
-                opzione.put("nome", rs.getString("NOME"));
-                opzione.put("descrizione", rs.getString("DESCRIZIONE"));
-                opzione.put("prezzo", rs.getDouble("PREZZO"));
-                opzione.put("default", rs.getBoolean("IS_DEFAULT"));
-                opzione.put("gruppo", rs.getString("GRUPPO"));
-                result.add(opzione);
+            try (ResultSet rs = sOptionsByProduct.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> option = new HashMap<>();
+                    option.put("id", rs.getInt("ID"));
+                    option.put("nome", rs.getString("NOME"));
+                    option.put("descrizione", rs.getString("DESCRIZIONE"));
+                    option.put("prezzo", rs.getDouble("PREZZO"));
+                    option.put("default", rs.getBoolean("IS_DEFAULT"));
+                    option.put("gruppo", rs.getString("GRUPPO"));
+                    result.add(option);
+                }
             }
+        } catch (SQLException e) {
+            throw new DataException("Errore recupero caratteristiche prodotto", e);
         }
-    } catch (SQLException e) {
-        throw new DataException("Errore recupero personalizzazioni ordine", e);
+
+        return result;
     }
 
-    return result;
-}
+    @Override
+    public void addOptionToProduct(int productId, int optionId) throws DataException {
+        try {
+            sAddOptionToProduct.setInt(1, productId);
+            sAddOptionToProduct.setInt(2, optionId);
+            sAddOptionToProduct.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataException("Errore collegamento caratteristica prodotto", e);
+        }
+    }
+
+    @Override
+    public void removeOptionFromProduct(int productId, int optionId) throws DataException {
+        try {
+            sRemoveOptionFromProduct.setInt(1, productId);
+            sRemoveOptionFromProduct.setInt(2, optionId);
+            sRemoveOptionFromProduct.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataException("Errore rimozione caratteristica prodotto", e);
+        }
+    }
+
+    private List<Map<String, Object>> getOptionsByOrderProduct(int orderId, int productId) throws DataException {
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        try {
+            sOptionsByOrderProduct.setInt(1, orderId);
+            sOptionsByOrderProduct.setInt(2, productId);
+
+            try (ResultSet rs = sOptionsByOrderProduct.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> option = new HashMap<>();
+                    option.put("id", rs.getInt("ID"));
+                    option.put("nome", rs.getString("NOME"));
+                    option.put("descrizione", rs.getString("DESCRIZIONE"));
+                    option.put("prezzo", rs.getDouble("PREZZO"));
+                    option.put("default", rs.getBoolean("IS_DEFAULT"));
+                    option.put("gruppo", rs.getString("GRUPPO"));
+                    result.add(option);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore recupero personalizzazioni ordine", e);
+        }
+
+        return result;
+    }
 }

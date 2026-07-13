@@ -17,6 +17,7 @@ CREATE TABLE UTENTE (
 CREATE TABLE GRUPPO (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     NOME VARCHAR(100) NOT NULL,
+    SCELTA_SINGOLA BOOLEAN NOT NULL DEFAULT FALSE,
     VERSION INT NOT NULL DEFAULT 1
 );
 
@@ -165,6 +166,8 @@ SELECT
     PRODOTTO_ID,
     OPZIONE_ID AS CARATTERISTICA_ID
 FROM ORDINE_PRODOTTO_OPZIONE;
+
+
 INSERT INTO UTENTE (ID, NOME, COGNOME, EMAIL, PASSWORD, RUOLO, INDIRIZZO, TELEFONO) VALUES
 (1, 'Rachid', 'Nhachi', 'rachid@webdelivery.it', 'admin123', 'ADMIN', 'Via Sede Centrale, 1', '3330000001'),
 (2, 'Mario', 'Rossi', 'mario.rossi@email.it', 'cliente123', 'CLIENTE', 'Via Roma, 10', '3339876543'),
@@ -234,13 +237,13 @@ INSERT INTO INGREDIENTE (ID, NOME) VALUES
 (58, 'Birra Bionda'),
 (59, 'Acqua Naturale');
 
-INSERT INTO GRUPPO (ID, NOME) VALUES
-(1, 'Tipo di Impasto'),
-(2, 'Aggiunte Extra'),
-(3, 'Scegli il Gusto'),
-(4, 'Salse Extra'),
-(5, 'Cottura Carne'),
-(6, 'Opzioni Bevande');
+INSERT INTO GRUPPO (ID, NOME, SCELTA_SINGOLA) VALUES
+(1, 'Tipo di Impasto', TRUE),
+(2, 'Aggiunte Extra', FALSE),
+(3, 'Scegli il Gusto', TRUE),
+(4, 'Salse Extra', FALSE),
+(5, 'Cottura Carne', TRUE),
+(6, 'Opzioni Bevande', TRUE);
 
 INSERT INTO CARATTERISTICA (ID, NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID) VALUES
 (1, 'Impasto Classico', 'Il nostro impasto tradizionale', 0.00, TRUE, 1),
@@ -327,3 +330,6 @@ INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES
 (1, 6, 1),
 (2, 2, 2),
 (2, 4, 1);
+
+
+

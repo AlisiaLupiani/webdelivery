@@ -1,9 +1,14 @@
 package WebMarket.Controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import WebMarket.data.dao.IngredientDAO;
 import WebMarket.data.dao.ProductDAO;
+import WebMarket.data.dao.ProductOptionDAO;
+import WebMarket.data.dao.ProductOptionGroupDAO;
 import framework.data.DataLayer;
 import framework.view.TemplateResult;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,8 +17,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Ingredient;
 import model.Product;
+import model.ProductOption;
+import model.ProductOptionGroup;
 import model.modelImpl.IngredientImpl;
 import model.modelImpl.ProductImpl;
+import model.modelImpl.ProductOptionGroupImpl;
+import model.modelImpl.ProductOptionImpl;
 
 @WebServlet(name = "AdminProdottiServlet", urlPatterns = {"/admin-prodotti"})
 public class AdminProdottiServlet extends WebDeliveryBaseController {
@@ -35,6 +44,8 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
         DataLayer dl = (DataLayer) request.getAttribute("datalayer");
         ProductDAO productDAO = (ProductDAO) dl.getDAO(Product.class);
         IngredientDAO ingredientDAO = (IngredientDAO) dl.getDAO(Ingredient.class);
+        ProductOptionDAO optionDAO = (ProductOptionDAO) dl.getDAO(ProductOption.class);
+        ProductOptionGroupDAO groupDAO = (ProductOptionGroupDAO) dl.getDAO(ProductOptionGroup.class);
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
             String action = normalize(request.getParameter("action"));
@@ -47,6 +58,22 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
                 aggiungiIngredienteProdotto(request, response, productDAO);
             } else if ("remove_product_ingredient".equals(action)) {
                 rimuoviIngredienteProdotto(request, response, productDAO);
+            } else if ("add_option_group".equals(action)) {
+                aggiungiGruppoCaratteristica(request, response, groupDAO);
+            } else if ("update_option_group".equals(action)) {
+                modificaGruppoCaratteristica(request, response, groupDAO);
+            } else if ("delete_option_group".equals(action)) {
+                eliminaGruppoCaratteristica(request, response, groupDAO);
+            } else if ("add_option".equals(action)) {
+                aggiungiCaratteristica(request, response, optionDAO, groupDAO);
+            } else if ("update_option".equals(action)) {
+                modificaCaratteristica(request, response, optionDAO, groupDAO);
+            } else if ("delete_option".equals(action)) {
+                eliminaCaratteristica(request, response, optionDAO);
+            } else if ("add_product_option".equals(action)) {
+                collegaCaratteristicaProdotto(request, response, productDAO);
+            } else if ("remove_product_option".equals(action)) {
+                rimuoviCaratteristicaProdotto(request, response, productDAO);
             } else {
                 salvaProdotto(request, response, productDAO);
             }
@@ -54,7 +81,7 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
             return;
         }
 
-        mostraPagina(request, response, productDAO, ingredientDAO);
+        mostraPagina(request, response, productDAO, ingredientDAO, optionDAO, groupDAO);
     }
 
     private void salvaProdotto(HttpServletRequest request, HttpServletResponse response, ProductDAO productDAO) throws Exception {
@@ -161,9 +188,192 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
         response.sendRedirect("admin-prodotti?edit=" + productId + "&success=unlink");
     }
 
-    private void mostraPagina(HttpServletRequest request, HttpServletResponse response, ProductDAO productDAO, IngredientDAO ingredientDAO) throws Exception {
+    private void aggiungiGruppoCaratteristica(HttpServletRequest request, HttpServletResponse response, ProductOptionGroupDAO groupDAO) throws Exception {
+        String nome = normalize(request.getParameter("nome_gruppo"));
+
+        if (nome.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=gruppo");
+            return;
+        }
+
+        ProductOptionGroup gruppo = new ProductOptionGroupImpl();
+        gruppo.setName(nome);
+        gruppo.setSingleChoice("on".equals(request.getParameter("scelta_singola")));
+
+        groupDAO.addProductOptionGroup(gruppo);
+        response.sendRedirect("admin-prodotti?success=gruppo");
+    }
+
+    private void modificaGruppoCaratteristica(HttpServletRequest request, HttpServletResponse response, ProductOptionGroupDAO groupDAO) throws Exception {
+        String groupIdParam = normalize(request.getParameter("group_id"));
+        String nome = normalize(request.getParameter("nome_gruppo"));
+
+        if (groupIdParam.isEmpty() || nome.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=gruppo");
+            return;
+        }
+
+        ProductOptionGroup gruppo = groupDAO.getProductOptionGroupById(Integer.parseInt(groupIdParam));
+
+        if (gruppo == null) {
+            response.sendRedirect("admin-prodotti?error=gruppo");
+            return;
+        }
+
+        gruppo.setName(nome);
+        gruppo.setSingleChoice("on".equals(request.getParameter("scelta_singola")));
+        groupDAO.updateProductOptionGroup(gruppo);
+
+        response.sendRedirect("admin-prodotti?success=gruppo_update");
+    }
+
+    private void eliminaGruppoCaratteristica(HttpServletRequest request, HttpServletResponse response, ProductOptionGroupDAO groupDAO) throws Exception {
+        String groupIdParam = normalize(request.getParameter("group_id"));
+
+        if (groupIdParam.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=gruppo");
+            return;
+        }
+
+        ProductOptionGroup gruppo = groupDAO.getProductOptionGroupById(Integer.parseInt(groupIdParam));
+
+        if (gruppo == null) {
+            response.sendRedirect("admin-prodotti?error=gruppo");
+            return;
+        }
+
+        groupDAO.deleteProductOptionGroup(gruppo);
+        response.sendRedirect("admin-prodotti?success=gruppo_delete");
+    }
+
+    private void aggiungiCaratteristica(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            ProductOptionDAO optionDAO,
+            ProductOptionGroupDAO groupDAO) throws Exception {
+
+        String nome = normalize(request.getParameter("nome_caratteristica"));
+        String groupIdParam = normalize(request.getParameter("group_id"));
+
+        if (nome.isEmpty() || groupIdParam.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=caratteristica");
+            return;
+        }
+
+        ProductOptionGroup gruppo = groupDAO.getProductOptionGroupById(Integer.parseInt(groupIdParam));
+
+        if (gruppo == null) {
+            response.sendRedirect("admin-prodotti?error=gruppo");
+            return;
+        }
+
+        ProductOption opzione = new ProductOptionImpl();
+        opzione.setName(nome);
+        opzione.setDescription(normalize(request.getParameter("descrizione_caratteristica")));
+        opzione.setAddictionalPrice(parseDouble(request.getParameter("prezzo_caratteristica")));
+        opzione.setDefault("on".equals(request.getParameter("is_default")));
+        opzione.setProductOptionGroup(gruppo);
+
+        optionDAO.addProductOption(opzione);
+        response.sendRedirect("admin-prodotti?success=caratteristica");
+    }
+
+    private void modificaCaratteristica(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            ProductOptionDAO optionDAO,
+            ProductOptionGroupDAO groupDAO) throws Exception {
+
+        String optionIdParam = normalize(request.getParameter("option_id"));
+        String nome = normalize(request.getParameter("nome_caratteristica"));
+        String groupIdParam = normalize(request.getParameter("group_id"));
+
+        if (optionIdParam.isEmpty() || nome.isEmpty() || groupIdParam.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=caratteristica");
+            return;
+        }
+
+        ProductOption opzione = optionDAO.getProductOptionById(Integer.parseInt(optionIdParam));
+        ProductOptionGroup gruppo = groupDAO.getProductOptionGroupById(Integer.parseInt(groupIdParam));
+
+        if (opzione == null || gruppo == null) {
+            response.sendRedirect("admin-prodotti?error=caratteristica");
+            return;
+        }
+
+        opzione.setName(nome);
+        opzione.setDescription(normalize(request.getParameter("descrizione_caratteristica")));
+        opzione.setAddictionalPrice(parseDouble(request.getParameter("prezzo_caratteristica")));
+        opzione.setDefault("on".equals(request.getParameter("is_default")));
+        opzione.setProductOptionGroup(gruppo);
+
+        optionDAO.updateProductOption(opzione);
+        response.sendRedirect("admin-prodotti?success=caratteristica_update");
+    }
+
+    private void eliminaCaratteristica(HttpServletRequest request, HttpServletResponse response, ProductOptionDAO optionDAO) throws Exception {
+        String optionIdParam = normalize(request.getParameter("option_id"));
+
+        if (optionIdParam.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=caratteristica");
+            return;
+        }
+
+        ProductOption opzione = optionDAO.getProductOptionById(Integer.parseInt(optionIdParam));
+
+        if (opzione == null) {
+            response.sendRedirect("admin-prodotti?error=caratteristica");
+            return;
+        }
+
+        optionDAO.deleteProductOption(opzione);
+        response.sendRedirect("admin-prodotti?success=caratteristica_delete");
+    }
+
+    private void collegaCaratteristicaProdotto(HttpServletRequest request, HttpServletResponse response, ProductDAO productDAO) throws Exception {
+        String productIdParam = normalize(request.getParameter("product_id"));
+        String optionIdParam = normalize(request.getParameter("option_id"));
+
+        if (productIdParam.isEmpty() || optionIdParam.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=product_option");
+            return;
+        }
+
+        int productId = Integer.parseInt(productIdParam);
+        int optionId = Integer.parseInt(optionIdParam);
+
+        productDAO.addOptionToProduct(productId, optionId);
+        response.sendRedirect("admin-prodotti?edit=" + productId + "&success=product_option");
+    }
+
+    private void rimuoviCaratteristicaProdotto(HttpServletRequest request, HttpServletResponse response, ProductDAO productDAO) throws Exception {
+        String productIdParam = normalize(request.getParameter("product_id"));
+        String optionIdParam = normalize(request.getParameter("option_id"));
+
+        if (productIdParam.isEmpty() || optionIdParam.isEmpty()) {
+            response.sendRedirect("admin-prodotti?error=product_option");
+            return;
+        }
+
+        int productId = Integer.parseInt(productIdParam);
+        int optionId = Integer.parseInt(optionIdParam);
+
+        productDAO.removeOptionFromProduct(productId, optionId);
+        response.sendRedirect("admin-prodotti?edit=" + productId + "&success=product_option_remove");
+    }
+
+    private void mostraPagina(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            ProductDAO productDAO,
+            IngredientDAO ingredientDAO,
+            ProductOptionDAO optionDAO,
+            ProductOptionGroupDAO groupDAO) throws Exception {
+
         List<Product> prodotti = productDAO.getAllProducts();
         List<Ingredient> ingredienti = ingredientDAO.getAllIngredients();
+        List<ProductOptionGroup> gruppi = groupDAO.getAllProductOptionGroups();
+        List<Map<String, Object>> opzioniCatalogo = buildOpzioniCatalogo(optionDAO, gruppi);
 
         String editParam = normalize(request.getParameter("edit"));
         if (!editParam.isEmpty()) {
@@ -172,14 +382,44 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
 
             if (prodottoEdit != null) {
                 request.setAttribute("ingredientiProdotto", productDAO.getIngredientsByProductId(prodottoEdit.getKey()));
+                request.setAttribute("caratteristicheProdotto", productDAO.getOptionsByProductId(prodottoEdit.getKey()));
             }
         }
 
+        setMessages(request);
+
+        request.setAttribute("prodotti", prodotti);
+        request.setAttribute("ingredienti", ingredienti);
+        request.setAttribute("gruppiCaratteristiche", gruppi);
+        request.setAttribute("opzioniCatalogo", opzioniCatalogo);
+
+        TemplateResult templateEngine = new TemplateResult(getServletContext());
+        templateEngine.activate("admin-prodotti.ftl.html", request, response);
+    }
+
+    private List<Map<String, Object>> buildOpzioniCatalogo(ProductOptionDAO optionDAO, List<ProductOptionGroup> gruppi) throws Exception {
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (ProductOptionGroup gruppo : gruppi) {
+            List<ProductOption> opzioni = optionDAO.getProductOptionsByProductOptionGroup(gruppo);
+
+            for (ProductOption opzione : opzioni) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("opzione", opzione);
+                row.put("gruppo", gruppo);
+                result.add(row);
+            }
+        }
+
+        return result;
+    }
+
+    private void setMessages(HttpServletRequest request) {
         String success = normalize(request.getParameter("success"));
         String error = normalize(request.getParameter("error"));
 
         if ("add".equals(success)) {
-            request.setAttribute("successo", "Prodotto aggiunto correttamente. Ora puoi collegare gli ingredienti.");
+            request.setAttribute("successo", "Prodotto aggiunto correttamente. Ora puoi collegare ingredienti e caratteristiche.");
         } else if ("update".equals(success)) {
             request.setAttribute("successo", "Prodotto modificato correttamente.");
         } else if ("delete".equals(success)) {
@@ -190,6 +430,22 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
             request.setAttribute("successo", "Ingrediente collegato al prodotto.");
         } else if ("unlink".equals(success)) {
             request.setAttribute("successo", "Ingrediente rimosso dal prodotto.");
+        } else if ("gruppo".equals(success)) {
+            request.setAttribute("successo", "Gruppo caratteristica aggiunto correttamente.");
+        } else if ("gruppo_update".equals(success)) {
+            request.setAttribute("successo", "Gruppo caratteristica modificato correttamente.");
+        } else if ("gruppo_delete".equals(success)) {
+            request.setAttribute("successo", "Gruppo caratteristica eliminato correttamente.");
+        } else if ("caratteristica".equals(success)) {
+            request.setAttribute("successo", "Caratteristica aggiunta correttamente.");
+        } else if ("caratteristica_update".equals(success)) {
+            request.setAttribute("successo", "Caratteristica modificata correttamente.");
+        } else if ("caratteristica_delete".equals(success)) {
+            request.setAttribute("successo", "Caratteristica eliminata correttamente.");
+        } else if ("product_option".equals(success)) {
+            request.setAttribute("successo", "Caratteristica collegata al prodotto.");
+        } else if ("product_option_remove".equals(success)) {
+            request.setAttribute("successo", "Caratteristica rimossa dal prodotto.");
         }
 
         if ("campi".equals(error)) {
@@ -200,13 +456,13 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
             request.setAttribute("errore", "Inserisci il nome dell'ingrediente.");
         } else if ("link".equals(error)) {
             request.setAttribute("errore", "Seleziona un prodotto e un ingrediente validi.");
+        } else if ("gruppo".equals(error)) {
+            request.setAttribute("errore", "Controlla i dati del gruppo caratteristica.");
+        } else if ("caratteristica".equals(error)) {
+            request.setAttribute("errore", "Controlla i dati della caratteristica.");
+        } else if ("product_option".equals(error)) {
+            request.setAttribute("errore", "Seleziona un prodotto e una caratteristica validi.");
         }
-
-        request.setAttribute("prodotti", prodotti);
-        request.setAttribute("ingredienti", ingredienti);
-
-        TemplateResult templateEngine = new TemplateResult(getServletContext());
-        templateEngine.activate("admin-prodotti.ftl.html", request, response);
     }
 
     private double parseDouble(String value) {

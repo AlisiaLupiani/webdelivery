@@ -1,8 +1,8 @@
 package WebMarket.Controller;
 
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
@@ -20,7 +20,6 @@ import model.ProductOption;
 
 @jakarta.servlet.annotation.WebServlet(name = "CartServlet", urlPatterns = {"/cart"})
 public class CartServlet extends WebDeliveryBaseController {
-
 
     @Override
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -40,31 +39,24 @@ public class CartServlet extends WebDeliveryBaseController {
         CartItemDAO cartItemDAO = (CartItemDAO) dl.getDAO(CartItem.class);
         ProductDAO productDAO = (ProductDAO) dl.getDAO(Product.class);
         ProductOptionDAO optionDAO = (ProductOptionDAO) dl.getDAO(ProductOption.class);
-      
+
         Cart carrello = cartDAO.getOrCreateActiveCart(userId);
 
         String action = request.getParameter("action");
 
         if ("add".equals(action)) {
             int idProdotto = Integer.parseInt(request.getParameter("prodotto_id"));
-            String[] idOpzioniScelte = request.getParameterValues("caratteristica_id");
-
             Product prodotto = productDAO.getProductById(idProdotto);
 
             if (prodotto != null) {
                 double prezzoUnitario = prodotto.getPrice();
-                List<Integer> opzioniDaSalvare = new ArrayList<>();
+                List<Integer> opzioniDaSalvare = getSelectedOptionIds(request);
 
-                if (idOpzioniScelte != null) {
-                    for (String idOpzioneStr : idOpzioniScelte) {
-                        int idOpzione = Integer.parseInt(idOpzioneStr);
+                for (Integer idOpzione : opzioniDaSalvare) {
+                    ProductOption opzione = optionDAO.getProductOptionById(idOpzione);
 
-                        ProductOption opzione = optionDAO.getProductOptionById(idOpzione);
-
-                        if (opzione != null) {
-                            prezzoUnitario += opzione.getAddictionalPrice();
-                            opzioniDaSalvare.add(idOpzione);
-                        }
+                    if (opzione != null) {
+                        prezzoUnitario += opzione.getAddictionalPrice();
                     }
                 }
 
@@ -118,8 +110,34 @@ public class CartServlet extends WebDeliveryBaseController {
         List<CartItem> elementi = cartItemDAO.getItemsByCartId(carrello.getKey());
         carrello.setElementi(elementi);
 
-        TemplateResult templateEngine = new TemplateResult(getServletContext());
         request.setAttribute("carrello", carrello);
+
+        TemplateResult templateEngine = new TemplateResult(getServletContext());
         templateEngine.activate("cart.ftl.html", request, response);
+    }
+
+    private List<Integer> getSelectedOptionIds(HttpServletRequest request) {
+        List<Integer> result = new ArrayList<>();
+
+        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            if (!entry.getKey().startsWith("caratteristica_id_")) {
+                continue;
+            }
+
+            String[] values = entry.getValue();
+            if (values == null) {
+                continue;
+            }
+
+            for (String value : values) {
+                try {
+                    result.add(Integer.parseInt(value));
+                } catch (NumberFormatException ignored) {
+                    // parametro non valido: lo ignoriamo
+                }
+            }
+        }
+
+        return result;
     }
 }

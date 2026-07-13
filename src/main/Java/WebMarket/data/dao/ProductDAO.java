@@ -28,4 +28,10 @@ public interface ProductDAO {
     void addIngredientToProduct(int productId, int ingredientId, String quantity) throws DataException;
 
     void removeIngredientFromProduct(int productId, int ingredientId) throws DataException;
+
+    List<Map<String, Object>> getOptionsByProductId(int productId) throws DataException;
+
+    void addOptionToProduct(int productId, int optionId) throws DataException;
+
+    void removeOptionFromProduct(int productId, int optionId) throws DataException;
 }

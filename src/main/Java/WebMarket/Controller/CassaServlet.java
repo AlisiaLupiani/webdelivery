@@ -79,6 +79,13 @@ public class CassaServlet extends WebDeliveryBaseController {
         LocalTime orarioMinimo = calcolaOrarioMinimo(tempoStimato);
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
+            String action = request.getParameter("action");
+
+            if ("annulla".equalsIgnoreCase(action)) {
+                response.sendRedirect("cart");
+                return;
+            }
+
             String indirizzo = request.getParameter("indirizzo");
             String orarioParam = request.getParameter("orario_consegna");
             String metodoPagamentoParam = request.getParameter("metodo_pagamento");

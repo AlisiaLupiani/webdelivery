@@ -4,39 +4,187 @@
     <meta charset="UTF-8">
     <title>Staff - WebDelivery</title>
     <link rel="stylesheet" href="/webdelivery/style/prova.css">
+
     <style>
-        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7f6; color: #333; }
-        main { max-width: 1150px; margin: 35px auto; padding: 0 20px; }
-        .panel { background: white; padding: 26px; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
-        h2, h3 { color: #ff8c00; margin-top: 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
-        th { background: #f1f1f1; }
-        .badge { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #fff3cd; color: #856404; font-weight: bold; }
-        .badge-done { background: #e8f5e9; color: #2e7d32; }
-        .btn-action { background: #ff8c00; color: white; border: none; padding: 9px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .btn-action:hover { background: #e07b00; }
-        .msg-ok { background: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 6px; margin-bottom: 18px; border: 1px solid #c8e6c9; }
-        .msg-error { background: #ffebee; color: #c62828; padding: 12px; border-radius: 6px; margin-bottom: 18px; border: 1px solid #ffcdd2; }
-        .empty { color: #777; font-style: italic; }
-        .order-card { border: 1px solid #e5e5e5; border-radius: 8px; margin-top: 22px; overflow: hidden; background: #fff; }
-        .order-head { background: #f8f9fa; padding: 16px; display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; border-bottom: 1px solid #e5e5e5; }
-        .order-title { font-weight: bold; font-size: 1.1em; color: #333; }
-        .order-meta { color: #666; font-size: 0.95em; margin-top: 6px; }
-        .order-action { display: flex; align-items: center; gap: 10px; }
-        .products { padding: 16px; }
-        .product-row { border-top: 1px solid #eee; padding: 16px 0; }
-        .product-row:first-child { border-top: none; padding-top: 0; }
-        .product-name { font-weight: bold; color: #333; font-size: 1.05em; }
-        .product-info { margin-top: 8px; color: #555; line-height: 1.5; }
-        .ingredients { margin: 8px 0 0; padding-left: 20px; color: #555; }
-        .procedure { margin-top: 8px; background: #fff8e1; padding: 10px; border-radius: 6px; color: #5d4037; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            color: #333;
+        }
+
+        main {
+            max-width: 1150px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 26px;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        }
+
+        h2, h3 {
+            color: #ff8c00;
+            margin-top: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+        }
+
+        .badge-done {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .btn-action {
+            background: #ff8c00;
+            color: white;
+            border: none;
+            padding: 9px 14px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-action:hover {
+            background: #e07b00;
+        }
+
+        .msg-ok {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .msg-error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            border: 1px solid #ffcdd2;
+        }
+
+        .empty {
+            color: #777;
+            font-style: italic;
+        }
+
+        .order-card {
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            margin-top: 22px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .order-head {
+            background: #f8f9fa;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .order-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .order-meta {
+            color: #666;
+            font-size: 0.95em;
+            margin-top: 6px;
+        }
+
+        .order-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .products {
+            padding: 16px;
+        }
+
+        .product-row {
+            border-top: 1px solid #eee;
+            padding: 16px 0;
+        }
+
+        .product-row:first-child {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .product-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.05em;
+        }
+
+        .product-info {
+            margin-top: 8px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .ingredients {
+            margin: 8px 0 0;
+            padding-left: 20px;
+            color: #555;
+        }
+
+        .customizations-box {
+            margin-top: 12px;
+            background: #f3fff5;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            padding: 10px;
+            color: #2e7d32;
+        }
+
+        .customizations {
+            margin: 8px 0 0;
+            padding-left: 20px;
+            color: #2e7d32;
+        }
+
+        .procedure {
+            margin-top: 8px;
+            background: #fff8e1;
+            padding: 10px;
+            border-radius: 6px;
+            color: #5d4037;
+        }
+
         @media (max-width: 700px) {
-            .order-head { flex-direction: column; }
-            .order-action { align-items: flex-start; }
+            .order-head {
+                flex-direction: column;
+            }
+
+            .order-action {
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
+
 <body>
 
 <header class="navbar" style="justify-content: space-between;">
@@ -63,18 +211,22 @@
         </#if>
 
         <#if ordini?? && ordini?has_content>
+
             <#list ordini as ordine>
                 <#assign prodottiOrdine = prodottiPerOrdine[ordine.id?string]![]>
 
                 <div class="order-card">
+
                     <div class="order-head">
                         <div>
                             <div class="order-title">Ordine #${ordine.id}</div>
+
                             <div class="order-meta">
                                 Data: ${ordine.date!""} |
                                 Consegna: ${ordine.deliveryTime!""} |
-                                Totale: € ${(ordine.price!0)?string("0.00")}
+                                Totale: &euro; ${(ordine.price!0)?string("0.00")}
                             </div>
+
                             <div class="order-meta">
                                 Indirizzo: ${ordine.deliveryAddress!""}
                             </div>
@@ -98,11 +250,14 @@
                         <h3>Prodotti ordinati</h3>
 
                         <#if prodottiOrdine?has_content>
+
                             <#list prodottiOrdine as riga>
                                 <#assign prodotto = riga.prodotto>
                                 <#assign ingredienti = riga.ingredienti![]>
+                                <#assign personalizzazioni = riga.personalizzazioni![]>
 
                                 <div class="product-row">
+
                                     <div class="product-name">
                                         ${riga.quantita}x ${prodotto.name!""}
                                     </div>
@@ -114,14 +269,53 @@
                                     </div>
 
                                     <#if ingredienti?has_content>
-                                        <strong>Ingredienti:</strong>
+                                        <div class="product-info">
+                                            <strong>Ingredienti:</strong>
+                                        </div>
+
                                         <ul class="ingredients">
                                             <#list ingredienti as ingrediente>
-                                                <li>${ingrediente.nome!""} <#if ingrediente.quantita?? && ingrediente.quantita != "">- ${ingrediente.quantita}</#if></li>
+                                                <li>
+                                                    ${ingrediente.nome!""}
+                                                    <#if ingrediente.quantita?? && ingrediente.quantita != "">
+                                                        - ${ingrediente.quantita}
+                                                    </#if>
+                                                </li>
                                             </#list>
                                         </ul>
                                     <#else>
-                                        <div class="product-info"><strong>Ingredienti:</strong> non indicati</div>
+                                        <div class="product-info">
+                                            <strong>Ingredienti:</strong> non indicati
+                                        </div>
+                                    </#if>
+
+                                    <#if personalizzazioni?has_content>
+                                        <div class="customizations-box">
+                                            <strong>Personalizzazioni cliente:</strong>
+
+                                            <ul class="customizations">
+                                                <#list personalizzazioni as opzione>
+                                                    <li>
+                                                        ${opzione.gruppo!""}: ${opzione.nome!""}
+
+                                                        <#assign prezzoOpzione = (opzione.prezzo!"")?string>
+
+                                                        <#if prezzoOpzione != ""
+                                                            && prezzoOpzione != "0"
+                                                            && prezzoOpzione != "0.0"
+                                                            && prezzoOpzione != "0.00"
+                                                            && prezzoOpzione != "0,0"
+                                                            && prezzoOpzione != "0,00">
+                                                            (+ &euro; ${prezzoOpzione})
+                                                        </#if>
+                                                    </li>
+                                                </#list>
+                                            </ul>
+                                        </div>
+                                    <#else>
+                                        <div class="product-info">
+                                            <strong>Personalizzazioni cliente:</strong> nessuna
+                                        </div>
                                     </#if>
 
                                     <#if prodotto.procedure?? && prodotto.procedure != "">
@@ -130,17 +324,21 @@
                                             ${prodotto.procedure}
                                         </div>
                                     </#if>
+
                                 </div>
                             </#list>
+
                         <#else>
                             <p class="empty">Nessun prodotto collegato a questo ordine.</p>
                         </#if>
                     </div>
                 </div>
             </#list>
+
         <#else>
             <p class="empty">Non ci sono ordini da mostrare.</p>
         </#if>
+
     </section>
 </main>
 

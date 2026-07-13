@@ -10,16 +10,15 @@ public class ProductOptionGroupImpl extends DataItemImpl<Integer> implements Pro
 
     protected Integer key;
     protected String name;
+    protected boolean singleChoice;
     private List<ProductOption> options;
-
 
     public ProductOptionGroupImpl() {
         this.key = 0;
         this.name = "";
-    
+        this.singleChoice = false;
     }
 
-    // Risolve gli errori su getKey e setKey
     @Override
     public Integer getKey() {
         return key;
@@ -30,7 +29,6 @@ public class ProductOptionGroupImpl extends DataItemImpl<Integer> implements Pro
         this.key = key;
     }
 
-    // Metodi ID (Alias della Key)
     @Override
     public Integer getId() {
         return key;
@@ -50,16 +48,24 @@ public class ProductOptionGroupImpl extends DataItemImpl<Integer> implements Pro
     public void setName(String name) {
         this.name = name;
     }
-    
+
     @Override
-public List<ProductOption> getOptions() {
-    return this.options;
-}
+    public boolean isSingleChoice() {
+        return singleChoice;
+    }
 
-@Override
-public void setOptions(List<ProductOption> options) {
-    this.options = options;
-}
+    @Override
+    public void setSingleChoice(boolean singleChoice) {
+        this.singleChoice = singleChoice;
+    }
 
-   
+    @Override
+    public List<ProductOption> getOptions() {
+        return this.options;
+    }
+
+    @Override
+    public void setOptions(List<ProductOption> options) {
+        this.options = options;
+    }
 }

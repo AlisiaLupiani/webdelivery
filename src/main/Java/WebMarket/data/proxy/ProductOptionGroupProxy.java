@@ -20,14 +20,19 @@ public class ProductOptionGroupProxy extends ProductOptionGroupImpl {
         this.isDirty = true;
     }
 
-
     @Override
     public void setName(String name) {
         super.setName(name);
         this.isDirty = true;
     }
 
-     @Override
+    @Override
+    public void setSingleChoice(boolean singleChoice) {
+        super.setSingleChoice(singleChoice);
+        this.isDirty = true;
+    }
+
+    @Override
     public void setKey(Integer key) {
         super.setKey(key);
         this.isDirty = true;
