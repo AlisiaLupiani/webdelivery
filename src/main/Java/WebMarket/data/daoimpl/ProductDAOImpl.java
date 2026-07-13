@@ -29,7 +29,7 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
     private PreparedStatement sIngredientsByProduct;
     private PreparedStatement sAddIngredientToProduct;
     private PreparedStatement sRemoveIngredientFromProduct;
-
+private PreparedStatement sOptionsByOrderProduct;   
     private static final String TABLE = "PRODOTTO";
 
     public ProductDAOImpl(DataLayer d) {
@@ -97,7 +97,14 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             sRemoveIngredientFromProduct = getConnection().prepareStatement(
                     "DELETE FROM PRODOTTO_INGREDIENTE WHERE PRODOTTO_ID = ? AND INGREDIENTE_ID = ?"
             );
-
+        sOptionsByOrderProduct = getConnection().prepareStatement(
+        "SELECT c.ID, c.NOME, c.DESCRIZIONE, c.PREZZO, c.IS_DEFAULT, g.NOME AS GRUPPO " +
+        "FROM ORDINE_PRODOTTO_CARATTERISTICA opc " +
+        "JOIN CARATTERISTICA c ON opc.CARATTERISTICA_ID = c.ID " +
+        "JOIN GRUPPO g ON c.GRUPPO_ID = g.ID " +
+        "WHERE opc.ORDINE_ID = ? AND opc.PRODOTTO_ID = ? " +
+        "ORDER BY g.NOME, c.NOME"
+);
         } catch (SQLException ex) {
             throw new DataException("Errore inizializzazione ProductDAO", ex);
         }
@@ -116,7 +123,7 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             if (sIngredientsByProduct != null) sIngredientsByProduct.close();
             if (sAddIngredientToProduct != null) sAddIngredientToProduct.close();
             if (sRemoveIngredientFromProduct != null) sRemoveIngredientFromProduct.close();
-
+if (sOptionsByOrderProduct != null) sOptionsByOrderProduct.close();
             super.destroy();
         } catch (SQLException ex) {
             throw new DataException("Errore chiusura ProductDAO", ex);
@@ -307,7 +314,7 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
                     riga.put("prodotto", prodotto);
                     riga.put("quantita", rs.getInt("ORDINE_QUANTITA"));
                     riga.put("ingredienti", getIngredientsByProductId(prodotto.getKey()));
-
+riga.put("personalizzazioni", getOptionsByOrderProduct(order.getKey(), prodotto.getKey()));
                     result.add(riga);
                 }
             }
@@ -363,4 +370,30 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             throw new DataException("Errore rimozione ingrediente prodotto", e);
         }
     }
+
+    private List<Map<String, Object>> getOptionsByOrderProduct(int orderId, int productId) throws DataException {
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    try {
+        sOptionsByOrderProduct.setInt(1, orderId);
+        sOptionsByOrderProduct.setInt(2, productId);
+
+        try (ResultSet rs = sOptionsByOrderProduct.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> opzione = new HashMap<>();
+                opzione.put("id", rs.getInt("ID"));
+                opzione.put("nome", rs.getString("NOME"));
+                opzione.put("descrizione", rs.getString("DESCRIZIONE"));
+                opzione.put("prezzo", rs.getDouble("PREZZO"));
+                opzione.put("default", rs.getBoolean("IS_DEFAULT"));
+                opzione.put("gruppo", rs.getString("GRUPPO"));
+                result.add(opzione);
+            }
+        }
+    } catch (SQLException e) {
+        throw new DataException("Errore recupero personalizzazioni ordine", e);
+    }
+
+    return result;
+}
 }

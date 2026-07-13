@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import model.Product;
 import WebMarket.data.dao.LogOrderStateDAO;
 import WebMarket.data.dao.OrderDAO;
 import WebMarket.data.dao.ProductDAO;
 import WebMarket.data.dao.UserDAO;
+import WebMarket.util.EmailService;
 import framework.data.DataLayer;
 import framework.view.TemplateResult;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,7 +19,6 @@ import jakarta.servlet.http.HttpSession;
 import model.LogOrderState;
 import model.Order;
 import model.OrderState;
-import model.Product;
 import model.Staff;
 import model.User;
 import model.modelImpl.LogOrderStateImpl;
@@ -107,6 +107,14 @@ public class StaffDashboardServlet extends WebDeliveryBaseController {
         log.setStateTo(statoTo);
 
         logDAO.addLogOrderState(log);
+
+        if (statoTo == OrderState.IN_CONSEGNA) {
+            try {
+                EmailService.sendOrderInDelivery(getServletContext(), ordine);
+            } catch (Exception ex) {
+                getServletContext().log("Errore invio email ordine in consegna", ex);
+            }
+        }
 
         response.sendRedirect("staff?success=stato");
     }

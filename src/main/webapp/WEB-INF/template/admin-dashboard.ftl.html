@@ -18,16 +18,18 @@
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
         th { background: #f1f1f1; }
         .badge { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #fff3cd; color: #856404; font-weight: bold; }
-        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
         .quick-card { border: 1px solid #eee; border-radius: 8px; padding: 18px; background: #fff; }
         .quick-card strong { display: block; color: #333; margin-bottom: 8px; }
         .quick-card span { color: #777; font-size: 0.95em; }
         .quick-link { display: block; text-decoration: none; color: inherit; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
         .quick-link:hover { transform: translateY(-2px); border-color: #ff8c00; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
         .state-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+
         @media (max-width: 900px) {
             .grid, .quick-grid { grid-template-columns: 1fr 1fr; }
         }
+
         @media (max-width: 600px) {
             .grid, .quick-grid { grid-template-columns: 1fr; }
         }
@@ -68,7 +70,7 @@
 
         <div class="card">
             <div class="label">Incasso totale</div>
-            <div class="value">€ ${(incassoTotale!0)?string("0.00")}</div>
+            <div class="value">&euro; ${(incassoTotale!0)?string("0.00")}</div>
         </div>
     </div>
 
@@ -86,9 +88,14 @@
                 <span>Creazione e controllo degli account del personale.</span>
             </a>
 
+            <a class="quick-card quick-link" href="/webdelivery/admin-ordini">
+                <strong>Gestione ordini</strong>
+                <span>Ordini divisi per stato, prodotti e log del personale.</span>
+            </a>
+
             <a class="quick-card quick-link" href="/webdelivery/admin-statistiche">
                 <strong>Statistiche</strong>
-                <span>Vendite, ordini per giorno e prodotti più richiesti.</span>
+                <span>Vendite, ordini per giorno e prodotti piu richiesti.</span>
             </a>
         </div>
     </section>
@@ -153,7 +160,7 @@
                             <td>${ordine.date!""}</td>
                             <td>${ordine.deliveryTime!""}</td>
                             <td><span class="badge">${ordine.orderState!""}</span></td>
-                            <td>€ ${(ordine.price!0)?string("0.00")}</td>
+                            <td>&euro; ${(ordine.price!0)?string("0.00")}</td>
                         </tr>
                     </#list>
                 </tbody>

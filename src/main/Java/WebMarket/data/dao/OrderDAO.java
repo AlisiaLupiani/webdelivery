@@ -24,4 +24,7 @@ public interface OrderDAO {
     void deleteOrder(Order order) throws DataException;
 
     void addProductToOrder(int orderId, int productId, int quantity) throws DataException;
+ 
+    void addOptionToOrderProduct(int orderId, int productId, int optionId) throws DataException;
+
 }

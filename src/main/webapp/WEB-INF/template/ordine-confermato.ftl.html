@@ -17,7 +17,7 @@
         }
 
         .confirm-page {
-            max-width: 900px;
+            max-width: 1120px;
             margin: 50px auto;
             padding: 20px;
         }
@@ -55,7 +55,7 @@
         }
 
         .order-summary {
-            max-width: 620px;
+            max-width: 720px;
             margin: 0 auto;
             text-align: left;
             border-top: 1px solid #eee;
@@ -88,6 +88,58 @@
             font-weight: bold;
         }
 
+        .products-summary {
+            margin-top: 32px;
+            text-align: left;
+        }
+
+        .products-summary h3 {
+            color: #ff8c00;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .order-products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .order-products-table th,
+        .order-products-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .order-products-table th {
+            background: #f1f1f1;
+            color: #333;
+        }
+
+        .ingredients-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .muted {
+            color: #888;
+            font-style: italic;
+        }
+
+        .money {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
         .actions {
             display: flex;
             justify-content: center;
@@ -105,7 +157,13 @@
             background: #5a6268;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
+            header.navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
             .confirm-box {
                 padding: 26px 18px;
             }
@@ -128,19 +186,19 @@
     <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
     <h1>WebDelivery</h1>
 
-    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <a href="/webdelivery/home" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Home</a>
-        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menù</a>
+        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menu</a>
         <a href="/webdelivery/cart" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Carrello</a>
     </div>
 </header>
 
 <main class="confirm-page">
     <div class="confirm-box">
-        <div class="success-icon">✓</div>
+        <div class="success-icon">&#10003;</div>
 
         <h2>Ordine confermato</h2>
-        <p>Grazie! Il tuo ordine è stato registrato correttamente.</p>
+        <p>Grazie! Il tuo ordine e' stato registrato correttamente.</p>
 
         <#if ordine??>
             <div class="order-summary">
@@ -176,15 +234,90 @@
 
                 <div class="summary-row">
                     <span>Totale</span>
-                    <strong>€ ${ordine.price!"0.00"}</strong>
+                    <strong class="money">&euro; ${(ordine.price!0)?string("0.00")}</strong>
                 </div>
             </div>
+
+            <div class="products-summary">
+                <h3>Prodotti ordinati</h3>
+
+                <#if prodottiOrdine?? && prodottiOrdine?has_content>
+                    <div class="table-wrap">
+                        <table class="order-products-table">
+                            <thead>
+                                <tr>
+                                    <th>Prodotto</th>
+                                    <th>Ingredienti</th>
+                                    <th>Personalizzazioni</th>
+                                    <th>Quantita</th>
+                                    <th>Prezzo unitario</th>
+                                    <th>Totale riga</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <#list prodottiOrdine as riga>
+                                    <#assign prodotto = riga.prodotto>
+                                    <#assign quantita = riga.quantita!0>
+                                    <#assign prezzo = prodotto.price!0>
+
+                                    <tr>
+                                        <td>
+                                            <strong>${prodotto.name!""}</strong><br>
+                                            <span>${prodotto.category!"Altro"}</span>
+                                        </td>
+
+                                        <td>
+                                            <#if riga.ingredienti?? && riga.ingredienti?has_content>
+                                                <ul class="ingredients-list">
+                                                    <#list riga.ingredienti as ingrediente>
+                                                        <li>
+                                                            ${ingrediente.nome!""}
+                                                            <#if ingrediente.quantita?? && ingrediente.quantita != "">
+                                                                (${ingrediente.quantita})
+                                                            </#if>
+                                                        </li>
+                                                    </#list>
+                                                </ul>
+                                            <#else>
+                                                <span class="muted">Nessun ingrediente indicato</span>
+                                            </#if>
+                                        </td>
+
+                                        <td>
+                                            <#if riga.personalizzazioni?? && riga.personalizzazioni?has_content>
+                                                <ul class="ingredients-list">
+                                                    <#list riga.personalizzazioni as opzione>
+                                                        <li>
+                                                            ${opzione.gruppo!""}: ${opzione.nome!""}
+                                                            <#if (opzione.prezzo!0) != 0>
+                                                                (+ &euro; ${(opzione.prezzo!0)?string("0.00")})
+                                                            </#if>
+                                                        </li>
+                                                    </#list>
+                                                </ul>
+                                            <#else>
+                                                <span class="muted">Nessuna</span>
+                                            </#if>
+                                        </td>
+
+                                        <td>${quantita}</td>
+                                        <td>&euro; ${(prezzo)?string("0.00")}</td>
+                                        <td><strong class="money">&euro; ${(prezzo * quantita)?string("0.00")}</strong></td>
+                                    </tr>
+                                </#list>
+                            </tbody>
+                        </table>
+                    </div>
+                <#else>
+                    <p class="muted">Nessun prodotto collegato all'ordine.</p>
+                </#if>
+            </div>
         <#else>
-            <p>Non è stato possibile caricare i dettagli dell'ordine.</p>
+            <p>Non e' stato possibile caricare i dettagli dell'ordine.</p>
         </#if>
 
         <div class="actions">
-            <a href="/webdelivery/menu" class="btn">Torna al Menù</a>
+            <a href="/webdelivery/menu" class="btn">Torna al Menu</a>
             <a href="/webdelivery/home" class="btn btn-secondary">Home</a>
         </div>
     </div>

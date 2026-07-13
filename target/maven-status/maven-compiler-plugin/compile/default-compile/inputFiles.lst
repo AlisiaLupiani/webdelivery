@@ -45,6 +45,7 @@ C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\model\P
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\model\Staff.java
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\model\User.java
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\Controller\AdminDashboardServlet.java
+C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\Controller\AdminOrdiniServlet.java
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\Controller\AdminProdottiServlet.java
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\Controller\AdminStaffServlet.java
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\Controller\AdminStatisticheServlet.java
@@ -97,3 +98,4 @@ C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMark
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\data\proxy\StaffProxy.java
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\data\proxy\UserProxy.java
 C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\data\WebDeliveryDataLayer.java
+C:\Users\aulis\Documents\apache-tomcat-10.1.57\webdelivery\src\main\java\WebMarket\util\EmailService.java

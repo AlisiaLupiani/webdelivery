@@ -19,6 +19,7 @@ framework\view\TemplateResult.class
 framework\view\HTMLResult$HTML_Version.class
 WebMarket\Controller\CassaServlet.class
 WebMarket\data\proxy\ProductProxy.class
+WebMarket\Controller\AdminOrdiniServlet.class
 model\modelImpl\ProprietorImpl.class
 WebMarket\data\dao\CartItemDAO.class
 model\Cart.class
@@ -53,10 +54,12 @@ framework\data\DataLayer.class
 model\LogOrderState.class
 WebMarket\data\dao\ConsumationDAO.class
 WebMarket\data\proxy\ProprietorProxy.class
+WebMarket\util\EmailService.class
 WebMarket\Controller\ProfiloServlet.class
 model\modelImpl\UserImpl.class
 WebMarket\Controller\AdminProdottiServlet.class
 WebMarket\data\proxy\ProductOptionGroupProxy.class
+WebMarket\util\EmailService$1.class
 framework\data\OptimisticLockException.class
 WebMarket\data\daoimpl\CartItemDAOImpl.class
 model\Product.class

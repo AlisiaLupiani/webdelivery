@@ -8,6 +8,7 @@ import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
 import WebMarket.data.dao.OrderDAO;
 import WebMarket.data.dao.UserDAO;
+import WebMarket.util.EmailService;
 import framework.data.DataLayer;
 import framework.view.TemplateResult;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,6 +22,7 @@ import model.Order;
 import model.OrderState;
 import model.PaymentMethod;
 import model.Product;
+import model.ProductOption;
 import model.User;
 import model.modelImpl.OrderImpl;
 
@@ -67,6 +69,8 @@ public class CassaServlet extends WebDeliveryBaseController {
 
         carrello.setElementi(elementi);
 
+        int tempoStimato = calcolaTempoStimato(elementi);
+
         if ("POST".equalsIgnoreCase(request.getMethod())) {
             Order ordine = new OrderImpl();
 
@@ -82,6 +86,28 @@ public class CassaServlet extends WebDeliveryBaseController {
 
             for (CartItem item : elementi) {
                 orderDAO.addProductToOrder(ordine.getKey(), item.getProductId(), item.getQuantita());
+
+                if (item.getOpzioniScelte() != null) {
+                    for (ProductOption opzione : item.getOpzioniScelte()) {
+                        orderDAO.addOptionToOrderProduct(
+                                ordine.getKey(),
+                                item.getProductId(),
+                                opzione.getKey()
+                        );
+                    }
+                }
+            }
+
+            try {
+                EmailService.sendOrderConfirmation(
+                        getServletContext(),
+                        (Client) utente,
+                        ordine,
+                        elementi,
+                        tempoStimato
+                );
+            } catch (Exception ex) {
+                getServletContext().log("Errore invio email conferma ordine", ex);
             }
 
             cartDAO.closeCart(carrello.getKey());
@@ -92,7 +118,7 @@ public class CassaServlet extends WebDeliveryBaseController {
 
         request.setAttribute("cliente", utente);
         request.setAttribute("carrello", carrello);
-        request.setAttribute("tempoStimato", calcolaTempoStimato(elementi));
+        request.setAttribute("tempoStimato", tempoStimato);
 
         TemplateResult templateEngine = new TemplateResult(getServletContext());
         templateEngine.activate("cassa.ftl.html", request, response);

@@ -29,6 +29,7 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     private PreparedStatement sUpdateOrder;
     private PreparedStatement sDeleteOrder;
     private PreparedStatement sAddProductToOrder;
+    private PreparedStatement sAddOptionToOrderProduct;
     private static final String TABLE = "ORDINE";
 
     public OrderDAOImpl(DataLayer d) {
@@ -56,6 +57,11 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     "INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES (?, ?, ?) " +
     "ON DUPLICATE KEY UPDATE QUANTITA = QUANTITA + VALUES(QUANTITA)"
 );
+
+            sAddOptionToOrderProduct = getConnection().prepareStatement(
+                    "INSERT INTO ORDINE_PRODOTTO_OPZIONE (ORDINE_ID, PRODOTTO_ID, OPZIONE_ID) VALUES (?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE OPZIONE_ID = VALUES(OPZIONE_ID)"
+            );
         } catch (SQLException ex) {
             throw new DataException("Error initializing OrderDAO", ex);
         }
@@ -72,6 +78,7 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             if (sUpdateOrder != null) sUpdateOrder.close();
             if (sDeleteOrder != null) sDeleteOrder.close();
             if (sAddProductToOrder != null) sAddProductToOrder.close();
+            if (sAddOptionToOrderProduct != null) sAddOptionToOrderProduct.close();
             super.destroy();
         } catch (SQLException e) {
             throw new DataException("Error closing OrderDAO", e);
@@ -239,6 +246,18 @@ public void addProductToOrder(int orderId, int productId, int quantity) throws D
         sAddProductToOrder.executeUpdate();
     } catch (SQLException ex) {
         throw new DataException("Errore addProductToOrder", ex);
+    }
+}
+
+@Override
+public void addOptionToOrderProduct(int orderId, int productId, int optionId) throws DataException {
+    try {
+        sAddOptionToOrderProduct.setInt(1, orderId);
+        sAddOptionToOrderProduct.setInt(2, productId);
+        sAddOptionToOrderProduct.setInt(3, optionId);
+        sAddOptionToOrderProduct.executeUpdate();
+    } catch (SQLException ex) {
+        throw new DataException("Errore addOptionToOrderProduct", ex);
     }
 }
     private Order getOrCreateOrder(ResultSet rs) throws SQLException {

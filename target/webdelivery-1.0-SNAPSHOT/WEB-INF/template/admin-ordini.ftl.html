@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestione Ordini - WebDelivery</title>
+    <link rel="stylesheet" href="/webdelivery/style/prova.css">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f7f6; color: #333; }
+        main { max-width: 1200px; margin: 35px auto; padding: 0 20px; }
+        .panel { background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); padding: 26px; margin-top: 24px; }
+        h2, h3, h4 { color: #ff8c00; margin-top: 0; }
+        .badge { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #fff3cd; color: #856404; font-weight: bold; }
+        .order-state-block { margin-top: 28px; border-top: 1px solid #eee; padding-top: 22px; }
+        .order-card { border: 1px solid #eee; border-radius: 8px; padding: 18px; margin-bottom: 16px; background: #fff; }
+        .order-head { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 12px; }
+        .order-head span { display: block; color: #777; margin-top: 4px; }
+        .order-meta { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 14px; }
+        .order-details { display: grid; grid-template-columns: 1fr 2fr; gap: 18px; }
+        .order-details h5 { margin: 0 0 8px; color: #ff8c00; }
+        .compact-list { margin: 0; padding-left: 18px; }
+        .compact-list li { margin-bottom: 6px; }
+        .muted { color: #777; font-size: 0.9em; }
+        .empty { color: #777; font-style: italic; }
+
+        @media (max-width: 900px) {
+            .order-meta, .order-details { grid-template-columns: 1fr; }
+            .order-head { align-items: flex-start; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="navbar" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center;">
+        <img src="/webdelivery/img/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h1>Gestione Ordini</h1>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+        <a href="/webdelivery/admin" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Dashboard</a>
+        <a href="/webdelivery/admin-statistiche" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Statistiche</a>
+        <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
+    </div>
+</header>
+
+<main>
+    <section class="panel">
+        <h2>Ordini per stato e log personale</h2>
+
+        <#if ordiniPerStatoDettagli??>
+            <#list ordiniPerStatoDettagli?keys as stato>
+                <div class="order-state-block">
+                    <h3>${stato} (${ordiniPerStato[stato]!0})</h3>
+
+                    <#assign listaOrdini = ordiniPerStatoDettagli[stato]![]>
+
+                    <#if listaOrdini?has_content>
+                        <#list listaOrdini as ordine>
+                            <#assign ordineKey = ordine.id?string>
+                            <#assign prodottiOrdine = prodottiPerOrdine[ordineKey]![]>
+                            <#assign logsOrdine = logPerOrdine[ordineKey]![]>
+
+                            <div class="order-card">
+                                <div class="order-head">
+                                    <div>
+                                        <strong>Ordine #${ordine.id}</strong>
+                                        <span>
+                                            <#if ordine.client??>
+                                                ${ordine.client.name!""} ${ordine.client.surname!""}
+                                            <#else>
+                                                Cliente non disponibile
+                                            </#if>
+                                        </span>
+                                    </div>
+                                    <span class="badge">${ordine.orderState!""}</span>
+                                </div>
+
+                                <div class="order-meta">
+                                    <span>Data: <strong>${ordine.date!""}</strong></span>
+                                    <span>Consegna: <strong>${ordine.deliveryTime!""}</strong></span>
+                                    <span>Prodotti: <strong>${numeroProdottiPerOrdine[ordineKey]!0}</strong></span>
+                                    <span>Tempo stimato: <strong>${tempoPreparazionePerOrdine[ordineKey]!0} min</strong></span>
+                                    <span>Totale: <strong>&euro; ${(ordine.price!0)?string("0.00")}</strong></span>
+                                </div>
+
+                                <div class="order-details">
+                                    <div>
+                                        <h5>Prodotti</h5>
+                                        <#if prodottiOrdine?has_content>
+                                            <ul class="compact-list">
+                                                <#list prodottiOrdine as riga>
+                                                    <#assign prodotto = riga.prodotto>
+                                                    <li>${riga.quantita!0}x ${prodotto.name!""}</li>
+                                                </#list>
+                                            </ul>
+                                        <#else>
+                                            <p class="empty">Nessun prodotto trovato.</p>
+                                        </#if>
+                                    </div>
+
+                                    <div>
+                                        <h5>Log cambi stato</h5>
+                                        <#if logsOrdine?has_content>
+                                            <ul class="compact-list">
+                                                <#list logsOrdine as log>
+                                                    <li>
+                                                        <#if log.staff??>
+                                                            <strong>${log.staff.name!""} ${log.staff.surname!""}</strong>
+                                                        <#else>
+                                                            <strong>Staff</strong>
+                                                        </#if>
+                                                        ha cambiato lo stato da
+                                                        <strong>${log.stateFrom!"-"}</strong>
+                                                        a
+                                                        <strong>${log.stateTo!"-"}</strong>
+                                                        <span class="muted">(${log.dateTime!""})</span>
+                                                    </li>
+                                                </#list>
+                                            </ul>
+                                        <#else>
+                                            <p class="empty">Nessun cambio stato registrato.</p>
+                                        </#if>
+                                    </div>
+                                </div>
+                            </div>
+                        </#list>
+                    <#else>
+                        <p class="empty">Nessun ordine in questo stato.</p>
+                    </#if>
+                </div>
+            </#list>
+        </#if>
+    </section>
+</main>
+
+<#include "footer.ftl.html">
+
+</body>
+</html>
