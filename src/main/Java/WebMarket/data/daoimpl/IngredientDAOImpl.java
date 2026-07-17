@@ -12,7 +12,6 @@ import WebMarket.data.proxy.IngredientProxy;
 import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
-import model.Food;
 import model.Ingredient;
 
 
@@ -21,7 +20,6 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
 
     private PreparedStatement sIngredientById;
     private PreparedStatement sAllIngredients;
-    private PreparedStatement sIngredientsByFood;
     private PreparedStatement sAddIngredient;
     private PreparedStatement sUpdateIngredient;
     private PreparedStatement sDeleteIngredient;
@@ -40,9 +38,6 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
             sIngredientById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID = ?");
             sAllIngredients = getConnection().prepareStatement("SELECT * FROM " + TABLE);
             
-            // Query per recuperare gli ingredienti di un prodotto tramite la tabella di join
-            sIngredientsByFood = getConnection().prepareStatement("SELECT * FROM " + TABLE + "WHERE CIBO_ID = ?");
-
             sAddIngredient = getConnection().prepareStatement(
                 "INSERT INTO " + TABLE + " (NOME, VERSION) VALUES (?, ?)", 
                 Statement.RETURN_GENERATED_KEYS);
@@ -62,7 +57,6 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
         try {
             if (sIngredientById != null) sIngredientById.close();
             if (sAllIngredients != null) sAllIngredients.close();
-            if (sIngredientsByFood != null) sIngredientsByFood.close();
             if (sAddIngredient != null) sAddIngredient.close();
             if (sUpdateIngredient != null) sUpdateIngredient.close();
             if (sDeleteIngredient != null) sDeleteIngredient.close();
@@ -115,22 +109,6 @@ public class IngredientDAOImpl extends DAO implements IngredientDAO {
             }
         } catch (SQLException ex) {
             throw new DataException("Errore recupero tutti gli ingredienti", ex);
-        }
-        return result;
-    }
-
-    @Override
-    public List<Ingredient> getIngredientsByFood(Food food) throws DataException {
-        List<Ingredient> result = new ArrayList<>();
-        try {
-            sIngredientsByFood.setInt(1, food.getKey());
-            try (ResultSet rs = sIngredientsByFood.executeQuery()) {
-                while (rs.next()) {
-                    result.add(createIngredient(rs));
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataException("Errore recupero ingredienti per prodotto", ex);
         }
         return result;
     }

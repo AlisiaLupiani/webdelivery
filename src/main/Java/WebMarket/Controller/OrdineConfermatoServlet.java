@@ -34,16 +34,24 @@ public class OrdineConfermatoServlet extends WebDeliveryBaseController {
             return;
         }
 
-        int ordineId = Integer.parseInt(idParam);
+        int ordineId;
+        int userId = Integer.parseInt(session.getAttribute("userid").toString());
+
+        try {
+            ordineId = Integer.parseInt(idParam);
+        } catch (NumberFormatException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Identificativo ordine non valido.");
+            return;
+        }
 
         DataLayer dl = (DataLayer) request.getAttribute("datalayer");
         OrderDAO orderDAO = (OrderDAO) dl.getDAO(Order.class);
         ProductDAO productDAO = (ProductDAO) dl.getDAO(Product.class);
 
-        Order ordine = orderDAO.getOrderById(ordineId);
+        Order ordine = orderDAO.getOrderByIdAndClientId(ordineId, userId);
 
         if (ordine == null) {
-            response.sendRedirect("home");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 

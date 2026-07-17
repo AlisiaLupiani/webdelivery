@@ -6,8 +6,6 @@ import javax.sql.DataSource;
 
 import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
-import WebMarket.data.dao.ConsumationDAO;
-import WebMarket.data.dao.FoodDAO;
 import WebMarket.data.dao.IngredientDAO;
 import WebMarket.data.dao.LogOrderStateDAO;
 import WebMarket.data.dao.OrderDAO;
@@ -17,8 +15,6 @@ import WebMarket.data.dao.ProductOptionGroupDAO;
 import WebMarket.data.dao.UserDAO;
 import WebMarket.data.daoimpl.CartDAOImpl;
 import WebMarket.data.daoimpl.CartItemDAOImpl;
-import WebMarket.data.daoimpl.ConsumationDAOImpl;
-import WebMarket.data.daoimpl.FoodDAOImpl;
 import WebMarket.data.daoimpl.IngredientDAOImpl;
 import WebMarket.data.daoimpl.LogOrderStateDAOImpl;
 import WebMarket.data.daoimpl.OrderDAOImpl;
@@ -30,8 +26,6 @@ import framework.data.DataException;
 import framework.data.DataLayer;
 import model.Cart;
 import model.CartItem;
-import model.Consumation;
-import model.Food;
 import model.Ingredient;
 import model.LogOrderState;
 import model.Order;
@@ -50,8 +44,6 @@ public class WebDeliveryDataLayer extends DataLayer {
     public void init() throws DataException {
         registerDAO(Cart.class, new CartDAOImpl(this));
         registerDAO(CartItem.class, new CartItemDAOImpl(this));
-        registerDAO(Consumation.class, new ConsumationDAOImpl(this));
-        registerDAO(Food.class, new FoodDAOImpl(this));
         registerDAO(Ingredient.class, new IngredientDAOImpl(this));
         registerDAO(LogOrderState.class, new LogOrderStateDAOImpl(this));
         registerDAO(Order.class, new OrderDAOImpl(this));
@@ -67,14 +59,6 @@ public class WebDeliveryDataLayer extends DataLayer {
 
     public CartItemDAO getCartItemDAO() {
         return (CartItemDAO) getDAO(CartItem.class);
-    }
-
-    public ConsumationDAO getConsumationDAO() {
-        return (ConsumationDAO) getDAO(Consumation.class);
-    }
-
-    public FoodDAO getFoodDAO() {
-        return (FoodDAO) getDAO(Food.class);
     }
 
     public IngredientDAO getIngredientDAO() {
@@ -103,5 +87,33 @@ public class WebDeliveryDataLayer extends DataLayer {
 
     public UserDAO getUserDAO() {
         return (UserDAO) getDAO(User.class);
+    }
+
+    public void beginTransaction() throws DataException {
+        try {
+            getConnection().setAutoCommit(false);
+        } catch (SQLException ex) {
+            throw new DataException("Impossibile avviare la transazione", ex);
+        }
+    }
+
+    public void commitTransaction() throws DataException {
+        try {
+            getConnection().commit();
+            getConnection().setAutoCommit(true);
+        } catch (SQLException ex) {
+            throw new DataException("Impossibile confermare la transazione", ex);
+        }
+    }
+
+    public void rollbackTransaction() throws DataException {
+        try {
+            if (!getConnection().getAutoCommit()) {
+                getConnection().rollback();
+                getConnection().setAutoCommit(true);
+            }
+        } catch (SQLException ex) {
+            throw new DataException("Impossibile annullare la transazione", ex);
+        }
     }
 }

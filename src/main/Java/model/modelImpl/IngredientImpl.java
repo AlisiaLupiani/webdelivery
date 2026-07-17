@@ -1,7 +1,6 @@
 package model.modelImpl;
 
 import framework.data.DataItemImpl;
-import model.Food;
 import model.Ingredient;
 
 
@@ -9,7 +8,6 @@ public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient 
 
     protected Integer key;
     protected String quantity;
-    protected Food food;
     protected String name;
     
 
@@ -17,7 +15,6 @@ public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient 
         this.name = "";
         this.key = 0;
         this.quantity = "";
-        this.food = null;
         
     }
 
@@ -35,12 +32,6 @@ public class IngredientImpl extends DataItemImpl<Integer> implements Ingredient 
     public String getQuantity() { return quantity; }
     @Override
     public void setQuantity(String quantity) { this.quantity = quantity; }
-
-    @Override
-    public Food getFood() { return food; }
-    @Override
-    public void setFood(Food food) { this.food = food; }
-
 
     @Override
     public String getName() { return name; }

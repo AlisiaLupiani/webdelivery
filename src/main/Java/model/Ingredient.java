@@ -12,9 +12,6 @@ public interface Ingredient extends DataItem<Integer> {
     String getQuantity();
     void setQuantity(String quantity);
 
-    Food getFood();
-    void setFood(Food food);
-
     Integer getId();
     void setId(Integer id);
 

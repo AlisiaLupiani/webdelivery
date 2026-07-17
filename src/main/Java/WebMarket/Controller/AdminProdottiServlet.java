@@ -48,6 +48,10 @@ public class AdminProdottiServlet extends WebDeliveryBaseController {
         ProductOptionGroupDAO groupDAO = (ProductOptionGroupDAO) dl.getDAO(ProductOptionGroup.class);
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
+            if (!checkCsrf(request, response)) {
+                return;
+            }
+
             String action = normalize(request.getParameter("action"));
 
             if ("delete".equals(action)) {

@@ -43,6 +43,10 @@ public class ProfiloServlet extends WebDeliveryBaseController {
         Client cliente = (Client) user;
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
+            if (!checkCsrf(request, response)) {
+                return;
+            }
+
             String action = normalize(request.getParameter("action"));
 
             if ("password".equals(action)) {

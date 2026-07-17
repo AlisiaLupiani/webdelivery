@@ -21,6 +21,7 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
 
     private PreparedStatement sProductOptionById;
     private PreparedStatement sProductOptionByProductOptionGroup;
+    private PreparedStatement sProductOptionsByProduct;
     private PreparedStatement sAllProductOptions;
     private PreparedStatement sAddProductOption;
     private PreparedStatement sUpdateProductOption;
@@ -38,6 +39,11 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
             super.init();
             sProductOptionById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID=?");
             sProductOptionByProductOptionGroup = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE GRUPPO_ID= ?");
+            sProductOptionsByProduct = getConnection().prepareStatement(
+                    "SELECT c.* FROM " + TABLE + " c " +
+                    "JOIN PRODOTTO_CARATTERISTICA pc ON pc.CARATTERISTICA_ID = c.ID " +
+                    "WHERE pc.PRODOTTO_ID = ? ORDER BY c.GRUPPO_ID, c.ID"
+            );
             sAllProductOptions = getConnection().prepareStatement("SELECT * FROM " + TABLE);
 
             sAddProductOption = getConnection().prepareStatement("INSERT INTO " + TABLE + " (NOME,DESCRIZIONE,PREZZO,IS_DEFAULT,GRUPPO_ID, VERSION) VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
@@ -58,6 +64,7 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
         try {
             if (sProductOptionById != null) sProductOptionById.close();
             if (sProductOptionByProductOptionGroup != null) sProductOptionByProductOptionGroup.close();
+            if (sProductOptionsByProduct != null) sProductOptionsByProduct.close();
             if (sAllProductOptions != null) sAllProductOptions.close();
             if (sAddProductOption != null) sAddProductOption.close();
             if (sUpdateProductOption != null) sUpdateProductOption.close();
@@ -73,7 +80,7 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
         ProductOptionProxy p = new ProductOptionProxy(getDataLayer());
         p.setKey(rs.getInt("ID"));
         p.setName(rs.getString("NOME"));
-        p.setDescription("DESCRIZIONE");
+        p.setDescription(rs.getString("DESCRIZIONE"));
         p.setDefault(rs.getBoolean("IS_DEFAULT"));
         p.setAddictionalPrice(rs.getDouble("PREZZO"));
         
@@ -99,7 +106,10 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
                  try {
                     sProductOptionById.setInt(1, id);
                     try (ResultSet rs = sProductOptionById.executeQuery()) {
-                    if (rs.next()) return createProductOption(rs);
+                    if (rs.next()) {
+                        option = createProductOption(rs);
+                        getDataLayer().getCache().add(ProductOption.class, option);
+                    }
                 }
                 } catch (SQLException ex) {
                     throw new DataException("Errore getProductOptionById", ex);
@@ -131,6 +141,35 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
             throw new DataException("Errore getProductOptionsByProductOptionGroup", e);
         }
         return res;
+    }
+
+    @Override
+    public List<ProductOption> getProductOptionsByProduct(int productId) throws DataException {
+        List<ProductOption> result = new ArrayList<>();
+
+        try {
+            sProductOptionsByProduct.setInt(1, productId);
+
+            try (ResultSet rs = sProductOptionsByProduct.executeQuery()) {
+                while (rs.next()) {
+                    int optionId = rs.getInt("ID");
+                    ProductOption option;
+
+                    if (getDataLayer().getCache().has(ProductOption.class, optionId)) {
+                        option = getDataLayer().getCache().get(ProductOption.class, optionId);
+                    } else {
+                        option = createProductOption(rs);
+                        getDataLayer().getCache().add(ProductOption.class, option);
+                    }
+
+                    result.add(option);
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataException("Errore recupero caratteristiche per prodotto", ex);
+        }
+
+        return result;
     }
 
 
@@ -197,11 +236,11 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
             sUpdateProductOption.setInt(7, option.getKey());
             sUpdateProductOption.setLong(8, currentVersion);
 
-            if(sUpdateProductOption.executeUpdate() == 1){
-                throw new DataException("Optimistic locking failed: order modified by another process");
-            }else{
-                option.setVersion(currentVersion + 1);
+            if (sUpdateProductOption.executeUpdate() == 0) {
+                throw new DataException("Optimistic locking failed: product option modified by another process");
             }
+            option.setVersion(currentVersion + 1);
+            getDataLayer().getCache().add(ProductOption.class, option);
               
         } catch (SQLException e) {
             throw new DataException("Errore updateProductOption", e);

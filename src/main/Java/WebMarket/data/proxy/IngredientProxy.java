@@ -1,8 +1,6 @@
 package WebMarket.data.proxy;
 
-import WebMarket.data.dao.FoodDAO;
 import framework.data.DataLayer;
-import model.Food;
 import model.modelImpl.IngredientImpl;
 
 public class IngredientProxy extends IngredientImpl {
@@ -10,19 +8,11 @@ public class IngredientProxy extends IngredientImpl {
     protected DataLayer dataLayer;
     protected boolean isDirty;
 
-    protected Integer idFood;
-
-
     public IngredientProxy(DataLayer dl) {
         super();
         this.dataLayer = dl;
         this.isDirty = false;
     }
-
-    public void setIdFood(Integer id) {
-        this.idFood = id;
-    }
-
 
    @Override
     public void setId(Integer id) {
@@ -40,27 +30,6 @@ public class IngredientProxy extends IngredientImpl {
     public void setQuantity(String quantity) {
         super.setQuantity(quantity);
         this.isDirty = true;
-    }
-
-    @Override
-    public void setFood(Food food) {
-        super.setFood(food);
-        this.isDirty = true;
-    }
-
-    @Override
-    public Food getFood() {
-        if (super.getFood() == null && this.idFood > 0) {
-            try {
-
-                FoodDAO foodDAO = (FoodDAO) dataLayer.getDAO(Food.class);
-                super.setFood(foodDAO.getFoodById(this.idFood)); 
-                
-            } catch (Exception e) {
-                e.printStackTrace(); 
-            }
-        }
-        return super.getFood();
     }
 
     @Override 

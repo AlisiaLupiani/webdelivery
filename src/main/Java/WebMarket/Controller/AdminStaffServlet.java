@@ -36,6 +36,10 @@ public class AdminStaffServlet extends WebDeliveryBaseController {
         UserDAO userDAO = (UserDAO) dl.getDAO(User.class);
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
+            if (!checkCsrf(request, response)) {
+                return;
+            }
+
             String action = normalize(request.getParameter("action"));
 
             if ("delete".equals(action)) {

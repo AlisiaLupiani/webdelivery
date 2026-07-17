@@ -78,11 +78,11 @@ public class CartItemDAOImpl extends DAO implements CartItemDAO {
 );
 
             sUpdateQuantity = getConnection().prepareStatement(
-                    "UPDATE " + TABLE + " SET QUANTITA=?, VERSION=VERSION+1 WHERE ID=?"
+                    "UPDATE " + TABLE + " SET QUANTITA=?, VERSION=VERSION+1 WHERE ID=? AND CARRELLO_ID=?"
             );
 
             sRemoveItem = getConnection().prepareStatement(
-                    "DELETE FROM " + TABLE + " WHERE ID=?"
+                    "DELETE FROM " + TABLE + " WHERE ID=? AND CARRELLO_ID=?"
             );
 
             sClearCart = getConnection().prepareStatement(
@@ -240,11 +240,12 @@ public List<CartItem> getItemsByCartId(int cartId) throws DataException {
     }
 
     @Override
-    public void updateQuantity(int cartItemId, int quantity) throws DataException {
+    public boolean updateQuantity(int cartItemId, int cartId, int quantity) throws DataException {
         try {
             sUpdateQuantity.setInt(1, quantity);
             sUpdateQuantity.setInt(2, cartItemId);
-            sUpdateQuantity.executeUpdate();
+            sUpdateQuantity.setInt(3, cartId);
+            return sUpdateQuantity.executeUpdate() == 1;
 
         } catch (SQLException ex) {
             throw new DataException("Errore updateQuantity", ex);
@@ -252,10 +253,11 @@ public List<CartItem> getItemsByCartId(int cartId) throws DataException {
     }
 
     @Override
-    public void removeItem(int cartItemId) throws DataException {
+    public boolean removeItem(int cartItemId, int cartId) throws DataException {
         try {
             sRemoveItem.setInt(1, cartItemId);
-            sRemoveItem.executeUpdate();
+            sRemoveItem.setInt(2, cartId);
+            return sRemoveItem.executeUpdate() == 1;
 
         } catch (SQLException ex) {
             throw new DataException("Errore removeItem", ex);

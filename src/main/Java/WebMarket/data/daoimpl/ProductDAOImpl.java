@@ -50,9 +50,16 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             );
 
             sProductByOrder = getConnection().prepareStatement(
-                    "SELECT p.* FROM " + TABLE + " p " +
-                    "INNER JOIN ORDINE_PRODOTTO op ON p.ID = op.PRODOTTO_ID " +
-                    "WHERE op.ORDINE_ID = ?"
+                    "SELECT COALESCE(op.PRODOTTO_ID, 0) AS ID, " +
+                    "op.NOME_PRODOTTO AS NOME, op.DESCRIZIONE_PRODOTTO AS DESCRIZIONE, " +
+                    "op.PREZZO_UNITARIO AS PREZZO, op.PROCEDURA_PRODOTTO AS PROCEDURA, " +
+                    "op.TEMPO_PREPARAZIONE AS TEMPO_PREPARAZIONE, " +
+                    "COALESCE(p.IMMAGINE, '') AS IMMAGINE, " +
+                    "COALESCE(p.CATEGORIA, 'Storico') AS CATEGORIA, " +
+                    "COALESCE(p.VERSION, 1) AS VERSION " +
+                    "FROM ORDINE_PRODOTTO op " +
+                    "LEFT JOIN " + TABLE + " p ON p.ID = op.PRODOTTO_ID " +
+                    "WHERE op.ORDINE_ID = ? ORDER BY op.ID"
             );
 
             sAllProducts = getConnection().prepareStatement(
@@ -77,11 +84,19 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             );
 
             sOrderProductDetails = getConnection().prepareStatement(
-                    "SELECT p.*, op.QUANTITA AS ORDINE_QUANTITA " +
+                    "SELECT op.ID AS ORDINE_PRODOTTO_ID, " +
+                    "COALESCE(op.PRODOTTO_ID, 0) AS ID, " +
+                    "op.NOME_PRODOTTO AS NOME, op.DESCRIZIONE_PRODOTTO AS DESCRIZIONE, " +
+                    "op.PREZZO_UNITARIO AS PREZZO, op.PROCEDURA_PRODOTTO AS PROCEDURA, " +
+                    "op.TEMPO_PREPARAZIONE AS TEMPO_PREPARAZIONE, " +
+                    "COALESCE(p.IMMAGINE, '') AS IMMAGINE, " +
+                    "COALESCE(p.CATEGORIA, 'Storico') AS CATEGORIA, " +
+                    "COALESCE(p.VERSION, 1) AS VERSION, " +
+                    "op.QUANTITA AS ORDINE_QUANTITA " +
                     "FROM ORDINE_PRODOTTO op " +
-                    "JOIN PRODOTTO p ON op.PRODOTTO_ID = p.ID " +
+                    "LEFT JOIN PRODOTTO p ON op.PRODOTTO_ID = p.ID " +
                     "WHERE op.ORDINE_ID = ? " +
-                    "ORDER BY p.NOME"
+                    "ORDER BY op.ID"
             );
 
             sIngredientsByProduct = getConnection().prepareStatement(
@@ -103,12 +118,11 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             );
 
             sOptionsByOrderProduct = getConnection().prepareStatement(
-                    "SELECT c.ID, c.NOME, c.DESCRIZIONE, c.PREZZO, c.IS_DEFAULT, g.NOME AS GRUPPO " +
-                    "FROM ORDINE_PRODOTTO_CARATTERISTICA opc " +
-                    "JOIN CARATTERISTICA c ON opc.CARATTERISTICA_ID = c.ID " +
-                    "JOIN GRUPPO g ON c.GRUPPO_ID = g.ID " +
-                    "WHERE opc.ORDINE_ID = ? AND opc.PRODOTTO_ID = ? " +
-                    "ORDER BY g.NOME, c.NOME"
+                    "SELECT COALESCE(OPZIONE_ID, 0) AS ID, NOME_OPZIONE AS NOME, " +
+                    "DESCRIZIONE_OPZIONE AS DESCRIZIONE, PREZZO_OPZIONE AS PREZZO, " +
+                    "FALSE AS IS_DEFAULT, NOME_GRUPPO AS GRUPPO " +
+                    "FROM ORDINE_PRODOTTO_OPZIONE " +
+                    "WHERE ORDINE_PRODOTTO_ID = ? ORDER BY NOME_GRUPPO, NOME_OPZIONE"
             );
 
             sOptionsByProduct = getConnection().prepareStatement(
@@ -336,12 +350,16 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
             try (ResultSet rs = sOrderProductDetails.executeQuery()) {
                 while (rs.next()) {
                     Product product = createProduct(rs);
+                    int productId = product.getKey();
+                    int orderProductId = rs.getInt("ORDINE_PRODOTTO_ID");
 
                     Map<String, Object> row = new HashMap<>();
                     row.put("prodotto", product);
                     row.put("quantita", rs.getInt("ORDINE_QUANTITA"));
-                    row.put("ingredienti", getIngredientsByProductId(product.getKey()));
-                    row.put("personalizzazioni", getOptionsByOrderProduct(order.getKey(), product.getKey()));
+                    row.put("ingredienti", productId > 0
+                            ? getIngredientsByProductId(productId)
+                            : new ArrayList<Map<String, String>>());
+                    row.put("personalizzazioni", getOptionsByOrderProduct(orderProductId));
 
                     result.add(row);
                 }
@@ -447,12 +465,11 @@ public class ProductDAOImpl extends DAO implements ProductDAO {
         }
     }
 
-    private List<Map<String, Object>> getOptionsByOrderProduct(int orderId, int productId) throws DataException {
+    private List<Map<String, Object>> getOptionsByOrderProduct(int orderProductId) throws DataException {
         List<Map<String, Object>> result = new ArrayList<>();
 
         try {
-            sOptionsByOrderProduct.setInt(1, orderId);
-            sOptionsByOrderProduct.setInt(2, productId);
+            sOptionsByOrderProduct.setInt(1, orderProductId);
 
             try (ResultSet rs = sOptionsByOrderProduct.executeQuery()) {
                 while (rs.next()) {

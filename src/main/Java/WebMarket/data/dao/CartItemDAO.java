@@ -13,9 +13,9 @@ public interface CartItemDAO {
 
     void addOptionToItem(int cartItemId, int optionId) throws DataException;
 
-    void updateQuantity(int cartItemId, int quantity) throws DataException;
+    boolean updateQuantity(int cartItemId, int cartId, int quantity) throws DataException;
 
-    void removeItem(int cartItemId) throws DataException;
+    boolean removeItem(int cartItemId, int cartId) throws DataException;
 
     void clearCart(int cartId) throws DataException;
 }

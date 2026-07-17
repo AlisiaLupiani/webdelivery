@@ -5,12 +5,12 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import WebMarket.data.WebDeliveryDataLayer;
 import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
 import WebMarket.data.dao.OrderDAO;
 import WebMarket.data.dao.UserDAO;
 import WebMarket.util.EmailService;
-import framework.data.DataLayer;
 import framework.view.TemplateResult;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,12 +43,12 @@ public class CassaServlet extends WebDeliveryBaseController {
         }
 
         int userId = Integer.parseInt(session.getAttribute("userid").toString());
-        DataLayer dl = (DataLayer) request.getAttribute("datalayer");
+        WebDeliveryDataLayer dl = (WebDeliveryDataLayer) request.getAttribute("datalayer");
 
-        CartDAO cartDAO = (CartDAO) dl.getDAO(Cart.class);
-        CartItemDAO cartItemDAO = (CartItemDAO) dl.getDAO(CartItem.class);
-        UserDAO userDAO = (UserDAO) dl.getDAO(User.class);
-        OrderDAO orderDAO = (OrderDAO) dl.getDAO(Order.class);
+        CartDAO cartDAO = dl.getCartDAO();
+        CartItemDAO cartItemDAO = dl.getCartItemDAO();
+        UserDAO userDAO = dl.getUserDAO();
+        OrderDAO orderDAO = dl.getOrderDAO();
 
         User utente = userDAO.getUserById(userId);
 
@@ -79,6 +79,10 @@ public class CassaServlet extends WebDeliveryBaseController {
         LocalTime orarioMinimo = calcolaOrarioMinimo(tempoStimato);
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
+            if (!checkCsrf(request, response)) {
+                return;
+            }
+
             String action = request.getParameter("action");
 
             if ("annulla".equalsIgnoreCase(action)) {
@@ -94,7 +98,14 @@ public class CassaServlet extends WebDeliveryBaseController {
             request.setAttribute("orarioInserito", orarioParam);
             request.setAttribute("metodoPagamentoInserito", metodoPagamentoParam);
 
+            if (indirizzo == null || indirizzo.isBlank() || indirizzo.trim().length() > 255) {
+                request.setAttribute("erroreOrario", "Inserisci un indirizzo di consegna valido.");
+                mostraCassa(request, response, cliente, carrello, tempoStimato, orarioMinimo);
+                return;
+            }
+
             LocalTime orarioConsegna;
+            PaymentMethod metodoPagamento;
 
             try {
                 orarioConsegna = LocalTime.parse(orarioParam);
@@ -122,30 +133,43 @@ public class CassaServlet extends WebDeliveryBaseController {
                 return;
             }
 
+            try {
+                metodoPagamento = parsePaymentMethod(metodoPagamentoParam);
+            } catch (IllegalArgumentException ex) {
+                request.setAttribute("erroreOrario", "Metodo di pagamento non valido.");
+                mostraCassa(request, response, cliente, carrello, tempoStimato, orarioMinimo);
+                return;
+            }
+
             Order ordine = new OrderImpl();
 
             ordine.setClient(cliente);
             ordine.setDate(LocalDate.now());
             ordine.setDeliveryTime(orarioConsegna);
             ordine.setPrice(carrello.getPrezzoTotaleCarrello());
-            ordine.setDeliveryAddress(indirizzo);
-            ordine.setPaymentMethod(PaymentMethod.valueOf(metodoPagamentoParam));
+            ordine.setDeliveryAddress(indirizzo.trim());
+            ordine.setPaymentMethod(metodoPagamento);
             ordine.setOrderState(OrderState.INSERITO);
 
-            orderDAO.addOrder(ordine);
+            try {
+                dl.beginTransaction();
+                orderDAO.addOrder(ordine);
 
-            for (CartItem item : elementi) {
-                orderDAO.addProductToOrder(ordine.getKey(), item.getProductId(), item.getQuantita());
+                for (CartItem item : elementi) {
+                    int orderProductId = orderDAO.addProductToOrder(ordine.getKey(), item);
 
-                if (item.getOpzioniScelte() != null) {
-                    for (ProductOption opzione : item.getOpzioniScelte()) {
-                        orderDAO.addOptionToOrderProduct(
-                                ordine.getKey(),
-                                item.getProductId(),
-                                opzione.getKey()
-                        );
+                    if (item.getOpzioniScelte() != null) {
+                        for (ProductOption opzione : item.getOpzioniScelte()) {
+                            orderDAO.addOptionToOrderProduct(orderProductId, opzione);
+                        }
                     }
                 }
+
+                cartDAO.closeCart(carrello.getKey());
+                dl.commitTransaction();
+            } catch (Exception ex) {
+                dl.rollbackTransaction();
+                throw ex;
             }
 
             try {
@@ -159,8 +183,6 @@ public class CassaServlet extends WebDeliveryBaseController {
             } catch (Exception ex) {
                 getServletContext().log("Errore invio email conferma ordine", ex);
             }
-
-            cartDAO.closeCart(carrello.getKey());
 
             response.sendRedirect("ordine-confermato?id=" + ordine.getKey());
             return;
@@ -218,5 +240,18 @@ public class CassaServlet extends WebDeliveryBaseController {
         }
 
         return totaleMinuti;
+    }
+
+    private PaymentMethod parsePaymentMethod(String value) {
+        PaymentMethod method = PaymentMethod.valueOf(value);
+
+        if (method != PaymentMethod.CASH
+                && method != PaymentMethod.VISA
+                && method != PaymentMethod.MASTERCARD
+                && method != PaymentMethod.PAYPAL) {
+            throw new IllegalArgumentException("Metodo di pagamento non supportato");
+        }
+
+        return method;
     }
 }

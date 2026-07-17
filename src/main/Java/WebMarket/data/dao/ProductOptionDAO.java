@@ -20,4 +20,6 @@ public interface ProductOptionDAO {
     void deleteProductOption(ProductOption option) throws DataException;
 
     List<ProductOption> getProductOptionsByProductOptionGroup(ProductOptionGroup group) throws DataException;
+
+    List<ProductOption> getProductOptionsByProduct(int productId) throws DataException;
 }

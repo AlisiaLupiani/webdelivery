@@ -1,5 +1,7 @@
 package framework.view;
 
+import freemarker.core.HTMLOutputFormat;
+import freemarker.ext.jakarta.servlet.WebappTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
@@ -7,7 +9,6 @@ import freemarker.template.TemplateExceptionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -23,23 +24,33 @@ public class TemplateResult {
     }
 
     private void init() {
-        cfg = new Configuration(Configuration.VERSION_2_3_32);
-        
-        // LA SOLUZIONE: Troviamo noi la cartella per aggirare il problema di Tomcat 10
-        try {
-            String pathCartella = context.getRealPath("/WEB-INF/template");
-            cfg.setDirectoryForTemplateLoading(new File(pathCartella));
-        } catch (Exception e) {
-            System.err.println("Errore nel trovare la cartella template: " + e.getMessage());
+        cfg = new Configuration(Configuration.VERSION_2_3_34);
+
+        String encoding = "UTF-8";
+        if (context.getInitParameter("view.encoding") != null) {
+            encoding = context.getInitParameter("view.encoding");
         }
-        
-        cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        cfg.setOutputEncoding(encoding);
+        cfg.setDefaultEncoding(encoding);
+
+        String templateDirectory = "/WEB-INF/template";
+        if (context.getInitParameter("view.template_directory") != null) {
+            templateDirectory = context.getInitParameter("view.template_directory");
+        }
+        cfg.setTemplateLoader(new WebappTemplateLoader(context, templateDirectory));
+
+        if ("true".equals(context.getInitParameter("view.debug"))) {
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        } else {
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        }
+
+        cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
     }
 
     public void activate(String templateName, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        response.setContentType("text/html; charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html");
+        response.setCharacterEncoding(cfg.getOutputEncoding());
 
         Map<String, Object> datamodel = new HashMap<>();
         Enumeration<String> attrs = request.getAttributeNames();

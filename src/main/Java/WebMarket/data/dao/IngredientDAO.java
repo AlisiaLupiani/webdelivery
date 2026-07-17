@@ -3,7 +3,6 @@ package WebMarket.data.dao;
 import java.util.List;
 
 import framework.data.DataException;
-import model.Food;
 import model.Ingredient;
 
 public interface IngredientDAO {
@@ -11,9 +10,6 @@ public interface IngredientDAO {
     Ingredient getIngredientById(int ingredient_key) throws DataException;
 
     List<Ingredient> getAllIngredients() throws DataException;
-
-    
-    List<Ingredient> getIngredientsByFood(Food food) throws DataException;
 
     
     void addIngredient(Ingredient ingredient) throws DataException;

@@ -1,14 +1,18 @@
 package WebMarket.Controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import WebMarket.data.WebDeliveryDataLayer;
 import WebMarket.data.dao.CartDAO;
 import WebMarket.data.dao.CartItemDAO;
 import WebMarket.data.dao.ProductDAO;
 import WebMarket.data.dao.ProductOptionDAO;
-import framework.data.DataLayer;
 import framework.view.TemplateResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +21,7 @@ import model.Cart;
 import model.CartItem;
 import model.Product;
 import model.ProductOption;
+import model.ProductOptionGroup;
 
 @jakarta.servlet.annotation.WebServlet(name = "CartServlet", urlPatterns = {"/cart"})
 public class CartServlet extends WebDeliveryBaseController {
@@ -33,33 +38,51 @@ public class CartServlet extends WebDeliveryBaseController {
 
         int userId = Integer.parseInt(session.getAttribute("userid").toString());
 
-        DataLayer dl = (DataLayer) request.getAttribute("datalayer");
+        if ("POST".equalsIgnoreCase(request.getMethod()) && !checkCsrf(request, response)) {
+            return;
+        }
 
-        CartDAO cartDAO = (CartDAO) dl.getDAO(Cart.class);
-        CartItemDAO cartItemDAO = (CartItemDAO) dl.getDAO(CartItem.class);
-        ProductDAO productDAO = (ProductDAO) dl.getDAO(Product.class);
-        ProductOptionDAO optionDAO = (ProductOptionDAO) dl.getDAO(ProductOption.class);
+        WebDeliveryDataLayer dl = (WebDeliveryDataLayer) request.getAttribute("datalayer");
+
+        CartDAO cartDAO = dl.getCartDAO();
+        CartItemDAO cartItemDAO = dl.getCartItemDAO();
+        ProductDAO productDAO = dl.getProductDAO();
+        ProductOptionDAO optionDAO = dl.getProductOptionDAO();
 
         Cart carrello = cartDAO.getOrCreateActiveCart(userId);
 
         String action = request.getParameter("action");
 
+        if (action != null && !action.isBlank() && !"POST".equalsIgnoreCase(request.getMethod())) {
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            return;
+        }
+
         if ("add".equals(action)) {
-            int idProdotto = Integer.parseInt(request.getParameter("prodotto_id"));
+            int idProdotto = parsePositiveInt(request.getParameter("prodotto_id"));
+
+            if (idProdotto <= 0) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Prodotto non valido.");
+                return;
+            }
+
             Product prodotto = productDAO.getProductById(idProdotto);
 
-            if (prodotto != null) {
+            if (prodotto == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            try {
+                List<ProductOption> opzioniDaSalvare =
+                        validateSelectedOptions(request, optionDAO, prodotto.getKey());
                 double prezzoUnitario = prodotto.getPrice();
-                List<Integer> opzioniDaSalvare = getSelectedOptionIds(request);
 
-                for (Integer idOpzione : opzioniDaSalvare) {
-                    ProductOption opzione = optionDAO.getProductOptionById(idOpzione);
-
-                    if (opzione != null) {
-                        prezzoUnitario += opzione.getAddictionalPrice();
-                    }
+                for (ProductOption opzione : opzioniDaSalvare) {
+                    prezzoUnitario += opzione.getAddictionalPrice();
                 }
 
+                dl.beginTransaction();
                 CartItem nuovaRiga = cartItemDAO.addItem(
                         carrello.getKey(),
                         prodotto.getKey(),
@@ -67,11 +90,21 @@ public class CartServlet extends WebDeliveryBaseController {
                         prezzoUnitario
                 );
 
-                if (nuovaRiga != null) {
-                    for (Integer idOpzione : opzioniDaSalvare) {
-                        cartItemDAO.addOptionToItem(nuovaRiga.getKey(), idOpzione);
-                    }
+                if (nuovaRiga == null) {
+                    throw new IllegalStateException("Impossibile aggiungere il prodotto al carrello.");
                 }
+
+                for (ProductOption opzione : opzioniDaSalvare) {
+                    cartItemDAO.addOptionToItem(nuovaRiga.getKey(), opzione.getKey());
+                }
+                dl.commitTransaction();
+            } catch (IllegalArgumentException ex) {
+                dl.rollbackTransaction();
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+                return;
+            } catch (Exception ex) {
+                dl.rollbackTransaction();
+                throw ex;
             }
 
             response.sendRedirect("cart");
@@ -79,21 +112,36 @@ public class CartServlet extends WebDeliveryBaseController {
         }
 
         if ("remove".equals(action)) {
-            int cartItemId = Integer.parseInt(request.getParameter("cart_item_id"));
-            cartItemDAO.removeItem(cartItemId);
+            int cartItemId = parsePositiveInt(request.getParameter("cart_item_id"));
+
+            if (cartItemId <= 0 || !cartItemDAO.removeItem(cartItemId, carrello.getKey())) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
 
             response.sendRedirect("cart");
             return;
         }
 
         if ("update".equals(action)) {
-            int cartItemId = Integer.parseInt(request.getParameter("cart_item_id"));
-            int quantita = Integer.parseInt(request.getParameter("quantita"));
+            int cartItemId = parsePositiveInt(request.getParameter("cart_item_id"));
+            int quantita = parsePositiveInt(request.getParameter("quantita"));
+
+            if (cartItemId <= 0 || quantita < 0 || quantita > 99) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Quantita' non valida.");
+                return;
+            }
 
             if (quantita <= 0) {
-                cartItemDAO.removeItem(cartItemId);
+                if (!cartItemDAO.removeItem(cartItemId, carrello.getKey())) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
             } else {
-                cartItemDAO.updateQuantity(cartItemId, quantita);
+                if (!cartItemDAO.updateQuantity(cartItemId, carrello.getKey(), quantita)) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
             }
 
             response.sendRedirect("cart");
@@ -116,8 +164,59 @@ public class CartServlet extends WebDeliveryBaseController {
         templateEngine.activate("cart.ftl.html", request, response);
     }
 
-    private List<Integer> getSelectedOptionIds(HttpServletRequest request) {
-        List<Integer> result = new ArrayList<>();
+    private List<ProductOption> validateSelectedOptions(
+            HttpServletRequest request,
+            ProductOptionDAO optionDAO,
+            int productId) throws Exception {
+
+        Set<Integer> requestedIds = getSelectedOptionIds(request);
+        List<ProductOption> availableOptions = optionDAO.getProductOptionsByProduct(productId);
+        Map<Integer, ProductOption> availableById = new LinkedHashMap<>();
+
+        for (ProductOption option : availableOptions) {
+            availableById.put(option.getKey(), option);
+        }
+
+        List<ProductOption> selectedOptions = new ArrayList<>();
+        Map<Integer, Integer> selectionsByGroup = new HashMap<>();
+
+        for (Integer optionId : requestedIds) {
+            ProductOption option = availableById.get(optionId);
+
+            if (option == null) {
+                throw new IllegalArgumentException("Una caratteristica non appartiene al prodotto selezionato.");
+            }
+
+            ProductOptionGroup group = option.getProductOptionGroup();
+            if (group == null) {
+                throw new IllegalArgumentException("Gruppo caratteristica non valido.");
+            }
+
+            int selectedCount = selectionsByGroup.getOrDefault(group.getKey(), 0) + 1;
+            if (group.isSingleChoice() && selectedCount > 1) {
+                throw new IllegalArgumentException("Puoi scegliere una sola caratteristica per gruppo.");
+            }
+
+            selectionsByGroup.put(group.getKey(), selectedCount);
+            selectedOptions.add(option);
+        }
+
+        for (ProductOption option : availableOptions) {
+            ProductOptionGroup group = option.getProductOptionGroup();
+
+            if (group != null && group.isSingleChoice()
+                    && !selectionsByGroup.containsKey(group.getKey())
+                    && option.isDefault()) {
+                selectionsByGroup.put(group.getKey(), 1);
+                selectedOptions.add(option);
+            }
+        }
+
+        return selectedOptions;
+    }
+
+    private Set<Integer> getSelectedOptionIds(HttpServletRequest request) {
+        Set<Integer> result = new LinkedHashSet<>();
 
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             if (!entry.getKey().startsWith("caratteristica_id_")) {
@@ -139,5 +238,13 @@ public class CartServlet extends WebDeliveryBaseController {
         }
 
         return result;
+    }
+
+    private int parsePositiveInt(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception ex) {
+            return -1;
+        }
     }
 }

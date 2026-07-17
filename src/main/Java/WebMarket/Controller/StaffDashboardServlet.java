@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import model.Product;
+
+import WebMarket.data.WebDeliveryDataLayer;
 import WebMarket.data.dao.LogOrderStateDAO;
 import WebMarket.data.dao.OrderDAO;
 import WebMarket.data.dao.ProductDAO;
 import WebMarket.data.dao.UserDAO;
 import WebMarket.util.EmailService;
-import framework.data.DataLayer;
 import framework.view.TemplateResult;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,12 +41,12 @@ public class StaffDashboardServlet extends WebDeliveryBaseController {
             return;
         }
 
-        DataLayer dl = (DataLayer) request.getAttribute("datalayer");
+        WebDeliveryDataLayer dl = (WebDeliveryDataLayer) request.getAttribute("datalayer");
 
-        OrderDAO orderDAO = (OrderDAO) dl.getDAO(Order.class);
-        ProductDAO productDAO = (ProductDAO) dl.getDAO(Product.class);
-        UserDAO userDAO = (UserDAO) dl.getDAO(User.class);
-        LogOrderStateDAO logDAO = (LogOrderStateDAO) dl.getDAO(LogOrderState.class);
+        OrderDAO orderDAO = dl.getOrderDAO();
+        ProductDAO productDAO = dl.getProductDAO();
+        UserDAO userDAO = dl.getUserDAO();
+        LogOrderStateDAO logDAO = dl.getLogOrderStateDAO();
 
         int staffId = Integer.parseInt(session.getAttribute("userid").toString());
         User user = userDAO.getUserById(staffId);
@@ -59,7 +59,11 @@ public class StaffDashboardServlet extends WebDeliveryBaseController {
         Staff staff = (Staff) user;
 
         if ("POST".equalsIgnoreCase(request.getMethod())) {
-            avanzaStatoOrdine(request, response, orderDAO, logDAO, staff);
+            if (!checkCsrf(request, response)) {
+                return;
+            }
+
+            avanzaStatoOrdine(request, response, dl, orderDAO, logDAO, staff);
             return;
         }
 
@@ -69,6 +73,7 @@ public class StaffDashboardServlet extends WebDeliveryBaseController {
     private void avanzaStatoOrdine(
             HttpServletRequest request,
             HttpServletResponse response,
+            WebDeliveryDataLayer dl,
             OrderDAO orderDAO,
             LogOrderStateDAO logDAO,
             Staff staff) throws Exception {
@@ -96,17 +101,24 @@ public class StaffDashboardServlet extends WebDeliveryBaseController {
             return;
         }
 
-        ordine.setOrderState(statoTo);
-        orderDAO.updateOrder(ordine);
+        try {
+            dl.beginTransaction();
+            ordine.setOrderState(statoTo);
+            orderDAO.updateOrder(ordine);
 
-        LogOrderState log = new LogOrderStateImpl();
-        log.setDateTime(LocalDateTime.now());
-        log.setOrder(ordine);
-        log.setStaff(staff);
-        log.setStateFrom(statoFrom);
-        log.setStateTo(statoTo);
+            LogOrderState log = new LogOrderStateImpl();
+            log.setDateTime(LocalDateTime.now());
+            log.setOrder(ordine);
+            log.setStaff(staff);
+            log.setStateFrom(statoFrom);
+            log.setStateTo(statoTo);
 
-        logDAO.addLogOrderState(log);
+            logDAO.addLogOrderState(log);
+            dl.commitTransaction();
+        } catch (Exception ex) {
+            dl.rollbackTransaction();
+            throw ex;
+        }
 
         if (statoTo == OrderState.IN_CONSEGNA) {
             try {

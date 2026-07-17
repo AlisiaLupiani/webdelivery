@@ -14,14 +14,19 @@ import WebMarket.data.proxy.OrderProxy;
 import framework.data.DAO;
 import framework.data.DataException;
 import framework.data.DataLayer;
+import model.CartItem;
 import model.Client;
 import model.Order;
 import model.OrderState;
 import model.PaymentMethod;
+import model.Product;
+import model.ProductOption;
+import model.ProductOptionGroup;
 
 public class OrderDAOImpl extends DAO implements OrderDAO {
 
     private PreparedStatement sOrderById;
+    private PreparedStatement sOrderByIdAndClient;
     private PreparedStatement sOrderByDate;
     private PreparedStatement sOrderByClient;
     private PreparedStatement sAllOrders;
@@ -41,6 +46,9 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
         try {
             super.init();
             sOrderById = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE ID = ?");
+            sOrderByIdAndClient = getConnection().prepareStatement(
+                    "SELECT * FROM " + TABLE + " WHERE ID = ? AND UTENTE_ID = ?"
+            );
             sOrderByDate = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE DATA_ORDINE = ?");
             sOrderByClient = getConnection().prepareStatement("SELECT * FROM " + TABLE + " WHERE UTENTE_ID = ? ORDER BY DATA_ORDINE DESC, ORARIO_CONSEGNA DESC");
             sAllOrders = getConnection().prepareStatement("SELECT * FROM " + TABLE + " ORDER BY DATA_ORDINE DESC, ORARIO_CONSEGNA DESC");
@@ -54,13 +62,17 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
 
             sDeleteOrder = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID = ? AND VERSION = ?");
             sAddProductToOrder = getConnection().prepareStatement(
-    "INSERT INTO ORDINE_PRODOTTO (ORDINE_ID, PRODOTTO_ID, QUANTITA) VALUES (?, ?, ?) " +
-    "ON DUPLICATE KEY UPDATE QUANTITA = QUANTITA + VALUES(QUANTITA)"
-);
+                    "INSERT INTO ORDINE_PRODOTTO " +
+                    "(ORDINE_ID, PRODOTTO_ID, QUANTITA, NOME_PRODOTTO, DESCRIZIONE_PRODOTTO, " +
+                    "PREZZO_UNITARIO, PROCEDURA_PRODOTTO, TEMPO_PREPARAZIONE) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
 
             sAddOptionToOrderProduct = getConnection().prepareStatement(
-                    "INSERT INTO ORDINE_PRODOTTO_OPZIONE (ORDINE_ID, PRODOTTO_ID, OPZIONE_ID) VALUES (?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE OPZIONE_ID = VALUES(OPZIONE_ID)"
+                    "INSERT INTO ORDINE_PRODOTTO_OPZIONE " +
+                    "(ORDINE_PRODOTTO_ID, OPZIONE_ID, NOME_OPZIONE, DESCRIZIONE_OPZIONE, " +
+                    "PREZZO_OPZIONE, NOME_GRUPPO) VALUES (?, ?, ?, ?, ?, ?)"
             );
         } catch (SQLException ex) {
             throw new DataException("Error initializing OrderDAO", ex);
@@ -71,6 +83,7 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
     public void destroy() throws DataException {
         try {
             if (sOrderById != null) sOrderById.close();
+            if (sOrderByIdAndClient != null) sOrderByIdAndClient.close();
             if (sOrderByDate != null) sOrderByDate.close();
             if (sOrderByClient != null) sOrderByClient.close();
             if (sAllOrders != null) sAllOrders.close();
@@ -122,6 +135,26 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             }
         }
         return order;
+    }
+
+    @Override
+    public Order getOrderByIdAndClientId(int orderKey, int clientId) throws DataException {
+        try {
+            sOrderByIdAndClient.setInt(1, orderKey);
+            sOrderByIdAndClient.setInt(2, clientId);
+
+            try (ResultSet rs = sOrderByIdAndClient.executeQuery()) {
+                if (rs.next()) {
+                    Order order = createOrder(rs);
+                    getDataLayer().getCache().add(Order.class, order);
+                    return order;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataException("Unable to retrieve order for client", ex);
+        }
+
+        return null;
     }
 
     @Override
@@ -237,29 +270,60 @@ public class OrderDAOImpl extends DAO implements OrderDAO {
             throw new DataException("Unable to delete order", e);
         }
     }
-@Override
-public void addProductToOrder(int orderId, int productId, int quantity) throws DataException {
-    try {
-        sAddProductToOrder.setInt(1, orderId);
-        sAddProductToOrder.setInt(2, productId);
-        sAddProductToOrder.setInt(3, quantity);
-        sAddProductToOrder.executeUpdate();
-    } catch (SQLException ex) {
-        throw new DataException("Errore addProductToOrder", ex);
-    }
-}
+    @Override
+    public int addProductToOrder(int orderId, CartItem item) throws DataException {
+        Product product = item.getProdotto();
 
-@Override
-public void addOptionToOrderProduct(int orderId, int productId, int optionId) throws DataException {
-    try {
-        sAddOptionToOrderProduct.setInt(1, orderId);
-        sAddOptionToOrderProduct.setInt(2, productId);
-        sAddOptionToOrderProduct.setInt(3, optionId);
-        sAddOptionToOrderProduct.executeUpdate();
-    } catch (SQLException ex) {
-        throw new DataException("Errore addOptionToOrderProduct", ex);
+        if (product == null) {
+            throw new DataException("Prodotto mancante nella riga del carrello");
+        }
+
+        try {
+            sAddProductToOrder.setInt(1, orderId);
+            sAddProductToOrder.setInt(2, product.getKey());
+            sAddProductToOrder.setInt(3, item.getQuantita());
+            sAddProductToOrder.setString(4, product.getName());
+            sAddProductToOrder.setString(5, product.getDescription());
+            sAddProductToOrder.setDouble(6, item.getPrezzoUnitario());
+            sAddProductToOrder.setString(7, product.getProcedure());
+            sAddProductToOrder.setInt(8, product.getPreparationTime());
+
+            if (sAddProductToOrder.executeUpdate() != 1) {
+                throw new DataException("Impossibile salvare la riga dell'ordine");
+            }
+
+            try (ResultSet rs = sAddProductToOrder.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+            throw new DataException("Chiave della riga ordine non disponibile");
+        } catch (SQLException ex) {
+            throw new DataException("Errore addProductToOrder", ex);
+        }
     }
-}
+
+    @Override
+    public void addOptionToOrderProduct(int orderProductId, ProductOption option) throws DataException {
+        ProductOptionGroup group = option.getProductOptionGroup();
+
+        try {
+            sAddOptionToOrderProduct.setInt(1, orderProductId);
+            sAddOptionToOrderProduct.setInt(2, option.getKey());
+            sAddOptionToOrderProduct.setString(3, option.getName());
+            sAddOptionToOrderProduct.setString(4, option.getDescription());
+            sAddOptionToOrderProduct.setDouble(5, option.getAddictionalPrice());
+            sAddOptionToOrderProduct.setString(6, group != null ? group.getName() : "");
+
+            if (sAddOptionToOrderProduct.executeUpdate() != 1) {
+                throw new DataException("Impossibile salvare la caratteristica della riga ordine");
+            }
+        } catch (SQLException ex) {
+            throw new DataException("Errore addOptionToOrderProduct", ex);
+        }
+    }
+
     private Order getOrCreateOrder(ResultSet rs) throws SQLException {
         Integer id = rs.getInt("ID");
         if (getDataLayer().getCache().has(Order.class, id)) {

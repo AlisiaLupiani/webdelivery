@@ -1,6 +1,7 @@
 package WebMarket.data.proxy;
 
 import framework.data.DataLayer;
+import WebMarket.data.dao.ProductOptionGroupDAO;
 import model.ProductOptionGroup;
 import model.modelImpl.ProductOptionImpl;
 
@@ -20,6 +21,20 @@ public class ProductOptionProxy extends ProductOptionImpl {
 
     public void setIdProductOptionGroup(Integer id) {
         this.idProductOptionGroup = id;
+    }
+
+    @Override
+    public ProductOptionGroup getProductOptionGroup() {
+        if (super.getProductOptionGroup() == null && idProductOptionGroup != null && idProductOptionGroup > 0) {
+            try {
+                ProductOptionGroupDAO groupDAO =
+                        (ProductOptionGroupDAO) dataLayer.getDAO(ProductOptionGroup.class);
+                super.setProductOptionGroup(groupDAO.getProductOptionGroupById(idProductOptionGroup));
+            } catch (Exception ex) {
+                throw new IllegalStateException("Impossibile caricare il gruppo della caratteristica", ex);
+            }
+        }
+        return super.getProductOptionGroup();
     }
 
     @Override

@@ -44,6 +44,9 @@
             <div class="detail-price">${prodotto.price!0} &euro;</div>
 
             <form action="/webdelivery/cart" method="POST">
+                <#if csrf??>
+                    <input type="hidden" name="csrf" value="${csrf}">
+                </#if>
                 <input type="hidden" name="action" value="add">
                 <input type="hidden" name="prodotto_id" value="${prodotto.id!""}">
 

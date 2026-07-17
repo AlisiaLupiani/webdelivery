@@ -56,6 +56,7 @@
             <h3>Dati personali</h3>
 
             <form action="/webdelivery/profilo" method="POST">
+                <input type="hidden" name="csrf" value="${csrf}">
                 <input type="hidden" name="action" value="profile">
 
                 <div class="form-group">
@@ -91,6 +92,7 @@
             <h3>Cambia password</h3>
 
             <form action="/webdelivery/profilo" method="POST">
+                <input type="hidden" name="csrf" value="${csrf}">
                 <input type="hidden" name="action" value="password">
 
                 <div class="form-group">
