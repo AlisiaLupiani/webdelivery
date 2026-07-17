@@ -52,7 +52,7 @@ public class UserProxy extends UserImpl{
     }
 
     @Override
-    public void setVersion(long version) { // nuovo attributo del DataItem
+    public void setVersion(long version) { 
         super.setVersion(version);
         this.isDirty = true;
     }

@@ -24,7 +24,6 @@ public class ProductOptionImpl extends DataItemImpl<Integer> implements ProductO
         
     }
 
-    // Metodi per la Chiave Primaria (DataItem)
     @Override
     public Integer getKey() {
         return key;
@@ -35,7 +34,6 @@ public class ProductOptionImpl extends DataItemImpl<Integer> implements ProductO
         this.key = key;
     }
 
-    // Metodi per l'ID (Alias di Key)
     @Override
     public Integer getId() {
         return key;
@@ -96,7 +94,7 @@ public class ProductOptionImpl extends DataItemImpl<Integer> implements ProductO
         this.productOptionGroup = productOptionGroup;
     }
 
-    // Metodo richiesto da Consumation (ereditato)
+    
     @Override
     public Double getPrice() {
         return addictionalPrice;

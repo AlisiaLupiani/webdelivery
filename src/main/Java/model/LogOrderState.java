@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import framework.data.DataItem;
 
-// Estendiamo DataItem per permettere al DAO di funzionare
+
 public interface LogOrderState extends DataItem<Integer> {
     
     public Integer getId();

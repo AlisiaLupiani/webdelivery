@@ -38,13 +38,11 @@ public class OrderImpl extends DataItemImpl<Integer> implements Order {
         
     }
 
-    // Metodi per la Chiave (DataItem)
     @Override
     public Integer getKey() { return key; }
     @Override
     public void setKey(Integer key) { this.key = key; }
 
-    // Metodi per l'ID (Alias di Key)
     @Override
     public Integer getId() { return key; }
     @Override

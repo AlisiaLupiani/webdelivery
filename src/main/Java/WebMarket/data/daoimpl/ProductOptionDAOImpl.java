@@ -48,8 +48,6 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
 
             sAddProductOption = getConnection().prepareStatement("INSERT INTO " + TABLE + " (NOME,DESCRIZIONE,PREZZO,IS_DEFAULT,GRUPPO_ID, VERSION) VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             
-            // Query UPDATE corretta: NOME, DESCRIZIONE, PREZZO, IS_DEFAULT, GRUPPO_ID, VERSION (6 campi)
-            // Filtra per ID e VERSION (2 campi)
             sUpdateProductOption = getConnection().prepareStatement("UPDATE " + TABLE + " SET NOME=?,DESCRIZIONE=?,PREZZO=?,IS_DEFAULT=?,GRUPPO_ID=?, VERSION=? WHERE ID=? AND VERSION=?");
             
             sDeleteProductOption = getConnection().prepareStatement("DELETE FROM " + TABLE + " WHERE ID=? AND VERSION=?" );
@@ -127,7 +125,7 @@ public class ProductOptionDAOImpl extends DAO implements ProductOptionDAO {
                 while (rs.next()) {
                     ProductOption option;
                     Integer id = rs.getInt("ID");
-                    // Controlliamo se la singola opzione è già in cache
+                    
                     if (getDataLayer().getCache().has(ProductOption.class, id)) {
                         option = getDataLayer().getCache().get(ProductOption.class, id);
                     } else {
