@@ -14,6 +14,21 @@
   </context-param>
 
   <context-param>
+    <param-name>view.debug</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>view.template_directory</param-name>
+    <param-value>/WEB-INF/template</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>view.encoding</param-name>
+    <param-value>UTF-8</param-value>
+  </context-param>
+
+  <context-param>
     <param-name>mail.enabled</param-name>
     <param-value>true</param-value>
   </context-param>

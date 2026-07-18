@@ -53,7 +53,6 @@
 
     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <a href="/webdelivery/admin" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Dashboard</a>
-        <a href="/webdelivery/menu" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Menu pubblico</a>
         <a href="/webdelivery/logout" class="btn" style="background: white; color: #ff5722; box-shadow: none;">Logout</a>
     </div>
 </header>
@@ -77,6 +76,7 @@
         </#if>
 
         <form action="/webdelivery/admin-prodotti" method="POST">
+            <input type="hidden" name="csrf" value="${csrf}">
             <#if prodottoEdit??>
                 <input type="hidden" name="id" value="${prodottoEdit.id}">
             </#if>
@@ -153,6 +153,7 @@
             <h3>Gruppi caratteristiche</h3>
 
             <form action="/webdelivery/admin-prodotti" method="POST" class="group-form">
+                <input type="hidden" name="csrf" value="${csrf}">
                 <input type="hidden" name="action" value="add_option_group">
                 <div class="form-group">
                     <label for="nome_gruppo">Nuovo gruppo</label>
@@ -180,6 +181,7 @@
                                 <tr>
                                     <td>
                                         <form action="/webdelivery/admin-prodotti" method="POST" class="group-form">
+                                            <input type="hidden" name="csrf" value="${csrf}">
                                             <input type="hidden" name="action" value="update_option_group">
                                             <input type="hidden" name="group_id" value="${gruppo.id}">
                                             <input type="text" name="nome_gruppo" value="${gruppo.name!""}">
@@ -199,6 +201,7 @@
                                     </td>
                                     <td>
                                         <form action="/webdelivery/admin-prodotti" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="csrf" value="${csrf}">
                                             <input type="hidden" name="action" value="delete_option_group">
                                             <input type="hidden" name="group_id" value="${gruppo.id}">
                                             <button type="submit" class="btn-small btn-delete">Elimina</button>
@@ -218,6 +221,7 @@
             <h3>Nuova caratteristica</h3>
 
             <form action="/webdelivery/admin-prodotti" method="POST">
+                <input type="hidden" name="csrf" value="${csrf}">
                 <input type="hidden" name="action" value="add_option">
 
                 <div class="form-grid">
@@ -284,6 +288,7 @@
                                 <tr>
                                     <td>
                                         <form action="/webdelivery/admin-prodotti" method="POST" class="inline-form">
+                                            <input type="hidden" name="csrf" value="${csrf}">
                                             <input type="hidden" name="action" value="update_option">
                                             <input type="hidden" name="option_id" value="${opzione.id}">
                                             <input type="text" name="nome_caratteristica" value="${opzione.name!""}">
@@ -306,6 +311,7 @@
                                     <td><#if opzione.default?? && opzione.default>Si<#else>No</#if></td>
                                     <td>
                                         <form action="/webdelivery/admin-prodotti" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="csrf" value="${csrf}">
                                             <input type="hidden" name="action" value="delete_option">
                                             <input type="hidden" name="option_id" value="${opzione.id}">
                                             <button type="submit" class="btn-small btn-delete">Elimina</button>
@@ -326,6 +332,7 @@
                 <h3>Caratteristiche di ${prodottoEdit.name!""}</h3>
 
                 <form action="/webdelivery/admin-prodotti" method="POST">
+                    <input type="hidden" name="csrf" value="${csrf}">
                     <input type="hidden" name="action" value="add_product_option">
                     <input type="hidden" name="product_id" value="${prodottoEdit.id}">
 
@@ -379,6 +386,7 @@
                                         <td><#if caratteristica.default?? && caratteristica.default>Si<#else>No</#if></td>
                                         <td>
                                             <form action="/webdelivery/admin-prodotti" method="POST" style="margin: 0;">
+                                                <input type="hidden" name="csrf" value="${csrf}">
                                                 <input type="hidden" name="action" value="remove_product_option">
                                                 <input type="hidden" name="product_id" value="${prodottoEdit.id}">
                                                 <input type="hidden" name="option_id" value="${caratteristica.id}">
@@ -408,6 +416,7 @@
             <p class="hint">Aggiungi qui gli ingredienti disponibili, poi li puoi collegare ai prodotti dalla tendina.</p>
 
             <form action="/webdelivery/admin-prodotti" method="POST">
+                <input type="hidden" name="csrf" value="${csrf}">
                 <input type="hidden" name="action" value="add_ingredient_catalog">
 
                 <div class="form-grid">
@@ -428,6 +437,7 @@
                 <h3>Ingredienti di ${prodottoEdit.name!""}</h3>
 
                 <form action="/webdelivery/admin-prodotti" method="POST">
+                    <input type="hidden" name="csrf" value="${csrf}">
                     <input type="hidden" name="action" value="add_product_ingredient">
                     <input type="hidden" name="product_id" value="${prodottoEdit.id}">
 
@@ -472,6 +482,7 @@
                                         <td>${ingrediente.quantita!""}</td>
                                         <td>
                                             <form action="/webdelivery/admin-prodotti" method="POST" style="margin: 0;">
+                                                <input type="hidden" name="csrf" value="${csrf}">
                                                 <input type="hidden" name="action" value="remove_product_ingredient">
                                                 <input type="hidden" name="product_id" value="${prodottoEdit.id}">
                                                 <input type="hidden" name="ingredient_id" value="${ingrediente.id}">
@@ -525,6 +536,7 @@
                                         <a class="btn-small btn-edit" href="/webdelivery/admin-prodotti?edit=${prodotto.id}">Modifica</a>
 
                                         <form action="/webdelivery/admin-prodotti" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="csrf" value="${csrf}">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="id" value="${prodotto.id}">
                                             <button type="submit" class="btn-small btn-delete">Elimina</button>
