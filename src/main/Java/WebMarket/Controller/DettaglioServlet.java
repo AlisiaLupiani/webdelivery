@@ -1,6 +1,7 @@
 package WebMarket.Controller;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import WebMarket.data.dao.ProductDAO;
@@ -36,14 +37,18 @@ public class DettaglioServlet extends WebDeliveryBaseController {
             
             // Estraiamo i gruppi collegati a questo specifico prodotto
             List<ProductOptionGroup> gruppi = groupDAO.getProductOptionGroupsByProduct(prodotto);
+            List<ProductOption> opzioniProdotto = optionDAO.getProductOptionsByProduct(idProdotto);
             
             // Riempiamo ogni gruppo con le sue rispettive opzioni spuntabili
             for (ProductOptionGroup gruppo : gruppi) {
-                // Messaggio di debug per la console
-                System.out.println("DEBUG: Sto cercando opzioni per il Gruppo: " + gruppo.getName() + " (ID: " + gruppo.getKey() + ")");
-                
-                List<ProductOption> opzioni = optionDAO.getProductOptionsByProductOptionGroup(gruppo);
-                gruppo.setOptions(opzioni); 
+                List<ProductOption> opzioniGruppo = new ArrayList<>();
+                for (ProductOption opzione : opzioniProdotto) {
+                    ProductOptionGroup gruppoOpzione = opzione.getProductOptionGroup();
+                    if (gruppoOpzione != null && gruppo.getKey().equals(gruppoOpzione.getKey())) {
+                        opzioniGruppo.add(opzione);
+                    }
+                }
+                gruppo.setOptions(opzioniGruppo);
             }
             
             // Mandiamo tutto al file HTML
